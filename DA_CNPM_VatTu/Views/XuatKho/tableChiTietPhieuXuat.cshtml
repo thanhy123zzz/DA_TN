@@ -1,0 +1,62 @@
+﻿@{
+    List<ChiTietPhieuXuatTam> ctpxs = ViewBag.CTPXTs;
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    List<HangHoa> hhs = ViewBag.HHs;
+    List<DonViTinh> dvts = ViewBag.Dvts;
+    string getTenHH(int? id)
+    {
+        return hhs.AsParallel().FirstOrDefault(x => x.Id == id).TenHh;
+    }
+    string getTenDVT(int? id)
+    {
+        return dvts.AsParallel().FirstOrDefault(x => x.Id == id).TenDvt;
+    }
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+    PhanQuyenChucNang phanQuyenXuatKho = ViewBag.phanQuyenXuatKho;
+}
+
+@foreach (ChiTietPhieuXuatTam item in ctpxs)
+{
+    <tr>
+                      <td>@getTenHH(item.Idhh)</td>
+                      <td>@getTenDVT(item.Iddvt)</td>
+                      <td class="text-end">@toDecimal(item.Sl)</td>
+                      <td class="text-end">@toDecimal(item.DonGia)</td>
+                      <td class="text-end">@toDecimal(item.Sl*item.DonGia)</td>
+                      <td class="text-end">@toDecimal(item.Cktm)</td>
+                      <td class="text-end">@item.Thue%</td>
+                      <td class='last-td-column'>
+                        <div class="action justify-content-end">
+                            @if (phanQuyenXuatKho.Sua.Value)
+                            {
+                                    <button class="text-primary" onclick="editCtpxts(@item.Id)">
+                                          <i class="lni lni-pencil"></i>
+                                    </button>
+                            }
+                            @if (phanQuyenXuatKho.Xoa.Value)
+                            {
+                                    <button class="text-danger" onclick="deleteCtpxts(@item.Id)">
+                                          <i class="lni lni-trash-can"></i>
+                                    </button>
+                             }
+                             </div>
+                      </td>
+                    </tr>
+}

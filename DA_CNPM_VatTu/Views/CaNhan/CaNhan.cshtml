@@ -1,0 +1,203 @@
+﻿@model NhanVien
+@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenCaNhan;
+}
+          <div class="row">
+            <div class="col-md-6 col-12 pe-md-0">
+              <div class="card p-3 settings-card-1 mb-3">
+                <div
+                  class="
+                    title
+                    mb-3
+                    d-flex
+                    justify-content-between
+                    align-items-center
+                  "
+                >
+                  <h6>Thông tin cá nhân</h6>
+                  @if(pqcn.Sua.Value){
+                              <button class="border-0 bg-transparent" onclick="showModalEdit(@Model.Id)" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        <i class="lni lni-pencil-alt"></i>
+                      </button>
+                  }
+                </div>
+                <div class="profile-info">
+                  <div class="d-flex align-items-center mb-30">
+                    <div class="profile-image">
+                      <img id="avatarImage" class="image-modal" src="@Model.Avatar" alt="@Model.TenNv" />
+                      <div class="update-image">
+                        <input type="file" id="avatarCN" readonly/>
+                        <label for="avatarCN"
+                          ><i class="lni lni-cloud-upload"></i
+                        ></label>
+                      </div>
+                    </div>
+                    <div class="profile-meta">
+                      <h5 class="text-bold text-dark mb-10">@Model.TenNv</h5>
+                      <p class="text-sm text-gray">@Model.IdnnvNavigation.TenNnv</p>
+                    </div>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Ma">Mã NV</label>
+                    <input type="text" value="@Model.MaNv" readonly id="Ma" placeholder="Mã nhân viên">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Ten">Tên nhân viên</label>
+                    <input type="text" value="@Model.TenNv" readonly id="Ten" placeholder="Tên nhân viên">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="DiaChi">Địa chỉ</label>
+                    <input type="text" value="@Model.DiaChi" readonly id="DiaChi" placeholder="Địa chỉ">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="queQuan">Quê quán</label>
+                    <input type="text" value="@Model.QueQuan" readonly id="QueQuan" placeholder="Quê quán">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Sdt">Số điện thoại</label>
+                    <input type="text" value="@Model.Sdt" id="Sdt" readonly placeholder="Số điện thoại">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Email">Email</label>
+                    <input type="email" value="@Model.Email" id="Email" readonly placeholder="Email">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="GhiChu">Căn cước công dân</label>
+                    <input type="text" value="@Model.Cccd" id="Cccd" readonly placeholder="Căn cước công dân">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="GioiTinh">Giới tính</label>
+                    <input type="text" value="@(Model.GioiTinh.Value ? "Nam" : "Nữ")" id="GioiTinh" readonly/>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="NgaySinh">Ngày sinh</label>
+                    <input type="text" readonly value="@(Model.NgaySinh==null?"":Model.NgaySinh.Value.ToString("dd-MM-yyyy"))" id="NgaySinh">
+                  </div>
+                </div>
+              </div>
+              <!-- end card -->
+            </div>
+            <!-- end col -->
+
+            <div class="col-md-6 col-12">
+              <div class="card p-3 settings-card-2 mb-3">
+                <div class="title mb-3">
+                  <h6>Thông tin hệ thống</h6>
+                </div>
+                <form action="#">
+                  <div class="row">
+                    <div class="input-style-1">
+                    <label for="Nnv">Nhóm NV</label>
+                    <input type="text" id="Nnv" value="@Model.IdnnvNavigation.TenNnv" readonly/>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="TaiKhoan">Tài khoản</label>
+                    <input type="text" value="@Model.IdtkNavigation.TaiKhoan" id="TaiKhoan" placeholder="Tài khoản" readonly>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="MatKhau">Mật khẩu</label>
+                    <input type="text" value="@Model.IdtkNavigation.MatKhau" id="MatKhau" placeholder="Mật khẩu" readonly>
+                  </div>
+                  </div>
+                </form>
+              </div>
+              <!-- end card -->
+            </div>
+            <!-- end col -->
+          </div>
+<script>
+    var idModel = 0;
+    $(document).on('change', '#Avatar', function (e) {
+
+    URL.revokeObjectURL($('#previewImage').prop('src'))
+
+    const file = e.target.files[0];
+    file.src = URL.createObjectURL(file);
+
+    $('#previewImage').prop('src', file.src);
+})
+    function showModalEdit(id) {
+    idModel = id;
+    $.ajax({
+        type: "get",
+        url: "/CaNhan/show-modal/" + id,
+        success: function (result) {
+            $('#contentModal').empty();
+            $('#contentModal').append(result.view);
+            $('#staticBackdropLabel').text(result.title);
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+
+$('#btnModal').on('click', function (e) {
+
+    var image = $('#Avatar').get(0).files[0];
+    var formData = new FormData();
+    formData.append('FormFile', image);
+
+    formData.append('NhanVien.Id', idModel);
+    formData.append('NhanVien.TenNv', $('#Ten').val());
+    formData.append('NhanVien.DiaChi', $('#DiaChi').val());
+    formData.append('NhanVien.Email', $('#Email').val());
+    formData.append('NhanVien.Sdt', $('#Sdt').val());
+    formData.append('NhanVien.QueQuan', $('#QueQuan').val());
+    formData.append('NhanVien.Cccd', $('#Cccd').val());
+    formData.append('NhanVien.GioiTinh', $('#GioiTinh').val());
+    formData.append('NgaySinh', $('#NgaySinh').val());
+
+    $.ajax({
+        url: "/CaNhan/update-tt",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (result) {
+            $("#loader").show();
+            $('#tBody').empty();
+            $('#contentModal').empty();
+            $('#staticBackdrop').modal('hide');
+
+            $('#toast').addClass(result.color);
+            $('#toastContent').text(result.message);
+            $('#toast').show();
+
+            $('#Ten').val(result.tt.tenNv);
+
+            $('#DiaChi').val(result.tt.diaChi);
+            $('#Email').val(result.tt.email);
+            $('#Sdt').val(result.tt.sdt);
+            $('#QueQuan').val(result.tt.queQuan);
+            $('#Cccd').val(result.tt.cccd);
+            var gt = result.tt.gioiTinh;
+            $('#GioiTinh').val(gt?"Nam": "Nữ");
+
+            // Chuỗi ngày tháng ban đầu
+            const dateString = result.tt.ngaySinh;
+
+            // Định dạng mới của ngày tháng
+            const newDateFormat = 'DD-MM-YYYY';
+
+            // Tạo đối tượng moment từ chuỗi ngày tháng ban đầu
+            const dateObj = moment(dateString);
+
+            // Đổi định dạng của ngày tháng
+            const newDateString = dateObj.format(newDateFormat);
+
+            $('#NgaySinh').val(newDateString);
+            $('#avatarImage').prop('src',result.tt.avatar);
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass(result.color);
+            }, 5000);
+        },
+        error: function (loi) {
+            console.log(loi)
+        }
+    });
+
+});
+
+</script>

@@ -1,0 +1,56 @@
+﻿@media (min-width: 768px)
+{
+    .vh-md-60{
+        height: 60vh;
+    }
+    .vh-md-55 {
+        height: 55vh;
+    }
+    .vh-md-50 {
+        height: 50vh;
+    }
+}
+.table-input td {
+    padding: 0 !important;
+}
+
+.table-input .btn-icon {
+    --tblr-btn-icon-size: 1.15rem;
+}
+input.form-table, select.form-table, textarea.form-table {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none;
+    min-height: 0 !important;
+}
+.form-control.form-table:focus {
+    background-color: whitesmoke;
+}
+.form-table:not([readonly]):not([disabled]):focus {
+    border: 1px solid #206BC4 !important;
+    background-color: white !important;
+}
+.form-table.selectize-control{
+   padding: 0 !important;
+}
+.form-table.selectize-control .selectize-input.focus{
+    box-shadow: none !important;
+}
+.form-table .selectize-input{
+    border-radius: 0;
+}
+
+input:read-only, textarea:read-only{
+    background-color: whitesmoke;
+}
+
+.selectize-input .item {
+    text-overflow: ellipsis;
+    max-width: 80%;
+    overflow: hidden;
+    display: inline-flex;
+}
+.selectize-dropdown [data-selectable].option{
+    white-space: break-spaces;
+}

@@ -1,0 +1,375 @@
+﻿@model PhieuNhapKho
+@{
+    Layout = null;
+    List<HangHoa> listHH = ViewBag.HangHoas;
+    var ListCTPNT = Model.ChiTietPhieuNhaps.ToList();
+    var TienHang = ListCTPNT.Sum(x => x.Sl * x.DonGia);
+    var TienCK = ListCTPNT.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
+    var TienThue = ListCTPNT.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
+    var TienThanhToan = TienHang - TienCK + TienThue;
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+    HangHoa getHangHoa(int? id)
+    {
+        return listHH.AsParallel().FirstOrDefault(x => x.Id == id);
+    }
+
+    string toDecimal(Double? a)
+    {
+        return a?.ToString("N", System.Globalization.CultureInfo.InvariantCulture);
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy");
+        }
+        else
+        {
+            return "";
+        }
+    }
+    string toDecimal2(double? d)
+    {
+        return d.Value.ToString("#,##0");
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" conNt="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="/assets/images/logo.png"
+      type="image/x-icon"
+    />
+    <title>@ViewData["title"]</title>
+
+    <!-- ========== All CSS files linkup ========= -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/lineicons.css" />
+    <link rel="stylesheet" href="/assets/css/materialdesignicons.min.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+
+  </head>
+<body>
+         @*<div id="tabXemPhieu">
+             <div id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="form-group  p-2 mb-2" style="border-radius: 5px; border: 1px solid black; background-color: lightgrey;">
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Số phiếu</label>
+                            <input type="text" value="@Model.SoPn" readonly>
+                        </div>
+                        <div class="col-sm-7 col-lg-7 input-style-4">
+                            <label>Nhà CC</label>
+                            <input type="text" value="@Model.IdnccNavigation.TenNcc" readonly>
+                        </div>
+                        <div class="col-sm-3 col-lg-3 input-style-4">
+                            <label>Ngày Nhập</label>
+                            <input type="text" value="@Model.NgayTao.Value.ToString("dd-MM-yyyy HH:mm")" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Số HĐ</label>
+                            <input type="text" value="@Model.SoHd" class="form-control" readonly>
+                        </div>
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Ngày HĐ</label>
+                            <input type="text" value="@dayToString(Model.NgayHd)" readonly>
+                        </div>
+                        <div class="col-sm-3 col-lg-3 input-style-4">
+                            <label>NV tạo</label>
+                            <input type="text" value="@Model.IdnvNavigation.TenNv" readonly>
+                        </div>
+                        <div class="col-sm-5 col-lg-5 input-style-4">
+                            <label>Ghi chú</label>
+                            <textarea rows="1" readonly>@Model.GhiChu</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="table-responsive" style="max-height: 400px;overflow-x: auto;white-space:nowrap;">
+                    <table class="table table-bordered table-hover table-striped text-center" id="tableChiTietPhieuNhap">
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th>Tên hàng hóa</th>
+                                <th>ĐVT</th>
+                                <th>Hạn dùng</th>
+                                <th>Ngày SX</th>
+                                <th>Số lô</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+
+                                <th>%CK</th>
+                                <th>Thuế suất</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                @foreach (ChiTietPhieuNhap c in Model.ChiTietPhieuNhaps)
+                {
+                    var hh = getHangHoa(c.Idhh);
+                        <tr>
+                                                        <td class="text-start">@hh.TenHh</td>
+                                                        <td>@hh.IddvtchinhNavigation.TenDvt</td>
+                                                        <td class="text-center">@formatDay(c.Hsd)</td>
+                                                        <td class="text-center">@formatDay(c.Nsx)</td>
+                                                        <td class="text-center">@c.SoLo</td>
+                                                        <td class="text-end">@toDecimal((Double)c.Sl)</td>
+                                                        <td class="text-end">@toDecimal(c.DonGia)</td>
+
+                                                        <td class="text-end">@toDecimal(c.Cktm)</td>
+                                                        <td class="text-end">@toDecimal(c.Thue)</td>
+                                                        <td class="text-end">@toDecimal(c.Sl * c.DonGia)</td>
+                                                    </tr>
+                }
+                        </tbody>
+                    </table>
+                </div>
+             <div class="form-group p-2 mb-2" style="border-radius: 5px; border: 1px solid black;">
+                     <div class="row">
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền hàng</label>
+                                            <input  type="text" readonly placeholder="Tiền Hàng" value="@toDecimal(TienHang)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền CK</label>
+                                            <input  type="text" readonly  placeholder="Tiền chiết khấu" value="@toDecimal(TienCK)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền thuế</label>
+                                            <input  type="text" readonly  placeholder="Tiền thuế" value="@toDecimal(TienThue)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Phải trả</label>
+                                            <input type="text" readonly  placeholder="Tổng phải trả" value="@toDecimal(TienThanhToan)">
+                                        </div>
+                                    </div>
+                </div>
+            <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn btn-secondary col-lg-2 col-sm-2" onclick="cancelXemPhieu()" type="button">Quay lại</button>
+                      <a class="btn btn btn-success col-lg-2 col-sm-2" href="/download/phieunhapkho/@Model.Id">In</a>
+                    </div>
+             </div>
+</div>*@
+<main class="main-wrapper" style="margin-left:0">
+    <section class="section">
+          <div class="container-fluid">
+                <header class="d-flex justify-content-between mb-2" style="border-bottom:double;font-size:larger">
+                    <div class="infor-DN d-flex col-sm-9 col-lg-9">
+                        <img src="/assets/images/logo.png"
+                             alt=""
+                             style="height: 120px; width: 120px" />
+
+                        <div class="infomation col-sm-8" style="margin-left: 40px">
+                            <div class="row mb-1">
+                                <label class="col-lg-12 col-form-label p-0"
+                                       style="text-transform: uppercase;font-size:larger;"><b>Công ty TNHH MTV Thanh Ý</b></label>
+                            </div>
+                            <div class="row">
+                                <label class="col-lg-12 col-form-label p-0">Địa chỉ: 45 Nguyễn Trọng Lội, P4, Q.Tân Bình, TP HCM</label>
+                            </div>
+                            <div class="row justify-content-between">
+                                <label class="col-lg-5 col-form-label p-0">SĐT: 0329263644</label>
+                                <label class="col-lg-6 col-form-label p-0">Email: thanhy123zzz@gmail.com</label>
+                            </div>
+                            <div class="row justify-content-between">
+                                <label class="col-lg-5 col-form-label p-0">MST: 21552663733</label>
+                                <label class="col-lg-6 col-form-label p-0">Số TK: 022392726237</label>
+                            </div>
+                            <div class="row justify-content-between">
+                                <label class="col-lg-5 col-form-label p-0">Ngân hàng: TECHCOMBANK</label>
+                                <label class="col-lg-6 col-form-label p-0">Chủ TK: Nguyễn Thanh Ý</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thongtinphieu col-sm-3 col-lg-3">
+                        <div class="row mb-4">
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-5 col-lg-5 col-form-label p-0">Số phiếu:</label>
+                            <div class="col-sm-6 col-lg-6">
+                                <label for="" class="col-form-label p-0">@Model.SoPn</label>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-sm-5 col-lg-5 col-form-label p-0">Ngày tạo:</label>
+                            <div class="col-sm-6 col-lg-6">
+                                <label for="" class="col-form-label p-0">@Model.NgayTao.Value.ToString("dd-MM-yyyy")</label>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-sm-5 col-lg-5 col-form-label p-0">Số HĐ:</label>
+                            <div class="col-sm-6 col-lg-6">
+                                <label for="" class="col-form-label p-0">@Model.SoHd</label>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-sm-5 col-lg-5 col-form-label p-0">Ngày HĐ:</label>
+                            <div class="col-sm-6 col-lg-6">
+                                <label for="" class="col-form-label p-0">@Model.NgayHd.Value.ToString("dd-MM-yyyy")</label>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <article>
+                    <h3 class="text-center" style="color: black">
+                        <b>PHIẾU NHẬP KHO</b>
+                    </h3>
+                    <div class="infor-NCC" style="font-size:larger;margin-left: 15px;">
+                        <div class="row mb-1">
+                            <label class="col-lg-2 col-sm-2 col-form-label p-0"><i><b>Nhà cung cấp: </b></i></label>
+                            <div class="col-lg-10 col-sm-10">
+                                <label for=""
+                                       class="col-form-label p-0"
+                                       style="word-break: break-all"><b>@Model.IdnccNavigation.TenNcc</b></label>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-sm-2 col-form-label p-0"><i><b>Địa chỉ:</b></i></label>
+                            <div class="col-sm-10">
+                                <label for=""
+                                       class="col-form-label p-0"
+                                       style="word-break: break-all"><b>@Model.IdnccNavigation.DiaChi</b></label>
+                            </div>
+                        </div>
+                        <div class="row mb-1">
+                            <label class="col-sm-2 col-form-label p-0"><i><b>Số điện thoại:</b></i></label>
+                            <div class="col-sm-4">
+                                <label for="" class="col-form-label p-0"><b>@Model.IdnccNavigation.Sdt</b></label>
+                            </div>
+
+                            <label class="col-sm-1 col-form-label p-0"><i><b>Email:</b></i></label>
+                            <div class="col-sm-5">
+                                <label for="" class="col-form-label p-0"><b>@Model.IdnccNavigation.Email</b></label>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label p-0"><i><b>Ghi chú:</b></i></label>
+                            <div class="col-sm-10">
+                                <label for=""
+                                       class="col-form-label p-0"
+                                       style="word-break: break-all">
+                                    <b>@Model.GhiChu</b>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <table id="tableChiTietPhieuNhap"
+                               class="table table-bordered table-striped top-selling-table table-hover display nowrap"
+                               style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">TT</th>
+                                    <th class="text-center">Mã hàng</th>
+                                    <th class="text-center">Tên hàng</th>
+                                    <th class="text-center">Số Lô</th>
+                                    <th class="text-center">Hạn dùng</th>
+                                    <th class="text-center">S.LG</th>
+                                    <th class="text-center">ĐVT</th>
+                                    <th class="text-center">Đơn giá</th>
+                                    <th class="text-center">CK</th>
+                                    <th class="text-center">VAT</th>
+                                    <th class="text-center">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>@{
+                                    int index = 0;
+                                }
+                                @foreach (ChiTietPhieuNhap ct in Model.ChiTietPhieuNhaps)
+                                {
+                                    index++;
+                                    var hh = getHangHoa(ct.Idhh);
+                                        <tr>
+                                        <td class="text-center">@index</td>
+                                        <td class="text-center">@hh.MaHh</td>
+                                        <td class="text-start">@hh.TenHh</td>
+                                        <td class="text-center">@ct.SoLo</td>
+                                        <td class="text-center">@formatDay(ct.Hsd)</td>
+                                        <td class="text-end">@toDecimal2(ct.Sl)</td>
+                                        <td class="text-center">@hh.IddvtchinhNavigation.TenDvt</td>
+                                        <td class="text-end">@toDecimal2(ct.DonGia)</td>
+                                        <td class="text-end">@ct.Cktm</td>
+                                        <td class="text-end">@ct.Thue</td>
+                                        <td class="text-end">@toDecimal2(ct.DonGia*ct.Sl)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group p-2 mb-2"
+                         style="border-radius: 5px; border: 1px solid black">
+                        <div class="row">
+                            <label class="col-sm-3 col-lg-3 col-form-label"
+                                  ><b>Tiền hàng: @toDecimal2(TienHang)</b></label>
+
+                            <label class="col-sm-3 col-lg-3 col-form-label"
+                                  ><b>Tiền CK: @toDecimal2(TienCK)</b></label>
+
+                            <label class="col-sm-3 col-lg-3 col-form-label"
+                                  ><b>Tiền thuế: @toDecimal2(TienThue)</b></label>
+
+                            <label class="col-sm-3 col-lg-3 col-form-label"><b>Phải trả: @toDecimal2(TienThanhToan)</b></label>
+                        </div>
+                    </div>
+                    <div class="sign">
+                        <div class="row" style="font-size:larger">
+                            <label class="col-sm-2 col-2 text-center text-dark" 
+                                   style="width:20%"><b>Thủ trưởng đơn vị</b>
+                            </label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><b>Kế toán</b>
+                            </label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><b>Người nhận hàng</b></label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><b>Người giao hàng</b></label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><b>Người lập phiếu</b></label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-2 col-2 text-center text-dark" 
+                                   style="width:20%;padding-bottom: 120px;">
+                                   <i>(ký,họ tên, đóng dấu)</i>
+                            </label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><i>(ký,họ tên)</i>
+                            </label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><i>(ký,họ tên)</i></label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="width:20%"><i>(ký,họ tên)</i></label>
+                            <label class="col-sm-2 col-2 text-center text-dark"
+                                   style="padding-bottom: 120px;width:20%"><i>(ký,họ tên)</i></label>
+                        </div>
+                    </div>
+                </article>
+          </div>
+      </section>
+</main>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/Chart.min.js"></script>
+        <script src="/assets/js/dynamic-pie-chart.js"></script>
+        <script src="/assets/js/moment.min.js"></script>
+        <script src="/assets/js/fullcalendar.js"></script>
+        <script src="/assets/js/jvectormap.min.js"></script>
+        <script src="/assets/js/world-merc.js"></script>
+        <script src="/assets/js/polyfill.js"></script>
+        <script src="/assets/js/main.js"></script>
+</body>
+</html>

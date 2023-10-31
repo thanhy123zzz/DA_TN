@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" conNt="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="/assets/images/logo2.png"
+      type="image/x-icon"
+    />
+    <title>@ViewData["title"]</title>
+
+    <!-- ========== All CSS files linkup ========= -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/lineicons.css" />
+    <link rel="stylesheet" href="/assets/css/materialdesignicons.min.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <link href="/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+    <script src="/datetimepicker/popper.min.js"></script>
+    <script src="/datetimepicker/moment.min.js"></script>
+    <script src="/datetimepicker/moment-with-locales.min.js"></script>
+    <script src="/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+    <link rel="stylesheet" href="/selectize/css/selectize.bootstrap5.min.css"/>
+    <script src="/selectize/selectize.min.js"></script>
+    <link href="/assets/css/mycss.css" rel="stylesheet" />
+  </head>
+<body>
+    <!-- Modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="modal-danger" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="">Chú ý</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center" id="modal-danger-content">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="btnModalDanger">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+            <button tabindex="-1" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="contentModal" class="modal-body" style="padding:0">
+            <div id="loader2">
+                   <div class="d-flex justify-content-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    </div>
+          </div>
+          <div class="modal-footer">
+            <button tabindex="-1" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="button" class="btn btn-primary" tabindex="" id="btnModal">Xác nhận</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="toast" style="z-index:9999" class="toast align-items-center text-white border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastContent">
+          
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    <div id="imageModal" class="imageModal">
+          <span class="closeImageModal">&times;</span>
+          <img class="imageModal-content" id="imageHHModal">
+          <div id="imageModelCaption"></div>
+    </div>
+    <!-- ======== sidebar-nav start =========== -->
+    <aside class="sidebar-nav-wrapper">
+      <div class="navbar-logo" style="margin-bottom:0">
+        <a href="/TrangChu" class="d-flex align-items-center justify-content-around">
+          <img src="/assets/images/logo2.png" alt="logo" style="width: 50px;"/>
+          <h4 class="text-logo" style="font-weight: 800;font-family: sans-serif;
+    font-size: x-large;"><mark style="background-color:#fff; font-size:larger">T</mark>.Soft</h4>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item" id="TrangChu">
+            <a href="/TrangChu">
+              <span class="icon">
+                <i class="lni lni-home"></i>
+              </span>
+              <span class="text">Trang chủ</span>
+            </a>
+          </li>
+          <li class="nav-item" id="DanhMuc">
+            <a href="/DanhMuc">
+              <span class="icon">
+                <i class="lni lni-list"></i>
+              </span>
+              <span class="text">Danh mục</span>
+            </a>
+          </li>
+          <li class="nav-item nav-item-has-children">
+            <a
+              href="#0"
+              data-bs-toggle="collapse"
+              data-bs-target="#QuyDinh"
+              aria-controls="ddmenu_1"
+              aria-expanded="true"
+              aria-label="Toggle navigation"
+              class="collapsed"
+            >
+              <span class="icon">
+                <i class="lni lni-library"></i>
+              </span>
+              <span class="text">Quy định</span>
+            </a>
+            <ul id="QuyDinh" class="collapse dropdown-nav">
+                        @foreach (var cn in User.Claims.Where(x => x.Type == ClaimTypes.Role && x.Value.StartsWith("QD_")).ToList())
+                        {
+                     <li>
+                        <a href="/QuyDinh/@cn.Issuer" id="@cn.Issuer">@cn.ValueType</a>
+                     </li>
+                        }
+            </ul>
+          </li>
+          <li class="nav-item nav-item-has-children">
+            <a
+              href="#0"
+              data-bs-toggle="collapse"
+              data-bs-target="#QuanLy"
+              aria-controls="ddmenu_1"
+              aria-expanded="true"
+              aria-label="Toggle navigation"
+              class="collapsed"
+            >
+              <span class="icon">
+                <i class="lni lni-consulting"></i>
+              </span>
+              <span class="text">Quản lý</span>
+            </a>
+            <ul id="QuanLy" class="collapse dropdown-nav">
+               @foreach (var cn in User.Claims.Where(x => x.Type == ClaimTypes.Role && x.Value.StartsWith("QL_")).ToList())
+               {
+                 <li>
+                    <a href="/QuanLy/@cn.Issuer" id="@cn.Issuer">@cn.ValueType</a>
+                 </li>
+                }
+            </ul>
+          </li>
+          <li class="nav-item nav-item-has-children">
+            <a
+              href="#0"
+              data-bs-toggle="collapse"
+              data-bs-target="#HeThong"
+              aria-controls="ddmenu_1"
+              aria-expanded="true"
+              aria-label="Toggle navigation"
+              class="collapsed"
+            >
+              <span class="icon">
+                <i class="lni lni-control-panel"></i>
+              </span>
+              <span class="text">Hệ thống</span>
+            </a>
+            <ul id="HeThong" class="collapse dropdown-nav">
+             @foreach (var cn in User.Claims.Where(x => x.Type == ClaimTypes.Role 
+             && x.Value.StartsWith("HT_")).ToList()){
+              <li>
+                <a href="/HeThong/@cn.Issuer" id="@cn.Issuer">@cn.ValueType</a>
+              </li>
+             }
+            </ul>
+          </li>
+          <span class="divider"><hr /></span>
+          <li class="nav-item" id="CaNhan">
+            <a href="/CaNhan">
+              <span class="icon">
+                <i class="lni lni-user"></i>
+              </span>
+              <span class="text">Thông tin cá nhân</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/logout">
+              <span class="icon">
+                  <i class="lni lni-backward"></i>
+              </span>
+              <span class="text">Đăng xuất</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+    <div class="overlay"></div>
+    <!-- ======== sidebar-nav end =========== -->
+
+    <main class="main-wrapper">
+      <section class="section">
+            <div class="container-fluid p-2">
+                @RenderBody()
+          </div>
+      </section>
+      <!-- ========== footer start =========== -->
+      <footer class="footer">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-6 order-last order-md-first">
+              <div class="copyright text-center text-md-start">
+                <p class="text-sm">
+                  Designed and Developed by
+                  <a
+                    href="https://www.facebook.com/nguyenthanhy2001"
+                    rel="nofollow"
+                    target="_blank"
+                  >
+                    Nguyễn Thanh Ý
+                  </a>
+                </p>
+              </div>
+            </div>
+            <!-- end col-->
+            <div class="col-md-6">
+              <div
+                class="
+                  terms
+                  d-flex
+                  justify-content-center justify-content-md-end
+                "
+              >
+                <a href="#0" class="text-sm">Công ty TNHH MTV</a>
+                <a href="https://github.com/thanhy123zzz" class="text-sm ml-15">Thanh Ý</a>
+              </div>
+            </div>
+          </div>
+          <!-- end row -->
+        </div>
+        <!-- end container -->
+      </footer>
+      <!-- ========== footer end =========== -->
+        <div id="dropdow-show" style="position:absolute; z-index: 1055;">
+        </div>
+    </main>
+        <!-- ========= All Javascript files linkup ======== -->
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/Chart.min.js"></script>
+        <script src="/assets/js/dynamic-pie-chart.js"></script>
+        <script src="/assets/js/moment.min.js"></script>
+        <script src="/assets/js/fullcalendar.js"></script>
+        <script src="/assets/js/jvectormap.min.js"></script>
+        <script src="/assets/js/world-merc.js"></script>
+        <script src="/assets/js/polyfill.js"></script>
+        <script src="/assets/js/main.js"></script>
+        <script src="/mask/jquery.inputmask.js"></script>
+        <environment include="Development">
+            <script src="/assets/js/custom.js" defer asp-append-version="true"></script>
+        </environment>
+        <environment exclude="Development">
+            <script src="/assets/js/custom.min.js" defer asp-append-version="true"></script>
+        </environment>
+        <script>
+            $(document).on('click','.btn-close.btn-close-white',function(){
+                $('#toast').hide();
+            })
+        </script>
+</body>
+</html>

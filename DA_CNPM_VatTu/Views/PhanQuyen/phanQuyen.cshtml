@@ -1,0 +1,138 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenPQ;
+}
+
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-md-4 col-12 pe-md-0 mb-2">
+            <div class="card">
+                <div style="overflow-x:auto;overflow-y:auto; max-height:500px">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th class="p-0" style="border: 2px solid lightgray;">
+                                    <div class="group-btn">
+                                        <div class="d-flex justify-content-end">
+                                            <input placeholder="Tìm kiếm" id="searchVT" type="text" style="height: 38px;" class="w-100" disabled="@(!pqcn.TimKiem.Value)">
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="p-0 min-width" style="border: 2px solid lightgray;">
+                                    <div class="group-btn">
+                                        <div class="d-flex justify-content-end">
+                                            <button disabled="@(!pqcn.Them.Value)" class="main-btn primary-btn btn-hover"
+                                                    style="border-radius:0;width:100%" onclick="showModalVaiTro(0)" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                <span>Thêm Mới</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr class="text-center" style="background-color:lightgray;">
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Tên vai trò
+                                    </h6>
+                                </th>
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Thao tác
+                                    </h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBodyVaiTro">
+                            @foreach (PhanQuyen vt in ViewBag.vaiTros)
+                            {
+                                <tr style="cursor:pointer" data-id="@vt.Id">
+                                    <td>
+                                        @vt.IdvtNavigation.TenVaiTro
+                                    </td>
+                                    <td>
+                                        <div class="action justify-content-end">
+                                            <button disabled="@(!pqcn.Xoa.Value)" class="text-danger" onclick="deletePhanQuyen(@vt.Id,event); event.stopPropagation()">
+                                                <i class="lni lni-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 col-12">
+            <div class="card">
+                <div style="overflow-x:auto;overflow-y:auto; max-height:500px">
+                    <table class="table table-bordered top-selling-table display nowrap">
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th colspan="8" class="p-0" style="border: 2px solid lightgray;background-color:white">
+                                    <div class="group-btn">
+                                        <div class="d-flex">
+                                            <button disabled="@(!pqcn.Sua.Value)" class="main-btn primary-btn btn-hover" style="border-radius:0" type="button" id="btn-save">
+                                                <span>Lưu</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr style="background-color:lightgray;">
+                                <th class="text-center" rowspan="3" style="vertical-align : middle;text-align:center;">Tên chức năng</th>
+                                <th class="text-center" colspan="7">Chức năng</th>
+                            </tr>
+                            <tr style="background-color:lightgray;">
+                                <th class="text-center">Nhập</th>
+                                <th class="text-center">Sửa</th>
+                                <th class="text-center">Xóa</th>
+                                <th class="text-center">Tìm</th>
+                                <th class="text-center">In</th>
+                                <th class="text-center">Xuất</th>
+                                <th class="text-center"></th>
+                            </tr>
+                            <tr style="background-color:lightgray;">
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="nhap">
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="sua">
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="xoa">
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="tim">
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="in">
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                        <input class="form-check-input m-0" type="checkbox" id="xuat">
+                                    </div>
+                                </th>
+                                <th class="text-center">Chọn tất cả</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBodyCN">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<script src="/assets/js/PhanQuyen.js">
+</script>

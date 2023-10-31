@@ -1,0 +1,213 @@
+﻿@model HangHoa 
+<div class="card-style m-30" style="border: none;">
+     <h6 class="text-center">Thông tin</h6>
+     <div class="input-style-1">
+        <label for="formFileMultiple" class="form-label">Ảnh hàng hoá</label>
+        <input style="font-size: small !important;" tabindex="-1" class="form-control" type="file" id="Avatar">
+        <img id="previewImage" src="@(Model.Avatar == null ? "" : Model.Avatar)" class="image-modal rounded mx-auto d-block mt-1" alt="@(Model.TenHh == null ? "..." : Model.TenHh)">
+     </div>
+                  <div class="input-style-1">
+                    <label for="Ma">Mã hàng hoá</label>
+                    <input tabindex="1" type="text" asp-for="@Model.MaHh" readonly="@(!(Model.MaHh==null))" id="Ma" placeholder="Mã hàng hoá">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Ten">Tên hàng hoá</label>
+                    <input tabindex="2" type="text" asp-for="@Model.TenHh" id="Ten" placeholder="Tên hàng hoá">
+                  </div>
+                  <div class="form-group input-style-1">
+                    <label for="Nhh">Nhóm HH</label>
+                    <div class="select-position d-flex justify-content-center">
+                         <select tabindex="3" id="Nhh" class="form-select w-100 my-selectize" required>
+                             @if(Model.Idnhh != null){
+                                <option value="@Model.Idnhh">@Model.IdnhhNavigation.TenNhh</option>
+                             }
+                         </select>
+                      </div>
+                  </div>
+                  <div class="form-group input-style-1">
+                    <label for="Hsx">Hãng sản xuất</label>
+                    <div class="select-position d-flex justify-content-center">
+                         <select tabindex="4" id="Hsx" class="form-select w-100 my-selectize" required>
+                             @if(Model.IdhsxNavigation!=null){
+                                 <option value="@(Model.Idhsx)">@(Model.IdhsxNavigation.TenHsx)</option>
+                             }
+                         </select>
+                      </div>
+                  </div>
+                  <div class="form-group input-style-1">
+                    <label for="Nsx">Nước sản xuất</label>
+                    <div class="select-position d-flex justify-content-center">
+                         <select tabindex="5" id="Nsx" class="form-select w-100 my-selectize" required>
+                             @if(Model.IdnsxNavigation!=null){
+                                 <option value="@(Model.Idnsx)">@(Model.IdnsxNavigation.TenNsx)</option>
+                             }
+                         </select>
+                      </div>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Dvtc">Đơn vị tính chính</label>
+                    <div class="select-position d-flex justify-content-center">
+                         <select tabindex="6" id="Dvtc" class="form-select w-100 my-selectize" required>
+                             @if(Model.IddvtchinhNavigation != null){
+                                <option value="@Model.Iddvtchinh">@(Model.IddvtchinhNavigation.TenDvt)</option>
+                             }
+                         </select>
+                      </div>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Bh">Loại bảo hành</label>
+                    <div class="select-position d-flex justify-content-center">
+                         <select tabindex="6" id="Bh" class="form-select w-100 my-selectize" required>
+                @if (Model.IdbaoHanhNavigation != null)
+                {
+                                    <option value="@Model.IdbaoHanh">@(Model.IdbaoHanhNavigation.TenBh)</option>
+                }
+                         </select>
+                      </div>
+                  </div>
+</div>
+<script>
+
+$('#Nhh').selectize({
+  maxOptions: 10,
+  onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenNhh",
+  searchField: ["tenNhh", "maNhh"],
+  placeholder: '-- Nhóm hàng hoá --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query,
+          type: 'POST',
+          url: '/DanhMuc/HangHoa/api/nhhs'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+$('#Nsx').selectize({
+    onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenNsx",
+  searchField: ["tenNsx", "maNsx"],
+  placeholder: '-- Nước sản xuất --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query,
+          type: 'POST',
+          url: '/DanhMuc/HangHoa/api/nsx'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+$('#Hsx').selectize({
+    onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenHsx",
+  searchField: ["tenHsx", "maHsx"],
+  placeholder: '-- Hãng sản xuất --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query,
+          type: 'POST',
+          url: '/DanhMuc/HangHoa/api/hsx'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+$('#Dvtc').selectize({
+  onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenDvt",
+  searchField: ["tenDvt", "maDvt"],
+  placeholder: '-- Đơn vị tính chính --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query,
+          type: 'POST',
+          url: '/DanhMuc/HangHoa/api/dvts'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+
+$('#Bh').selectize({
+  onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenBh",
+  searchField: ["tenBh", "maBh"],
+  placeholder: '-- Loại bảo hành --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query,
+          type: 'POST',
+          url: '/DanhMuc/HangHoa/api/bh'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+</script>

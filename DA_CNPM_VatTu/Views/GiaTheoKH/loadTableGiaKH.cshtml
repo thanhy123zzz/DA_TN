@@ -1,0 +1,46 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenGiaTheoKH;
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+}
+<tbody id="tBodyGTKH">
+    @foreach (GiaTheoKhachHang gtkh in ViewBag.GTKHs)
+    {
+             <tr data-id="@gtkh.Id">
+                    <td>
+                @gtkh.IddvtNavigation.TenDvt
+                    </td>
+                    <td class="text-center">
+                @toDecimal(gtkh.TiLeLe)
+                    </td>
+                    <td class="text-center">
+                @toDecimal(gtkh.TiLeSi)
+                    </td>
+                    <td class="text-center">
+                @toDecimal(gtkh.GiaBanLe)
+                    </td>
+                    <td class="text-center">
+                @toDecimal(gtkh.GiaBanSi)
+                    </td>
+                    <td class="last-td-column">
+                         <div class="action justify-content-end">
+                             <button disabled="@(!pqcn.Sua.Value)"  onclick="showModal(@gtkh.Id)" class="text-primary">
+                                   <i class="lni lni-pencil"></i>
+                             </button> 
+                            <button onclick="deleteGTKH(@gtkh.Id)" disabled="@(!pqcn.Xoa.Value)" class="text-danger">
+                                <i class="lni lni-trash-can"></i>
+                            </button>
+                         </div>
+                    </td>
+             </tr>
+    }
+</tbody>

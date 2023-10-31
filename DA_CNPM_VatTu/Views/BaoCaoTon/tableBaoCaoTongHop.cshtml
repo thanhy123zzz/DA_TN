@@ -1,0 +1,58 @@
+﻿@{
+	List<HangTonKho> hangTons = ViewBag.hangTons;
+	string toDecimal(double? d)
+	{
+		if (d == null)
+		{
+			return "";
+		}
+		else
+		{
+			return d.Value.ToString("#,##0.00");
+		}
+	}
+	double? tongGiaTri = 0;
+}
+<tbody id="tBodyBaoCaoTongHop">
+
+	@foreach(NhomHangHoa n in ViewBag.Nhhs){
+		<tr style="background-color: aliceblue; font-weight:700">
+			<td colspan="5">@n.TenNhh</td>
+		</tr>
+		var htNhh = hangTons.AsParallel().Where(x => x.IdhhNavigation.Idnhh == n.Id)
+				.DistinctBy(x=>x.IdhhNavigation)
+				.ToList();
+		int stt = 1;
+		foreach(HangTonKho ht in htNhh){
+			var hhHangTons = hangTons.AsParallel()
+			.Where(x => x.Idhh == ht.Idhh)
+			.ToList();
+			var sumSl = hhHangTons.AsParallel().Sum(x => x.Slcon);
+			var sumGia = hhHangTons.AsParallel().Sum(x => (x.Slcon*x.GiaNhap));
+			tongGiaTri += sumGia;
+			<tr>
+				<td class="text-center">@stt</td>
+				<td>@ht.IdhhNavigation.MaHh</td>
+				<td>@ht.IdhhNavigation.TenHh</td>
+				<td class="text-end">@toDecimal(sumSl)</td>
+				<td class="text-end">@toDecimal(sumGia)</td>
+			</tr>
+			stt += 1;
+		}
+	}
+	<tr>
+		<td colspan="4" style="background-color: lightgray !important;
+                               position: sticky;padding: 10px 5px;
+                               bottom:0; text-align:start!important;
+							   font-weight:700">
+														Tổng giá trị
+													</td>
+													<td style="
+                                                        background-color: lightgray !important;
+                                                        position: sticky;padding: 10px 5px;
+                                                        bottom:0; text-align:end!important;
+                                                        font-weight:700">
+														@toDecimal(tongGiaTri) (VNĐ)
+													</td>
+												</tr>
+</tbody>

@@ -1,0 +1,211 @@
+﻿@{
+    List<NhanVien> listNV = ViewBag.NhanViens;
+    NhanVien getNhanVien(int? id)
+    {
+        NhanVien nv = listNV.FirstOrDefault(x => x.Id == id);
+        if (nv != null) return nv;
+        else return new NhanVien();
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy HH:mm");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    PhanQuyenChucNang phanQuyenHH = ViewBag.phanQuyenHH;
+}
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content" class="card-style mb-30 p-3">
+                <div class="row justify-content-between mb-2">
+                    <div class="col-auto">
+                        @if (phanQuyenHH.Them.Value)
+                        {
+                            <button class="btn btn-outline-primary"
+                                    onclick="showModalEdit(0)" value="0"
+                                    data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                Thêm mới
+                            </button>
+                        }
+                    </div>
+                    <div class="col-auto">
+                        @if (phanQuyenHH.TimKiem.Value)
+                        {
+                            <form id="formTimKiem" class="row justify-content-between">
+                                <div class="col-auto">
+                                    <div class="select-style-1 mb-0">
+                                        <div class="select-position select-sm">
+                                            <select class="light-bg" id="active" onchange="changeActive()">
+                                                <option value="true">Hiện tại</option>
+                                                <option value="false">Tất cả</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="text" class="form-control" id="search" placeholder="Tìm kiếm..." />
+                                </div>
+                                <div class="col-auto">
+                                    <button title="Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light">
+                                        <span class="lni lni-keyword-research"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <!-- End Title -->
+                <div class="card">
+                    <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh">
+                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>
+                                        <h6 class="text-sm fw-bold">#</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">Mã HH</h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Tên HH
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Nhóm HH
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Nước SX
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            Hãng SX
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            ĐVT chính
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Loại bảo hành
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            NV tạo
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày tạo
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            NV sửa
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày sửa
+                                        </h6>
+                                    </th>
+                                    <th class="last-th-column min-width" style="z-index: 3;">
+                                        <h6 class="text-sm fw-bold">
+                                            Thao tác
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tBody">
+                                @foreach (HangHoa hh in ViewBag.HangHoas)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="product">
+                                                <div class="image">
+                                                    <img class='image-modal' src="@(hh.Avatar == null ? "" : $"{hh.Avatar}")" alt='@hh.TenHh'>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@hh.MaHh</td>
+                                        <td>@hh.TenHh</td>
+                                        <td>@(hh.IdnhhNavigation == null ? "" : hh.IdnhhNavigation.TenNhh)</td>
+                                        <td>@(hh.IdnsxNavigation == null ? "" : hh.IdnsxNavigation.TenNsx)</td>
+                                        <td>@(hh.IdhsxNavigation == null ? "" : hh.IdhsxNavigation.TenHsx)</td>
+                                        <td>@(hh.IddvtchinhNavigation == null ? "" : hh.IddvtchinhNavigation.TenDvt)</td>
+                                        <td>@(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)</td>
+                                        <td>@getNhanVien(hh.Nvtao).TenNv</td>
+                                        <td>@formatDay(hh.NgayTao)</td>
+                                        <td>@getNhanVien(hh.Nvsua).TenNv</td>
+                                        <td>@formatDay(hh.NgaySua)</td>
+                                        <td class="last-td-column">
+                                            <div class="action justify-content-end">
+                                                @if (phanQuyenHH.Sua.Value)
+                                                {
+                                                    <button onclick="showModalEdit(@hh.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="lni lni-pencil"></i>
+                                                    </button>
+                                                }
+                                                @if (phanQuyenHH.Xoa.Value)
+                                                {
+                                                    <button onclick="deleteHH(@hh.Id)" class="text-danger">
+                                                        @if (hh.Active.Value)
+                                                        {
+                                                            <i class="lni lni-trash-can"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="lni lni-spinner-arrow"></i>
+                                                        }
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="loader">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-grow text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Table -->
+                    </div>
+                </div>
+                <nav id="pages" aria-label="Page navigation example" class="m-2">
+                  <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                      <a class="page-link disabled" href="" id="prePage">
+                          <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" id="currentPage" href="#">1</a></li>
+                    <li class="page-item">
+                      <a class="page-link" href="#" id="nextPage" >
+                          <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/HangHoa.js">
+</script>

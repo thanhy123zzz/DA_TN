@@ -1,0 +1,97 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenPQ;
+}
+    <div class="row">
+        <div class="col-lg-4 pe-0">
+            <div class="card-style mb-30 p-3">
+                <input placeholder="Tìm kiếm" id="search" type="text" class="form-control mb-2" disabled="@(!pqcn.TimKiem.Value)">
+                <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                        <thead>
+                            <tr>
+                                <th class="min-width first-th-column text-center">
+                                    <h6 class="text-sm fw-bold">
+                                        Mã NHH
+                                    </h6>
+                                </th>
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Tên NHH
+                                    </h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBodyNHH">
+                            @foreach (NhomHangHoa nhh in ViewBag.NHHs)
+                            {
+                                <tr style="cursor:pointer" data-id="@nhh.Id">
+                                    <td class="text-center first-td-column">
+                                        @nhh.MaNhh
+                                    </td>
+                                    <td>
+                                        @nhh.TenNhh
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-3" style="position: sticky;top: 15px;">
+                <div class="table-responsive" style="max-height: 60vh;">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                                <thead>
+                                  <tr>
+                                      <th colspan="7" class="p-0" style="border: 2px solid lightgray;">
+                                        <div class="group-btn">
+                                        <div class="d-flex">
+                                          <button onclick="showModalGTNHH(0)" disabled="@(!pqcn.Them.Value)" class="main-btn primary-btn btn-hover" style="border-radius:0" type="button" id="btn-them">
+                                            <span>Thêm mới</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                      </th>
+                                  </tr>
+                                  <tr class="text-center" style="background-color:lightgray;">
+                                    <th class="min-width">
+                                      <h6 class="text-sm fw-bold">
+                                        Giá trị min
+                                      </h6>
+                                    </th>
+                                    <th class="min-width">
+                                      <h6 class="text-sm fw-bold">
+                                        Giá trị max
+                                      </h6>
+                                    </th>
+                                    <th class="min-width">
+                                      <h6 class="text-sm fw-bold">
+                                        Tỉ lệ lẻ
+                                      </h6>
+                                    </th>
+                                    <th class="min-width">
+                                      <h6 class="text-sm fw-bold">
+                                        Tỉ lệ sỉ
+                                      </h6>
+                                    </th>
+                                    <th class="last-th-column min-width">
+                                      <h6 class="text-sm fw-bold">
+                                        Thao tác
+                                      </h6>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody id="tBodyGTNHH">
+
+                                </tbody>
+                            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="/assets/js/GiaTheoNHH.js">
+
+</script>

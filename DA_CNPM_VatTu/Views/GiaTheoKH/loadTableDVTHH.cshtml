@@ -1,0 +1,50 @@
+﻿@{
+    string toDecimal(double? d){
+        if(d==null){
+            return "";
+        }else{
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    HangHoa hh = ViewBag.Hhdvt;
+}
+
+<tbody id="tBodyDVT">
+             <tr data-id="@hh.Id" style="background-color:aliceblue">
+                <td>
+                    @hh.IddvtchinhNavigation.TenDvt
+                </td>
+                <td class="text-center">
+                    @toDecimal(hh.TiLeLe)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hh.TiLeSi)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hh.GiaBanLe)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hh.GiaBanSi)
+                </td>
+         </tr>
+    @foreach (Hhdvt hhdvt in ViewBag.Hhdvts)
+    {
+         <tr data-id="@hhdvt.Id">
+                <td>
+                    @hhdvt.IddvtNavigation.TenDvt
+                </td>
+                <td class="text-center">
+                    @toDecimal(hhdvt.TiLeLe)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hhdvt.TiLeSi)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hhdvt.GiaBanLe)
+                </td>
+                <td class="text-center">
+                    @toDecimal(hhdvt.GiaBanSi)
+                </td>
+         </tr>
+    }
+</tbody>

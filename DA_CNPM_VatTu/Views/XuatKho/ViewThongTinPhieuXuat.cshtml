@@ -1,0 +1,132 @@
+﻿@model PhieuXuatKho
+@{
+    List<HangHoa> listHH = ViewBag.HangHoas;
+    var ListCTPNT = Model.ChiTietPhieuXuats.ToList();
+    var TienHang = ListCTPNT.Sum(x => x.Sl * x.DonGia);
+    var TienCK = ListCTPNT.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
+    var TienThue = ListCTPNT.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
+    var TienThanhToan = TienHang - TienCK + TienThue;
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+    HangHoa getHangHoa(int? id)
+    {
+        return listHH.AsParallel().FirstOrDefault(x=>x.Id == id);
+    }
+
+    string toDecimal(Double? a)
+    {
+        return a?.ToString("N", System.Globalization.CultureInfo.InvariantCulture);
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy");
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+}
+         <div id="tabXemPhieu">
+             <div id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="form-group  p-2 mb-2" style="border-radius: 5px; border: 1px solid black; background-color: lightgrey;">
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Số phiếu</label>
+                            <input type="text" value="@Model.SoPx" readonly>
+                        </div>
+                        <div class="col-sm-7 col-lg-7 input-style-4">
+                            <label>Nhà CC</label>
+                            <input type="text" value="@Model.IdkhNavigation.TenKh" readonly>
+                        </div>
+                        <div class="col-sm-3 col-lg-3 input-style-4">
+                            <label>Ngày Nhập</label>
+                            <input type="text" value="@Model.NgayTao.Value.ToString("dd-MM-yyyy HH:mm")" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Số HĐ</label>
+                            <input type="text" value="@Model.SoHd" class="form-control" readonly>
+                        </div>
+                        <div class="col-sm-2 col-lg-2 input-style-4">
+                            <label>Ngày HĐ</label>
+                            <input type="text" value="@dayToString(Model.NgayHd)" readonly>
+                        </div>
+                        <div class="col-sm-3 col-lg-3 input-style-4">
+                            <label>NV tạo</label>
+                            <input type="text" value="@Model.IdnvNavigation.TenNv" readonly>
+                        </div>
+                        <div class="col-sm-5 col-lg-5 input-style-4">
+                            <label>Ghi chú</label>
+                            <textarea rows="1" readonly>@Model.GhiChu</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="table-responsive" style="max-height: 400px;overflow-x: auto;white-space:nowrap;">
+                    <table class="table table-bordered table-striped top-selling-table table-hover display nowrap" id="tableChiTietPhieuNhap">
+                        <thead>
+                            <tr>
+                                <th>Tên hàng hóa</th>
+                                <th>ĐVT</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>%CK</th>
+                                <th>Thuế suất</th>
+                                <th class="last-th-column">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                @foreach (ChiTietPhieuXuat c in Model.ChiTietPhieuXuats)
+                {
+                    var hh = getHangHoa(c.Idhh);
+                    <tr>
+                                                    <td class="text-start">@hh.TenHh</td>
+                                                    <td>@hh.IddvtchinhNavigation.TenDvt</td>
+                                                    <td class="text-end">@toDecimal((Double)c.Sl)</td>
+                                                    <td class="text-end">@toDecimal(c.DonGia)</td>
+                                                    <td class="text-end">@toDecimal(c.Cktm)</td>
+                                                    <td class="text-end">@toDecimal(c.Thue)</td>
+                                                    <td class="text-end last-td-column">@toDecimal(c.Sl * c.DonGia)</td>
+                                                </tr>
+                }
+                        </tbody>
+                    </table>
+                </div>
+             <div class="form-group p-2 mb-2" style="border-radius: 5px; border: 1px solid black;">
+                    <div class="row">
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền hàng</label>
+                                            <input  type="text" readonly placeholder="Tiền Hàng" value="@toDecimal(TienHang)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền CK</label>
+                                            <input  type="text" readonly  placeholder="Tiền chiết khấu" value="@toDecimal(TienCK)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền thuế</label>
+                                            <input  type="text" readonly  placeholder="Tiền thuế" value="@toDecimal(TienThue)">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Phải trả</label>
+                                            <input type="text" readonly  placeholder="Tổng phải trả" value="@toDecimal(TienThanhToan)">
+                                        </div>
+                                    </div>
+                </div>
+            <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn btn-secondary col-lg-2 col-sm-2" onclick="cancelXemPhieu()" type="button">Quay lại</button>
+                      <a class="btn btn btn-success col-lg-2 col-sm-2" href="/QuanLy/XuatKho/download/phieuxuatkho/@Model.Id">In</a>
+                    </div>
+             </div>
+</div>

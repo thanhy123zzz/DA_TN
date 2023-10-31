@@ -1,0 +1,67 @@
+﻿@model CachXuat
+@{
+	PhanQuyenChucNang phanQuyenCachXuat = ViewBag.PhanQuyenCachXuat;
+}
+<div class="tables-wrapper">
+	<div class="row">
+		<div class="col-lg-12">
+			<div id="content" class="card-style mb-30">
+				<div class="row">
+					<label for="roles">Cách xuất</label>
+					<div class="select-style-1">
+						  <div class="select-position d-flex justify-content-between">
+							<select id="cachXuat" disabled="@(!phanQuyenCachXuat.Sua.Value)" class="light-bg col-lg-9">
+								@if (Model.TheoTgnhap == true)
+								{
+									<option selected value="1">Nhập trước xuất trước</option>
+									<option value="2">Xuất theo hạn sử dụng (thấp nhất xuất trước)</option>
+								}else{
+									<option value="1">Nhập trước xuất trước</option>
+									<option selected value="2">Xuất theo hạn sử dụng (thấp nhất xuất trước)</option>
+								}
+							</select>
+						  </div>
+					</div>
+					<div>
+						<label for="roles">Tính giá xuất kho</label>
+						@foreach (TinhGiaXuat t in ViewBag.TinhGiaXuat)
+						{
+							<div class="form-check radio-style mb-20">
+								<input class="form-check-input" checked="@t.GiaTri" type="radio" value="@t.Id" id="@t.MaCach" name="giaXuat">
+								<label class="form-check-label" for="@t.MaCach">
+								  @t.TenCach</label>
+							</div>
+						}
+					</div>
+				</div>
+				<div class="row justify-content-end">
+					<div class="col-lg-2 col-sm-2 text-end">
+						<button disabled="@(!phanQuyenCachXuat.Sua.Value)" id="xacNhan" type="button" class="main-btn primary-btn btn-hover">Xác nhận</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).on('click','#xacNhan',function(){
+		$.ajax({
+		type: "post",
+		url: "/QuyDinh/CachXuat/change",
+		data: "CachXuat="+$('#cachXuat').val() + "&giaXuat=" + $('input[name="giaXuat"]:checked').val(),
+		success: function (result) {
+			 $('#toast').addClass(result.color);
+			 $('#toastContent').text(result.message);
+			 $('#toast').show();
+		
+			 setTimeout(function () {
+				$('#toast').hide();
+				$('#toast').removeClass(result.color);
+			}, 5000);
+		},
+		error: function (loi) {
+			console.log(loi);
+		}
+	});
+	});
+</script>

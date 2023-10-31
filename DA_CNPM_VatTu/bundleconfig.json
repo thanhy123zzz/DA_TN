@@ -1,0 +1,14 @@
+[
+  {
+    "outputFileName": "wwwroot/assets/js/NhapKho.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/NhapKho.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/assets/js/custom.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/custom.js"
+    ]
+  }
+]

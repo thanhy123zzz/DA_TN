@@ -1,0 +1,223 @@
+﻿@model List<PhieuNhapKho>
+@{
+    Layout = null;
+    List<HangTonKho> hangTons = ViewBag.hangTons;
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    double? tongGiaTri = 0;
+}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" conNt="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="/assets/images/logo.png"
+      type="image/x-icon"
+    />
+    <title>@ViewData["title"]</title>
+
+    <!-- ========== All CSS files linkup ========= -->
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/lineicons.css" />
+    <link rel="stylesheet" href="/assets/css/materialdesignicons.min.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <style>
+        th{
+            border:1px solid !important;
+        }
+        td{
+            border:1px solid !important;
+        }
+    </style>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+
+  </head>
+<body style="background-color:white">
+<main class="main-wrapper" style="margin-left:0">
+    <section class="section">
+          <div class="container-fluid">
+                <header class="d-flex justify-content-between mb-2" style="border-bottom:double;font-size:larger">
+                    <div class="col-lg-1 mr-10" >
+                        <img src="/assets/images/logo2.png"
+                             alt=""
+                             style="height: 120px; width: 120px" />
+                    </div>
+                    <div class="col-lg-11 ml-15">
+                        <div class="row justify-content-between">
+                            <div class="col-lg-8">
+                                <label class="col-form-label p-0"
+                                           style="text-transform: uppercase;font-size:larger;"><b>Công ty TNHH MTV Thanh Ý</b>
+                                </label>
+                            </div>
+                            <div class="col-lg-4">
+                                <h3 class="text-center" style="color: black">
+                                    <b>BÁO CÁO HÀNG TỒN</b>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <label class="col-form-label p-0">Địa chỉ: 45 Nguyễn Trọng Lội, P4, Q.Tân Bình, TP HCM</label>
+                            </div>
+                            <div class="col-lg-4">
+                                <h3 class="text-center" style="color: black">
+                                    <b>TỔNG HỢP</b>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8 row justify-content-between">
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">SĐT: 0329263644</label>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">Email: thanhy123zzz@gmail.com</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 row justify-content-between">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8 row justify-content-between">
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">MST: 21552663733</label>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">Số TK: 022392726237</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 row justify-content-between">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8 row justify-content-between">
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">Ngân hàng: TECHCOMBANK</label>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="col-form-label p-0">Chủ TK: Nguyễn Thanh Ý</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 row justify-content-between">
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <article>
+
+                    <div>
+                        <table id="tableChiTietPhieuNhap"
+                               class="table table-striped top-selling-table table-hover display nowrap"
+                               style="width: 100%">
+                               <thead>
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>Mã hàng</th>
+                                                    <th>Tên hàng</th>
+                                                    <th>Tổng SL tồn</th>
+                                                    <th>Tổng giá trị tồn</th>
+                                                </tr>
+                                </thead>
+                               <tbody id="tBodyBaoCaoTongHop">
+
+                                @foreach (NhomHangHoa n in ViewBag.Nhhs)
+                                {
+                                <tr style="background-color: aliceblue; font-weight:700">
+                                    <td colspan="5">@n.TenNhh</td>
+                                </tr>
+                                    var htNhh = hangTons.Where(x => x.IdhhNavigation.Idnhh == n.Id)
+                                            .DistinctBy(x => x.IdhhNavigation)
+                                            .ToList();
+                                    int stt = 1;
+                                    foreach (HangTonKho ht in htNhh)
+                                    {
+                                        var hhHangTons = hangTons
+                                        .Where(x => x.Idhh == ht.Idhh)
+                                        .ToList();
+                                        var sumSl = hhHangTons.Sum(x => x.Slcon);
+                                        var sumGia = hhHangTons.Sum(x => (x.Slcon * x.GiaNhap));
+                                        tongGiaTri += sumGia;
+                                    <tr>
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center">@ht.IdhhNavigation.MaHh</td>
+                                        <td>@ht.IdhhNavigation.TenHh</td>
+                                        <td class="text-end">@toDecimal(sumSl)</td>
+                                        <td class="text-end">@toDecimal(sumGia)</td>
+                                    </tr>
+                                        stt += 1;
+                                    }
+                                }
+                               </tbody>
+                               <tfoot>
+                                   <tr>
+                                    <td colspan="4" style="background-color: lightgray !important;
+                                       position: sticky;padding: 10px 5px;
+                                       bottom:0; text-align:start!important;
+							           font-weight:700">
+                                                        Tổng giá trị
+                                                    </td>
+                                                    <td style="
+                                                        background-color: lightgray !important;
+                                                        position: sticky;padding: 10px 5px;
+                                                        bottom:0; text-align:end!important;
+                                                        font-weight:700">
+                                        @toDecimal(tongGiaTri) (VNĐ)
+                                                    </td>
+                                                </tr>
+                               </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="sign">
+                        <div class="row" style="font-size: larger">
+                            <label class="col-sm-4 col-4 text-center text-dark">
+                                <b>Thủ trưởng đơn vị</b>
+                            </label>
+                            <label class="col-sm-4 col-4 text-center text-dark">
+                                <b>Kế toán</b>
+                            </label>
+                            <label class="col-sm-4 col-4 text-center text-dark"><b>Người lập phiếu</b></label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-4 col-4 text-center text-dark"
+                                   style="padding-bottom: 120px">
+                                <i>(ký,họ tên, đóng dấu)</i>
+                            </label>
+                            <label class="col-sm-4 col-4 text-center text-dark"
+                                   style="padding-bottom: 120px">
+                                <i>(ký,họ tên)</i>
+                            </label>
+
+                            <label class="col-sm-4 col-4 text-center text-dark"
+                                   style="padding-bottom: 120px"><i>(ký,họ tên)</i></label>
+                        </div>
+                    </div>
+                </article>
+          </div>
+      </section>
+</main>
+          <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/Chart.min.js"></script>
+        <script src="/assets/js/dynamic-pie-chart.js"></script>
+        <script src="/assets/js/moment.min.js"></script>
+        <script src="/assets/js/fullcalendar.js"></script>
+        <script src="/assets/js/jvectormap.min.js"></script>
+        <script src="/assets/js/world-merc.js"></script>
+        <script src="/assets/js/polyfill.js"></script>
+        <script src="/assets/js/main.js"></script>
+</body>
+</html>

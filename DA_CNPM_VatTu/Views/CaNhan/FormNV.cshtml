@@ -1,0 +1,61 @@
+﻿@model NhanVien
+<div class="card-style m-30" style="border: none;">
+                  <h6 class="mb-25 text-center">Thông tin</h6>
+                  <div class="input-style-1">
+                    <label for="formFileMultiple" class="form-label">Ảnh nhân viên</label>
+                    <input tabindex="-1" class="form-control" type="file" id="Avatar">
+                    <img id="previewImage" src="@(Model.Avatar == null ? "" : Model.Avatar)" class="image-modal rounded mx-auto d-block mt-1" alt="@(Model.TenNv == null ? "..." : Model.TenNv)">
+                 </div>
+                  <div class="input-style-1">
+                    <label for="Ten">Tên nhân viên</label>
+                    <input type="text" asp-for="@Model.TenNv" id="Ten" placeholder="Tên nhân viên">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="DiaChi">Địa chỉ</label>
+                    <input type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="queQuan">Quê quán</label>
+                    <input type="text" asp-for="@Model.QueQuan" id="QueQuan" placeholder="Quê quán">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Sdt">Số điện thoại</label>
+                    <input type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="Email">Email</label>
+                    <input type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
+                  </div>
+                  <div class="input-style-1">
+                    <label for="GhiChu">Căn cước công dân</label>
+                    <input type="text" asp-for="@Model.Cccd" id="Cccd" placeholder="Căn cước công dân">
+                  </div>
+                  <div class="select-style-1">
+                    <label for="GioiTinh">Giới tính</label>
+                    <div class="select-position d-flex justify-content-between">
+                        <select class="light-bg col-lg-9" asp-for="@Model.GioiTinh" id="GioiTinh">
+                            <option value="true">Nam</option>
+                            <option value="false">Nữ</option>
+                        </select>
+                    </div>
+                  </div>
+                  <div class="input-style-1">
+                    <label for="NgaySinh">Ngày sinh</label>
+                    <input type="text" value="@(Model.NgaySinh==null?"":Model.NgaySinh.Value.ToString("dd-MM-yyyy"))" id="NgaySinh">
+                  </div>
+</div>
+<script>
+$('#NgaySinh').datetimepicker({
+                locale: 'vi',
+                useStrict: true,
+                format: "DD-MM-yyyy",
+                icons: {
+                    date: "lni lni-calendar",
+                    up: "lni lni-angle-double-up",
+                    down: "lni lni-angle-double-down",
+                    previous: 'lni lni-angle-double-left',
+                    next: 'lni lni-angle-double-right',
+                    time: "lni lni-alarm-clock"
+                }
+});
+</script>

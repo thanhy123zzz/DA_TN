@@ -1,0 +1,992 @@
+﻿@{
+    List<HangHoa> hhs = ViewBag.HHs;
+    List<DonViTinh> dvts = ViewBag.Dvts;
+    string getTenHH(int? id)
+    {
+        return hhs.FirstOrDefault(x => x.Id == id).TenHh;
+    }
+    string getTenDVT(int? id)
+    {
+        return dvts.AsParallel().FirstOrDefault(x => x.Id == id).TenDvt;
+    }
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    List<ChiTietPhieuXuatTam> ctpxts = ViewBag.CTPXTs;
+    var TienHang = ctpxts.Sum(x => x.Sl * x.DonGia);
+    var TienCK = ctpxts.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
+    var TienThue = ctpxts.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
+    var TienThanhToan = TienHang - TienCK + TienThue;
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+    PhanQuyenChucNang phanQuyenXuatKho = ViewBag.phanQuyenXuatKho;
+}
+
+<div class="tables-wrapper">
+        <div class="row">
+                <div class="col-lg-12">
+                    <div id="content" class="card-style mb-30 px-3 py-2" >
+                        <!-- Bordered Tabs Justified -->
+                        <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100 active" id="home-tab" onclick="offTabNhap()" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Phiếu xuất kho</button>
+                            </li>
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Lịch sử xuất kho</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-2">
+                        <div class="tab-pane fade active show" id="borderedTabJustifiedContent">
+                            <div id="bordered-justified-home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="groupPX" class="form-group  p-2 mb-2" style="border-radius: 5px; border: 1px solid black; background-color: lightgrey;">
+                                    <div class="row mb-1">
+                                        <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="inputText" >Số PN</label>
+                                            <input value="@ViewBag.SoPhieuXuat" readonly type="text" id="inputText">
+                                        </div>
+                                        <div class="col-sm-7 col-lg-7 select-style-4">
+                                            <label for="KhachHang">Khách hàng</label>
+                                            <select id="KhachHang" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="NgayXuat" >Ngày xuất</label>
+                                            <input placeholder="dd-MM-yyyy HH:mm" value="@DateTime.Now.ToString("dd-MM-yyyy HH:mm")" type="text" id="NgayXuat">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="soHD">Số HĐ</label>
+                                            <input type="text" id="soHD"  placeholder="Số hoá đơn">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="ngayHD" >Ngày hoá đơn</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text" id="ngayHD">
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 input-style-4">
+                                            <label for="ghiChu">Ghi chú</label>
+                                            <textarea rows="1" id="ghiChu" placeholder="Ghi chú"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group p-2 mb-2" id="groupCTPX" style="border-radius: 5px; border: 1px solid black;">
+                                     <div class="row mb-1">
+                                      <div class="col-sm-8 col-lg-8 select-style-4">
+                                                <label for="hangHoa">Hàng hoá</label>
+                                                <select id="hangHoa" class="form-select w-100 my-selectize-2">
+                                                </select>
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                                <label for="SLCon">Số lượng còn</label>
+                                                <input type="text" id="SLCon" placeholder="Số lượng còn" readonly class="text-decimal">
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 select-style-4">
+                                                <label for="dvt">Đơn vị tính</label>
+                                                <select onchange="changeDVT()" id="dvt" class="form-select w-100">
+
+                                                </select>
+                                       </div>
+
+                                </div>
+                                     <div class="row mb-1">
+                                         <div class="col-lg-3 col-sm-3 select-style-4">
+                                             <label for="ThueXuat">VAT</label>
+                                              <select id="ThueXuat" class="form-select w-100 my-selectize-2">
+                                                <option selected value="0">0</option>
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                              </select>
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="SL">Số lượng</label>
+                                                <input type="text" id="SLHH"  placeholder="Số lượng" oninput="inputSLHH()" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="DonGia">Đơn giá</label>
+                                                <input type="text" readonly id="DonGia"  placeholder="Đơn giá" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ThanhTien">Thành tiền</label>
+                                                <input type="text" id="ThanhTien" placeholder="Thành tiền" readonly oninput="inputThanhTien()" class="text-decimal">
+                                            </div>
+                                        </div>
+                                     <div class="row">
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ChietKhau">%CKTM</label>
+                                                <input type="text" id="ChietKhau" placeholder="Chiết khấu thương mại" class="text-decimal">
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                               
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                
+                                          </div>
+                                    @if (phanQuyenXuatKho.Them.Value)
+                                    {
+                                                <div class="col-sm-3 mt-1 col-lg-3 d-flex justify-content-between" id="group-btn">
+                                                    <div class="product">
+                                                        <div class="image h-100">
+                                                                <img class='image-modal h-100 object-fit-cover' style="max-width:55px;border:1px solid;max-height: 55px;" src="" alt='' id="imageHH">
+                                                        </div>
+                                                      </div>
+                                                    <button class="btn btn-primary" onclick="addChiTietPhieu()" type="button">Thêm</button>
+                                                </div>
+                                    }
+                                </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 400px;overflow-x: auto;white-space:nowrap;">
+                                    <table class="table table-bordered table-striped top-selling-table table-hover display nowrap" id="tableChiTietPhieuNhap">
+                                        <thead>
+                                            <tr>
+                                                <th>Tên hàng hóa</th>
+                                                <th>ĐVT</th>
+                                                <th>Số lượng</th>
+                                                <th>Đơn giá</th>
+                                                <th>Thành tiền</th>
+                                                <th>%CK</th>
+                                                <th>Thuế suất</th>
+                                                <th class="last-th-column">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tBodyCtpx">
+                                    @foreach (ChiTietPhieuXuatTam item in ViewBag.CTPXTs)
+                                    {
+                                                <tr>
+                                                                  <td>@getTenHH(item.Idhh)</td>
+                                                                  <td>@getTenDVT(item.Iddvt)</td>
+                                                                  <td class="text-end">@toDecimal(item.Sl)</td>
+                                                                  <td class="text-end">@toDecimal(item.DonGia)</td>
+                                                                  <td class="text-end">@toDecimal(item.Sl*item.DonGia)</td>
+                                                                  <td class="text-end">@toDecimal(item.Cktm)</td>
+                                                                  <td class="text-end">@item.Thue%</td>
+                                                                  <td class='last-td-column'>
+                                                                    <div class="action justify-content-end">
+                                                    @if (phanQuyenXuatKho.Sua.Value)
+                                                    {
+                                                                            <button class="text-primary" onclick="editCtpxts(@item.Id)">
+                                                                                  <i class="lni lni-pencil"></i>
+                                                                             </button>
+                                                    }
+                                                    @if (phanQuyenXuatKho.Xoa.Value)
+                                                    {
+                                                       <button class="text-danger" onclick="deleteCtpxts(@item.Id)">
+                                                                                  <i class="lni lni-trash-can"></i>
+                                                                             </button>
+                                                    }
+                                                                         </div>
+                                                                  </td>
+                                                                </tr>
+                                    }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <div class="form-group p-2 mb-2" style="border-radius: 5px; border: 1px solid black;">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền hàng</label>
+                                            <input id="TienHang" type="text" readonly placeholder="Tiền Hàng" value="@toDecimal(TienHang)" class="text-decimal">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền CK</label>
+                                            <input id="TienCK" type="text" readonly  placeholder="Tiền chiết khấu" value="@toDecimal(TienCK)" class="text-decimal">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Tiền thuế</label>
+                                            <input id="TienThue" type="text" readonly  placeholder="Tiền thuế" value="@toDecimal(TienThue)" class="text-decimal">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label>Phải trả</label>
+                                            <input id="TienThanhToan" type="text" readonly  placeholder="Tổng phải trả" value="@toDecimal(TienThanhToan)" class="text-decimal">
+                                        </div>
+                                    </div>
+                                </div>  
+                            <div class="row">
+                            @if (phanQuyenXuatKho.Them.Value)
+                            {
+                                        <div class="d-flex justify-content-end">
+                                          <button class="btn btn-primary col-lg-2 col-sm-2" type="button" onclick="addPhieuXuat()">Tạo phiếu</button>
+                                        </div>
+                            }
+                             </div>
+                        </div>
+                       </div>
+                       <div class = "tab-content">
+                         <form action="/QuanLy/XuatKho/download/BaoCaoPhieuXuat" method="post" class="tab-pane fade" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
+                             <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                 <div class="row mb-1">
+                                  <div class="col-sm-8 col-lg-8 select-style-4">
+                                            <label for="KhachHangLS">Khách hàng</label>
+                                            <select id="KhachHangLS" name="KhachHangLS" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="fromDay" >Từ ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" id="fromDay" name="fromDay" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text">
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="toDay" >Đến ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text" id="toDay" name="toDay">
+                                        </div>
+                            </div>
+                                    <div class="row">
+                                      <div class="col-sm-7 col-lg-7 select-style-4">
+                                                <label for="hangHoaLS">Hàng hoá</label>
+                                                <select id="hangHoaLS" name="hangHoaLS" class="form-select w-100 my-selectize-2">
+                                                </select>
+                                            </div>
+
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                         <label for="soPhieuLS">Số phiếu</label>
+                                        <input class="form-control" type="text" name="soPhieuLS" id="soPhieuLS" placeholder="Số phiếu"/>
+                                    </div>
+                                    <div class="col-sm-2 col-lg-2 input-style-4">
+                                         <label for="soHDLS">Số HĐ</label>
+                                        <input class="form-control" type="text" name="soHDLS" id="soHDLS" placeholder="Số hoá đơn"/>
+                                    </div>
+                                @if (phanQuyenXuatKho.TimKiem.Value)
+                                {
+                                          <div class="col-sm-1 col-lg-1 d-flex justify-content-end mt-1">
+                                             <button class="btn btn-light w-100" type="button" onclick="loadTableLichSuXuat()">
+                                                 <i class="lni lni-keyword-research d-flex justify-content-center"></i>
+                                             </button>
+                                          </div>
+                                }
+                                    </div>
+                            </div>
+                            <div id="tableLichSuNhap" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;"> 
+                                   <table id="LichSuNhap" class="table table-bordered table-striped top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                                            <thead>
+                                                <tr>
+                                                    <th>Số phiếu</th>
+                                                    <th>Khách hàng</th>
+                                                    <th>Ngày tạo</th>
+                                                    <th>Số hoá đơn</th>
+                                                    <th>Ngày hoá đơn</th>
+                                                    <th>Nhân viên tạo</th>
+                                                    <th>Ghi chú</th>
+                                                    <th class="last-th-column">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tBodyLSXuat">
+                                            </tbody>
+                                        </table>
+                                        <div id="loader">
+                                       <div class="d-flex justify-content-center">
+                                            <div class="spinner-grow text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                            <div class="row">
+                            @if (phanQuyenXuatKho.Xuat.Value)
+                            {
+                                    <div class="d-flex justify-content-end">
+                                        <button class="btn btn-outline-success col-lg-2 col-sm-2" type="submit">Xuất tất cả</button>
+                                    </div>
+                            }
+                        </div>
+                         </form>
+                         <div class="d-lg-none" id="tabXemPhieu">
+
+                          </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+<script>
+$(document).ready(function () {
+    onLoadGroupCTPX();
+    onloadGroupPX();
+    onloadGroupLS();
+    $("#loader").hide();
+});
+$(document).on('blur', '.text-decimal', function () {
+    if (/[0-9,.\-$]+/.test(this.value)) {
+        const value = this.value.replace(/,/g, '');
+        this.value = parseFloat(value).toLocaleString('en-US', {
+            style: 'decimal',
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+        })
+    }
+});
+function offTabNhap() {
+    $('#tabXemPhieu').addClass('d-lg-none');
+};
+function inputSLHH() {
+    
+    if($('#DonGia').val() !== ""){
+        var donGia = getValue($('#DonGia').val());
+        var SL = getValue($('#SLHH').val());
+        var SLCon = getValue($('#SLCon').val());
+        if(SL > SLCon){
+            $('#SLHH').addClass('is-invalid');
+        }else{
+            $('#SLHH').removeClass('is-invalid');
+        }
+        var ThanhTien = toDecimal(donGia * SL);
+        $('#ThanhTien').val(ThanhTien);
+    }
+};
+
+function getValue(str) {
+    return Number(str.replace(/[^0-9.-]+/g, ""));
+}
+
+function toDecimal(str) {
+    return parseFloat(str).toLocaleString('en-US', {
+        style: 'decimal',
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    });
+}
+function checkNumber(str) {
+    return /[0-9,.\-$]+/.test(str);
+}
+function onloadGroupPX() {
+    $('#KhachHang').selectize({
+        maxOptions: 30,
+        onChange: function (value) {
+            if (value !== "") {
+                var $select = $('#hangHoa').selectize();
+                 var control = $select[0].selectize;
+                 control.clear();
+                 $('#dvt').empty();
+                 $('#SLCon').val('');
+                 $('#DonGia').val('');
+                 $("#SLHH").val("");
+                 $("#ThanhTien").val("");
+                 $("#ChietKhau").val("");
+            }
+        },
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenKh",
+        searchField: ["tenKh", "maKh"],
+        placeholder: '-- Khách hàng --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/XuatKho/api/khs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+        render: {
+            item: function (item, escape) {
+                return '<div>' + escape(item.tenKh + ' (' + item.loai + ')') + '</div>';
+            }
+        },
+    });
+
+    $('#NgayXuat').datetimepicker({
+        locale: 'vi',
+        useStrict: true,
+        format: "DD-MM-yyyy HH:mm",
+        icons: {
+            date: "lni lni-calendar",
+            up: "lni lni-angle-double-up",
+            down: "lni lni-angle-double-down",
+            previous: 'lni lni-angle-double-left',
+            next: 'lni lni-angle-double-right',
+            time: "lni lni-alarm-clock"
+        }
+    });
+}
+function changeDVT(){
+    if ($('#hangHoa').val() !== "" && $('#KhachHang').val() !== "") {
+                    $.ajax({
+                    type: "post",
+                    url: "/QuanLy/XuatKho/load-tthh",
+                    data: "idKh=" + $('#KhachHang').val() + "&idHh=" + $('#hangHoa').val() + "&idDvt=" + $('#dvt').val(),
+                    success: function (result) {
+                        $('#SLCon').val(toDecimal(result.slCon));
+                        $('#DonGia').val(toDecimal(result.donGia));
+                        if(result.messages !== undefined){
+                            $('#toast').addClass(result.messages.color);
+                            $('#toastContent').text(result.messages.message);
+                            $('#toast').show();
+                            setTimeout(function () {
+                            $('#toast').hide();
+                            $('#toast').removeClass(result.messages.color);
+                            }, 5000);
+                        }
+                        if($('#SLHH').val() !== ""){
+                            if(result.slCon < $('#SLHH').val()){
+                                $('#SLHH').addClass('is-invalid');
+                            }
+                            $('#ThanhTien').val(toDecimal($('#SLHH').val()*result.donGia))
+                        }else{
+                                $('#ThanhTien').val('');
+                        }
+                    },
+                    error: function (loi) {
+                        console.log(loi);
+                    }
+                });
+            }
+}
+function onLoadGroupCTPX() {
+    $('#hangHoa').selectize({
+        maxOptions: 30,
+        onChange: function (value) {
+            if (value !== "" && $('#KhachHang').val() !== "") {
+                    $.ajax({
+                    type: "post",
+                    url: "/QuanLy/XuatKho/load-tthh",
+                    data: "idKh=" + $('#KhachHang').val() + "&idHh=" + value + "&idDvt=" + 0,
+                    success: function (result) {
+                        $('#SLCon').val(toDecimal(result.slCon));
+                        $('#dvt').empty();
+                        result.dvts.map(item => $('#dvt').append(`<option value="${item.id}" data-slqd= '${item.slQuyDoi}'>${item.tenDvt}</option>`))
+                        $('#DonGia').val(toDecimal(result.donGia));
+                        if(result.messages !== undefined){
+                            $('#toast').addClass(result.messages.color);
+                            $('#toastContent').text(result.messages.message);
+                            $('#toast').show();
+
+                            setTimeout(function () {
+                            $('#toast').hide();
+                            $('#toast').removeClass(result.messages.color);
+                            }, 5000);
+                        }
+                        $('#imageHH').prop('src',result.avatar);
+                        if($('#SLHH').val() !== ""){
+                            if(result.slCon < $('#SLHH').val()){
+                                $('#SLHH').addClass('is-invalid');
+                            }
+                            $('#ThanhTien').val(toDecimal($('#SLHH').val()*result.donGia))
+                        }else{
+                            $('#ThanhTien').val('');
+                        }
+                    },
+                    error: function (loi) {
+                        console.log(loi);
+                    }
+                });
+            }
+            if($('#KhachHang').val() === ""){
+                $('#toast').addClass('bg-danger');
+            $('#toastContent').text("Chưa chọn khách hàng");
+            $('#toast').show();
+
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass('bg-danger');
+            }, 5000);
+            }
+        },
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenHh",
+        searchField: ["tenHh", "maHh"],
+        placeholder: '-- Hàng hoá --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/XuatKho/api/hhs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+    });
+    $('#ThueXuat').selectize({
+        maxOptions: 30,
+        create: true,
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        placeholder: '-- Thuế xuất --',
+        allowEmptyOption: false,
+        preload: true,
+    });
+    $('.input-date').datetimepicker({
+        locale: 'vi',
+        useStrict: true,
+        format: "DD-MM-yyyy",
+        icons: {
+            date: "lni lni-calendar",
+            up: "lni lni-angle-double-up",
+            down: "lni lni-angle-double-down",
+            previous: 'lni lni-angle-double-left',
+            next: 'lni lni-angle-double-right',
+            time: "lni lni-alarm-clock"
+        }
+    });
+
+}
+
+function onloadGroupLS() {
+    $('#hangHoaLS').selectize({
+        maxOptions: 30,
+        onChange: function (value) {
+            if (value !== "") {
+
+            }
+        },
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenHh",
+        searchField: ["tenHh", "maHh"],
+        placeholder: '-- Hàng hoá --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/XuatKho/api/hhs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+    });
+    $('#KhachHangLS').selectize({
+        maxOptions: 30,
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenKh",
+        searchField: ["tenKh", "maKh"],
+        placeholder: '-- Khách hàng --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/XuatKho/api/khs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+        render: {
+            item: function (item, escape) {
+                return '<div>' + escape(item.tenKh + ' (' + item.loai + ')') + '</div>';
+            }
+        },
+    });
+}
+$(document).on('focus', '.text-decimal, .selectize-input.items', function () {
+    $('.form-select.w-100').removeClass('is-invalid');
+    $('.text-decimal').each(function () {
+        $(this).removeClass('is-invalid');
+    });
+});
+function addChiTietPhieu() {
+    var invalid = false;
+    $('#hangHoa').each(function () {
+        if (this.selectize) {
+            if ($(this).val() === "") {
+                $(this).nextAll().addClass("is-invalid");
+                invalid = true;
+            }
+        }
+    });
+    $('.text-decimal:not([readonly])').each(function () {
+        if ($(this).val() === "") {
+            $(this).addClass("is-invalid")
+            invalid = true;
+        }
+    });
+    if(getValue($('#SLHH').val()) > getValue($('#SLCon').val())){
+        invalid = true;
+    }
+    if (invalid) {
+        return;
+    }
+
+    var idhh = getValue($('#hangHoa').val());
+    var Dvt = $('#dvt').val();
+    var ThueXuat = getValue($('#ThueXuat').val());
+    var SL = getValue($('#SLHH').val());
+    var DonGia = getValue($('#DonGia').val());
+    var ChietKhau = getValue($('#ChietKhau').val());
+
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/add-ctpxt",
+        data: "idHH=" + idhh + "&ThueXuat="
+            + ThueXuat + "&idDvt=" + Dvt + "&SL=" + SL + "&DonGia=" + DonGia
+            + "&ChietKhau=" + ChietKhau
+        ,
+        success: function (result) {
+            $('#tBodyCtpx').empty();
+            $('#tBodyCtpx').append(result.table);
+            $('#TienHang').val(toDecimal(result.tienHang));
+            $('#TienCK').val(toDecimal(result.tienCK));
+            $('#TienThue').val(toDecimal(result.tienThue));
+            $('#TienThanhToan').val(toDecimal(result.tienThanhToan));
+
+            $('#toast').addClass(result.color);
+            $('#toastContent').text(result.message);
+            $('#toast').show();
+
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass(result.color);
+            }, 5000);
+
+            resetEditCtpxts();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+function resetEditCtpxts() {
+    var t = `<div class="form-group p-2 mb-2" id="groupCTPX" style="border-radius: 5px; border: 1px solid black;">
+                                     <div class="row mb-1">
+                                      <div class="col-sm-8 col-lg-8 select-style-4">
+                                                <label for="hangHoa">Hàng hoá</label>
+                                                <select id="hangHoa" class="form-select w-100 my-selectize-2">
+                                                </select>
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                                <label for="SLCon">Số lượng còn</label>
+                                                <input type="text" id="SLCon" placeholder="Số lượng còn" readonly class="text-decimal">
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 select-style-4">
+                                                <label for="dvt">Đơn vị tính</label>
+                                                <select onchange="changeDVT()" id="dvt" class="form-select w-100">
+
+                                                </select>
+                                       </div>
+
+                                </div>
+                                     <div class="row mb-1">
+                                         <div class="col-lg-3 col-sm-3 select-style-4">
+                                             <label for="ThueXuat">VAT</label>
+                                              <select id="ThueXuat" class="form-select w-100 my-selectize-2">
+                                                <option selected value="0">0</option>
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                              </select>
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="SL">Số lượng</label>
+                                                <input type="text" id="SLHH"  placeholder="Số lượng" oninput="inputSLHH()" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="DonGia">Đơn giá</label>
+                                                <input type="text" readonly id="DonGia"  placeholder="Đơn giá" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ThanhTien">Thành tiền</label>
+                                                <input type="text" id="ThanhTien" placeholder="Thành tiền" readonly oninput="inputThanhTien()" class="text-decimal">
+                                            </div>
+                                        </div>
+                                     <div class="row">
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ChietKhau">%CKTM</label>
+                                                <input type="text" id="ChietKhau" placeholder="Chiết khấu thương mại" class="text-decimal">
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+
+                                          </div>
+                                            @if (phanQuyenXuatKho.Them.Value)
+                                            {
+                                                    <div class="col-sm-3 mt-1 col-lg-3 d-flex justify-content-between" id="group-btn">
+                                                        <div class="product">
+                                                            <div class="image h-100">
+                                                                    <img class='image-modal h-100 object-fit-cover' style="max-width:55px;border:1px solid;max-height: 55px;" src="" alt='' id="imageHH">
+                                                            </div>
+                                                          </div>
+                                                        <button class="btn btn-primary" onclick="addChiTietPhieu()" type="button">Thêm</button>
+                                                    </div>
+                                            }
+                                </div>
+                                </div>`;
+    $('#groupCTPX').replaceWith(t);
+    onLoadGroupCTPX();
+};
+
+function editCtpxts(id) {
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/showEditCTPXT",
+        data: "id=" + id,
+        success: function (result) {
+            $('#groupCTPX').replaceWith(result);
+            onLoadGroupCTPX();
+        },
+        error: function () {
+            alert("Fail");
+        }
+    });
+}
+function confirmEditCtpxts(id) {
+    var idhh = getValue($('#hangHoa').val());
+    var idDvt = $('#dvt').val();
+    var ThueXuat = getValue($('#ThueXuat').val());
+    var SL = getValue($('#SLHH').val());
+    var DonGia = getValue($('#DonGia').val());
+    var ChietKhau = getValue($('#ChietKhau').val());
+
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/edit-ctpxt",
+        data: "idHH=" + idhh + "&ThueXuat="
+            + ThueXuat + "&idDvt=" + idDvt + "&SL=" + SL + "&DonGia=" + DonGia
+            + "&ChietKhau=" + ChietKhau + "&id=" + id
+        ,
+        success: function (result) {
+            $('#tBodyCtpx').empty();
+            $('#tBodyCtpx').append(result.table);
+            $('#TienHang').val(toDecimal(result.tienHang));
+            $('#TienCK').val(toDecimal(result.tienCK));
+            $('#TienThue').val(toDecimal(result.tienThue));
+            $('#TienThanhToan').val(toDecimal(result.tienThanhToan));
+
+            $('#toast').addClass(result.color);
+            $('#toastContent').text(result.message);
+            $('#toast').show();
+
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass(result.color);
+            }, 5000);
+
+            resetEditCtpxts();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+
+function deleteCtpxts(id){
+        $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/delete-ctpxt",
+        data: "id=" + id,
+        success: function (result) {
+            $('#tBodyCtpx').empty();
+            $('#tBodyCtpx').append(result.table);
+            $('#TienHang').val(toDecimal(result.tienHang));
+            $('#TienCK').val(toDecimal(result.tienCK));
+            $('#TienThue').val(toDecimal(result.tienThue));
+            $('#TienThanhToan').val(toDecimal(result.tienThanhToan));
+
+            $('#toast').addClass(result.color);
+            $('#toastContent').text(result.message);
+            $('#toast').show();
+
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass(result.color);
+            }, 5000);
+
+            resetEditCtpxts();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+function addPhieuXuat() {
+    if (confirm("Bạn có muốn thực hiện thao tác này?")) {
+        $.ajax({
+            type: "post",
+            url: "/QuanLy/XuatKho/add-px",
+            data: "IdKh=" + $('#KhachHang').val() + "&NgayXuat=" + $('#NgayXuat').val()
+                + "&SoHD=" + $('#soHD').val() + "&NgayHD=" + $('#ngayHD').val()
+                + "&GhiChu=" + $('#ghiChu').val(),
+            success: function (result) {
+                if (result.statusCode === 200) {
+                    $('#toast').addClass(result.color);
+                    $('#toastContent').text(result.message);
+                    $('#toast').show();
+
+                    $('#tBodyCtpx').empty();
+                    resetEditCtpxts();
+                    resetGroupPX();
+
+                    $('#TienHang').val('');
+                    $('#TienCK').val('');
+                    $('#TienThue').val('');
+                    $('#TienThanhToan').val('');
+
+                    setTimeout(function () {
+                        $('#toast').hide();
+                        $('#toast').removeClass(result.color);
+                    }, 5000);
+                } else {
+                    $('#toast').addClass(result.color);
+                    $('#toastContent').text(result.message);
+                    $('#toast').show();
+
+                    setTimeout(function () {
+                        $('#toast').hide();
+                        $('#toast').removeClass(result.color);
+                    }, 5000);
+                }
+            },
+            error: function (loi) {
+                console.log(loi);
+            }
+        });
+    }
+}
+function resetGroupPX() {
+    var t = `<div id="groupPX" class="form-group  p-2 mb-2" style="border-radius: 5px; border: 1px solid black; background-color: lightgrey;">
+                                    <div class="row mb-1">
+                                        <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="inputText" >Số PN</label>
+                                            <input value="@ViewBag.SoPhieuXuat" readonly type="text" id="inputText">
+                                        </div>
+                                        <div class="col-sm-7 col-lg-7 select-style-4">
+                                            <label for="KhachHang">Khách hàng</label>
+                                            <select id="KhachHang" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="NgayXuat" >Ngày xuất</label>
+                                            <input placeholder="dd-MM-yyyy HH:mm" value="@DateTime.Now.ToString("dd-MM-yyyy HH:mm")" type="text" id="NgayXuat">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="soHD">Số HĐ</label>
+                                            <input type="text" id="soHD"  placeholder="Số hoá đơn">
+                                        </div>
+                                        <div class="col-sm-3 col-lg-3 input-style-4">
+                                            <label for="ngayHD" >Ngày hoá đơn</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text" id="ngayHD">
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 input-style-4">
+                                            <label for="ghiChu">Ghi chú</label>
+                                            <textarea rows="1" id="ghiChu" placeholder="Ghi chú"></textarea>
+                                        </div>
+                                    </div>
+                                </div>`
+    $('#groupPX').replaceWith(t);
+    onloadGroupPX();
+}
+
+function loadTableLichSuXuat(){
+    $("#loader").show();
+
+    var toDay = $('#toDay').val();
+    var fromDay = $('#fromDay').val();
+    var KhLs = $('#KhachHangLS').val();
+    var hhLS = $('#hangHoaLS').val();
+    var soPhieuLS = $("#soPhieuLS").val();
+    var soHDLS = $('#soHDLS').val();
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/loadTableLichSuXuat",
+        data: "toDay=" + toDay + "&fromDay=" + fromDay + "&KhLs="
+            + KhLs + "&hhLS=" + hhLS + "&soPhieuLS=" + soPhieuLS + "&soHDLS=" + soHDLS,
+        success: function (result) {
+            $("#loader").hide();
+            $('#tBodyLSXuat').empty();
+            $('#tBodyLSXuat').append(result);
+
+        },
+        error: function () {
+            alert("Fail");
+        }
+    });
+}
+function ViewPhieuXuat(id) {
+    $('#bordered-justified-profile').removeClass('active');
+    $('#bordered-justified-profile').removeClass('show');
+    $('#tabXemPhieu').removeClass('d-lg-none');
+
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/XuatKho/ViewThongTinPhieuXuat",
+        data: "idPX=" + id,
+        success: function (result) {
+            $('#tabXemPhieu').replaceWith(result);
+        },
+        error: function () {
+            alert("Fail");
+        }
+    });
+}
+function cancelXemPhieu() {
+    $('#tabXemPhieu').addClass('d-lg-none');
+    $('#bordered-justified-profile').addClass('active');
+    $('#bordered-justified-profile').addClass('show');
+}
+</script>

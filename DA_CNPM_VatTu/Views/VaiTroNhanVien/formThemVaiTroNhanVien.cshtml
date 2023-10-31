@@ -1,0 +1,14 @@
+﻿@model List<VaiTro>
+<div class="card-style m-30" style="border: none;">
+                  <h6 class="mb-25 text-center">Thông tin</h6>
+                  <div class="select-style-1">
+                      <label for="roles">Vai trò</label>
+                      <div class="select-position d-flex justify-content-center">
+                         <select id="roles" class="light-bg col-lg-9">
+                             @foreach(VaiTro vt in Model){
+                                 <option value="@vt.Id">@vt.TenVaiTro</option>
+                             }
+                         </select>
+                      </div>
+                  </div>
+</div>

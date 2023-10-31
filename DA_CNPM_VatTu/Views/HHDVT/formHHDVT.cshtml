@@ -1,0 +1,96 @@
+﻿@model Hhdvt
+@{
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+}
+<div class="card-style m-30" style="border: none;">
+	<h6 class="text-center">Thông tin</h6>
+	<div class="form-group input-style-1">
+        <label for="DVT">Đơn vị tính</label>
+             <div class="select-position d-flex justify-content-center">
+                <select tabindex="1" id="DVT" class="form-select w-100 my-selectize" required>
+                    @if(Model.IddvtNavigation != null){
+                        <option value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
+                     }
+                </select>
+            </div>
+    </div>
+    <div class="input-style-1">
+        <label for="Slquydoi">SL quy đổi</label>
+        <input tabindex="2" type="text" value="@toDecimal(Model.SlquyDoi)" id="Slquydoi" placeholder="Số lượng quy đổi">
+    </div>
+    <div class="input-style-1">
+        <label for="TLLe">Tỉ lệ lẻ</label>
+        <input tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ"  class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="TLSi">Tỉ lệ sỉ</label>
+        <input tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="GBLe">Giá bán lẻ</label>
+        <input tabindex="5" type="text" value="@toDecimal(Model.GiaBanLe)" id="GBLe" placeholder="Giá bán lẻ" class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="GBSi">Giá bán sỉ</label>
+        <input tabindex="6" type="text" value="@toDecimal(Model.GiaBanSi)" id="GBSi" placeholder="Giá bán sỉ" class="text-decimal">
+    </div>
+</div>
+<script>
+$('#DVT').selectize({
+  maxOptions: 10,
+  onFocus: function($dropdown) {
+      $('.my-selectize').not(this.$input).each(function() {
+      if (this.selectize) {
+        this.selectize.close();
+        this.selectize.blur();
+      }
+    });
+  },
+  valueField: "id",
+  labelField: "tenDvt",
+  searchField: ["tenDvt", "maDvt"],
+  placeholder: '-- Đơn vị tính --',
+  allowEmptyOption: false,
+  preload: true,
+  load: function(query, callback) {
+      if(query!==""){
+        $.ajax({
+          data: "key="+query + "&idHh="+@Html.Raw(ViewBag.IdHH),
+          type: 'POST',
+          url: '/QuyDinh/HHDVT/api/dvts'
+        }).done(function(response) {
+          callback(response);
+        });
+      }
+  },
+  loadThrottle: 400,
+});
+
+$('input[type="text"]').blur(function(){
+    if(/[0-9,.\-$]+/.test(this.value)){
+        const value = this.value.replace(/,/g, '');
+        this.value = parseFloat(value).toLocaleString('en-US', {
+        style: 'decimal',
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+            })
+    }
+});
+$('.text-decimal').focus(function(){
+    $('.text-decimal').removeClass('is-invalid')
+});
+function checkNumber(str) {
+        return /[0-9,.\-$]+/.test(str);
+}
+
+</script>

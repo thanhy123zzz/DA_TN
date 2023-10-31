@@ -1,0 +1,427 @@
+﻿@{
+    List<NhanVien> listNV = ViewBag.NhanViens;
+
+    NhanVien getNhanVien(int? id)
+    {
+        NhanVien nv = listNV.FirstOrDefault(x => x.Id == id);
+        if (nv != null) return nv;
+        else return new NhanVien();
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy HH:mm");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    PhanQuyenChucNang phanQuyenBH = ViewBag.phanQuyenBH;
+}
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content" class="card-style mb-30 p-3">
+                <div class="row justify-content-between mb-2">
+                    <div class="col-auto">
+                        @if (phanQuyenBH.Them.Value)
+                        {
+                            <button class="btn btn-outline-primary"
+                                    onclick="showModalEdit(0)" value="0"
+                                    data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                Thêm mới
+                            </button>
+                        }
+                    </div>
+                    <div class="col-auto">
+                        @if (phanQuyenBH.TimKiem.Value)
+                        {
+                            <form id="formTimKiem" class="row justify-content-between">
+                                <div class="col-auto">
+                                    <div class="select-style-1 mb-0">
+                                        <div class="select-position select-sm">
+                                            <select class="light-bg" id="active" onchange="changeActive()">
+                                                <option value="true">Hiện tại</option>
+                                                <option value="false">Tất cả</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="text" class="form-control" id="search" placeholder="Tìm kiếm..." />
+                                </div>
+                                <div class="col-auto">
+                                    <button title="Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light">
+                                        <span class="lni lni-keyword-research"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <!-- End Title -->
+                <div class="card">
+                    <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh;">
+                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead style="background-color:lightgray;position: sticky; top: 0;">
+                                <tr class="text-center">
+                                    <th>
+                                        <h6 class="text-sm fw-bold">Mã BH</h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Tên bảo hành
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Số ngày bảo hành
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            NV tạo
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày tạo
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            NV sửa
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày sửa
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Thao tác
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tBody">
+                                @foreach (BaoHanh bh in ViewBag.Bhs)
+                                {
+                                    <tr>
+                                        <td>@bh.MaBh</td>
+                                        <td>@bh.TenBh</td>
+                                        <td>@bh.SoNgay</td>
+                                        <td>@getNhanVien(bh.Nvtao).TenNv</td>
+                                        <td>@formatDay(bh.NgayTao)</td>
+                                        <td>@getNhanVien(bh.Nvsua).TenNv</td>
+                                        <td>@formatDay(bh.NgaySua)</td>
+                                        <td>
+                                            <div class="action justify-content-end">
+                                                @if (phanQuyenBH.Sua.Value)
+                                                {
+                                                    <button onclick="showModalEdit(@bh.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="lni lni-pencil"></i>
+                                                    </button>
+                                                }
+                                                @if (phanQuyenBH.Xoa.Value)
+                                                {
+                                                    <button onclick="deleteBh(@bh.Id)" class="text-danger">
+                                                        @if (bh.Active.Value)
+                                                        {
+                                                            <i class="lni lni-trash-can"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="lni lni-spinner-arrow"></i>
+                                                        }
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="loader">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-grow text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Table -->
+                    </div>
+                </div>
+                <nav id="pages" aria-label="Page navigation example" class="m-2">
+                  <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                      <a class="page-link disabled" href="" id="prePage">
+                          <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" id="currentPage" href="#">1</a></li>
+                    <li class="page-item">
+                      <a class="page-link" href="#" id="nextPage" >
+                          <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+        </div>
+    </div>
+</div>
+<script>
+$("#loader").hide();
+const pages = $("#pages");
+var contentTable = $('#tBody').children();
+var page = 0;
+var idModel = 0;
+var active = $('#active').val();
+if ($('#tBody').children().length < 10) {
+    $('#nextPage').addClass('disabled')
+} else {
+    $('#nextPage').removeClass('disabled')
+}
+
+$(document).on("click", '#nextPage', (e) => {
+
+    $('#tBody').empty();
+    $("#loader").show();
+    page += 1;
+
+    $.ajax({
+        type: "post",
+        url: "/DanhMuc/BaoHanh/change-page",
+        data: "active=" + active + "&page=" + page,
+        success: function (result) {
+            $("#loader").hide();
+            $('#tBody').empty();
+            $('#tBody').append(result);
+
+            contentTable = $('#tBody').children();
+            $('#currentPage').text(page + 1);
+            if ($('#tBody').children().length < 10) {
+                $('#nextPage').addClass('disabled')
+            } else {
+                $('#nextPage').removeClass('disabled')
+            }
+            if (page > 0) {
+                $('#prePage').removeClass('disabled')
+            } else {
+                $('#prePage').addClass('disabled')
+            }
+
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+    e.preventDefault();
+});
+$(document).on('click', '#prePage', (e) => {
+
+    $('#tBody').empty();
+    $("#loader").show();
+    page -= 1;
+
+    $.ajax({
+        type: "post",
+        url: "/DanhMuc/BaoHanh/change-page",
+        data: "active=" + active + "&page=" + page,
+        success: function (result) {
+            $("#loader").hide();
+            $('#tBody').empty();
+            $('#tBody').append(result);
+            contentTable = $('#tBody').children();
+            $('#currentPage').text(page + 1);
+
+            if ($('#tBody').children().length < 10) {
+                $('#nextPage').addClass('disabled')
+            } else {
+                $('#nextPage').removeClass('disabled')
+            }
+            if (page > 0) {
+                $('#prePage').removeClass('disabled')
+            } else {
+                $('#prePage').addClass('disabled')
+            }
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+    e.preventDefault();
+});
+
+$('#formTimKiem').on('submit', function (e) {
+    var key = $('#search').val();
+
+    if (key !== "") {
+
+        $("#btnSearch").replaceWith('<button onclick="goBack()" title="Quay lại" id="btnBack" type="button" class="btn btn-light m-2"><i class="lni lni-angle-double-left d-flex"></i></button>')
+        pages.remove();
+
+        $('#tBody').empty();
+        $("#loader").show();
+
+        $.ajax({
+            type: "post",
+            url: "/DanhMuc/BaoHanh/searchTableBaoHanh",
+            data: "active=" + active + "&key=" + key,
+            success: function (result) {
+                $("#loader").hide();
+                $('#tBody').empty();
+                $('#tBody').append(result);
+
+            },
+            error: function (loi) {
+                console.log(loi);
+            }
+        });
+    }
+    e.preventDefault();
+});
+function goBack() {
+    $('#tBody').empty()
+    $('#search').val('');
+    $("#content").append(pages);
+
+    $('#tBody').append(contentTable)
+
+    $("#btnBack").replaceWith('<button title=Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light m-2"><i class="lni lni-keyword-research d-flex"></i></button>')
+};
+
+function showModalEdit(id) {
+    idModel = id;
+    $.ajax({
+        type: "get",
+        url: "/DanhMuc/BaoHanh/show-modal/" + id,
+        success: function (result) {
+            $('#contentModal').empty();
+            $('#contentModal').append(result.view);
+            $('#staticBackdropLabel').text(result.title);
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+
+$('#btnModal').on('click', (e) => {
+    fetch("/DanhMuc/BaoHanh/update-bh", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            Id: idModel,
+            MaBh: $('#MaBh').val(),
+            TenBh: $('#TenBh').val(),
+            SoNgay: $('#SoNgay').val()
+        })
+    })
+        .then(Response => Response.json())
+        .then(data => {
+            $("#loader").show();
+            $('#tBody').empty();
+            $('#staticBackdrop').modal('hide');
+
+            if ($('#search').val() === "") {
+                $.ajax({
+                    type: "post",
+                    url: "/DanhMuc/BaoHanh/change-page",
+                    data: "active=" + active + "&page=" + page,
+                    success: function (result) {
+                        $('#toast').addClass(data.color);
+                        $('#toastContent').text(data.message);
+                        $('#toast').show();
+
+                        $('#tBody').append(result);
+                        $("#loader").hide();
+                    },
+                    error: function (loi) {
+                        console.log(loi);
+                    }
+                });
+            }
+            else {
+
+                $.ajax({
+                    type: "post",
+                    url: "/DanhMuc/BaoHanh/searchTableBaoHanh",
+                    data: "active=" + active + "&key=" + $('#search').val(),
+                    success: function (result) {
+                        $('#toast').addClass(data.color);
+                        $('#toastContent').text(data.message);
+                        $('#toast').show();
+
+                        $("#loader").hide();
+                        $('#tBody').append(result);
+                    },
+                    error: function (loi) {
+                        console.log(loi);
+                    }
+                });
+            }
+
+            setTimeout(function () {
+                $('#toast').hide();
+                $('#toast').removeClass(data.color);
+            }, 5000);
+        })
+        .catch(error => console.error(error))
+});
+
+function deleteBh(id) {
+    if (confirm("Bạn có muốn thực hiện thao tác này?")) {
+        $("#loader").show();
+        $('#tBody').empty();
+        $.ajax({
+            type: "post",
+            url: "/DanhMuc/BaoHanh/remove-bh",
+            data: "Id=" + id + "&active=" + active + "&page=" + page + "&key=" + $('#search').val(),
+            success: function (result) {
+
+                $('#toast').addClass(result.color);
+                $('#toastContent').text(result.message);
+                $('#toast').show();
+
+                $('#tBody').append(result.nsxs);
+                $("#loader").hide();
+                setTimeout(function () {
+                    $('#toast').hide();
+                    $('#toast').removeClass(data.color);
+                }, 5000);
+
+            },
+            error: function (loi) {
+                console.log(loi);
+            }
+        });
+    }
+}
+
+function changeActive() {
+    $("#loader").show();
+    $('#tBody').empty();
+    active = $('#active').val();
+
+    $.ajax({
+        type: "post",
+        url: "/DanhMuc/BaoHanh/change-page",
+        data: "active=" + active + "&page=" + page,
+        success: function (result) {
+            $("#loader").hide();
+            $('#tBody').append(result);
+            contentTable = $('#tBody').children();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+</script>

@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "selectize.js@0.15.2",
+      "destination": "wwwroot/selectize/",
+      "files": [
+        "css/selectize.bootstrap5.min.css"
+      ]
+    }
+  ]
+}

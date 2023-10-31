@@ -1,0 +1,62 @@
+﻿@{
+	List<ChiTietPhieuNhap> chiTietPhieuNhaps = ViewBag.chiTietPhieuNhaps;
+	string toDecimal(double? d)
+	{
+		if (d == null)
+		{
+			return "";
+		}
+		else
+		{
+			return d.Value.ToString("#,##0.00");
+		}
+	}
+	string dayToString(DateTime? a)
+	{
+		if (a == null)
+		{
+			return "";
+		}
+		return a.Value.ToString("dd-MM-yyyy");
+	}
+	double? tongGiaTri = 0;
+	int stt = 1;
+}
+<tbody id="tBodyBaoCaoChiTiet">
+	@foreach (ChiTietPhieuNhap ht in chiTietPhieuNhaps)
+	{
+		<tr>
+				<td class="text-center">@stt</td>
+				<td class="text-center">@dayToString(ht.NgayTao)</td>
+				<td>@ht.IdpnNavigation.IdnccNavigation.TenNcc</td>
+				<td class="text-center">@ht.IdhhNavigation.MaHh</td>
+				<td>@ht.IdhhNavigation.TenHh</td>
+				<td class="text-center">@ht.SoLo</td>
+				<td class="text-center">@dayToString(ht.Hsd)</td>
+				<td class="text-end">@toDecimal(ht.Sl)</td>
+				<td class="text-end">@toDecimal(ht.Sl - (ht.HangTonKhos.Count == 0 ? 0 : ht.HangTonKhos.FirstOrDefault().Slcon))</td>
+				<td class="text-end">@toDecimal(ht.HangTonKhos.Count == 0 ? 0 : ht.HangTonKhos.FirstOrDefault().Slcon)</td>
+				<td>@ht.IdhhNavigation.IddvtchinhNavigation.TenDvt</td>
+				<td class="text-end">@toDecimal(ht.DonGia)</td>
+				<td class="text-end">@toDecimal(ht.Thue)</td>
+				<td class="text-end last-td-column">@toDecimal(ht.DonGia * (ht.HangTonKhos.Count == 0 ? 0 : ht.HangTonKhos.FirstOrDefault().Slcon))</td>
+		</tr>
+		tongGiaTri += ht.DonGia * (ht.HangTonKhos.Count == 0 ? 0 : ht.HangTonKhos.FirstOrDefault().Slcon);
+		stt++;
+	}
+	<tr>
+		<td colspan="13" style="background-color: lightgray !important;
+                               position: sticky;padding: 10px 5px;
+                               bottom:0; text-align:start!important;
+							   font-weight:700">
+														Tổng giá trị
+													</td>
+													<td class="last-td-column" style="
+                                                        background-color: lightgray !important;
+                                                        position: sticky;padding: 10px 5px;
+                                                        bottom:0; text-align:end!important;
+                                                        font-weight:700">
+														@toDecimal(tongGiaTri) (VNĐ)
+													</td>
+												</tr>
+</tbody>

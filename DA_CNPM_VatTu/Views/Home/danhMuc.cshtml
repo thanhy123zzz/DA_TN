@@ -1,0 +1,14 @@
+﻿<div class="row">
+    @foreach (ChucNang C in ViewBag.danhMuc){
+    <div class="col-xl-3 col-lg-4 col-sm-6">
+            <a class="icon-card mb-3 py-3 px-4" href="/DanhMuc/@C.Url">
+                    <div class="icon primary">
+                      <i class="lni lni-layers"></i>
+                    </div>
+                    <div class="content">
+                      <h5 class="text-bold mb-10">@C.TenChucNang</h5>
+                    </div>
+                  </a>
+    </div>
+    }
+</div>

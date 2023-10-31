@@ -1,0 +1,89 @@
+﻿@model ChiTietPhieuXuatTam
+@{
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+}
+<div class="form-group p-2 mb-2" id="groupCTPX" style="border-radius: 5px; border: 1px solid black;">
+                                     <div class="row mb-2">
+                                      <div class="col-sm-8 col-lg-8 select-style-4">
+                                                <label for="hangHoa">Hàng hoá</label>
+                                                <select id="hangHoa" class="form-select w-100 my-selectize-2">
+                                                    <option value="@Model.Idhh">@Model.TenHh</option>
+                                                </select>
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                                <label for="SLCon">Số lượng còn</label>
+                                                <input value="@toDecimal(ViewBag.SlCon)" type="text" id="SLCon" placeholder="Số lượng còn" readonly>
+                                            </div>
+                                      <div class="col-sm-2 col-lg-2 select-style-4">
+                                                <label for="dvt">Đơn vị tính</label>
+                                                <select asp-for="@Model.Iddvt" onchange="changeDVT()" id="dvt" class="form-select w-100">
+                                                    @foreach(Hhdvt h in ViewBag.HhDvts){
+                                                        <option value="@h.IddvtNavigation.Id" data-slqd="@h.SlquyDoi">
+                                                            @h.IddvtNavigation.TenDvt
+                                                        </option>
+                                                    }
+                                                </select>
+                                       </div>
+
+                                </div>
+                                     <div class="row mb-2">
+                                         <div class="col-lg-3 col-sm-3 select-style-4">
+                                             <label for="ThueXuat">VAT</label>
+                                              <select id="ThueXuat" class="form-select w-100 my-selectize-2">
+                                                <option value="@Model.Thue">@Model.Thue</option>
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                              </select>
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="SL">Số lượng</label>
+                                                <input value="@toDecimal(Model.Sl)" type="text" id="SLHH"  placeholder="Số lượng" oninput="inputSLHH()" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="DonGia">Đơn giá</label>
+                                                <input value="@toDecimal(Model.DonGia)" type="text" readonly id="DonGia"  placeholder="Đơn giá" oninput="inputDoGia()" class="text-decimal">
+                                            </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ThanhTien">Thành tiền</label>
+                                                <input value="@toDecimal(Model.Sl*Model.DonGia)" type="text" id="ThanhTien" readonly placeholder="Thành tiền" oninput="inputThanhTien()" class="text-decimal">
+                                            </div>
+                                        </div>
+                                     <div class="row">
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+                                                <label for="ChietKhau">%CKTM</label>
+                                                <input value="@toDecimal(Model.Cktm)" type="text" id="ChietKhau" placeholder="Chiết khấu thương mại" class="text-decimal">
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+
+                                          </div>
+                                          <div class="col-sm-3 col-lg-3 input-style-4">
+
+                                          </div>
+                                        <div class="col-sm-3 mt-1 col-lg-3 d-flex justify-content-end" id="group-btn">
+                                            <button class="btn btn-light mr-10" onclick="resetEditCtpxts()" type="button">Huỷ</button>
+                                                <button class="btn btn-primary" onclick="confirmEditCtpxts(@Model.Id)" type="button">Xác nhận</button>
+                                          </div>
+                                </div>
+                                </div>

@@ -1,0 +1,32 @@
+﻿@{
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+}
+    @foreach (PhieuNhapKho p in ViewBag.ListPhieuNhap)
+    {
+          <tr>
+              <td>@p.SoPn</td>
+              <td>@p.IdnccNavigation.TenNcc</td>
+              <td>@p.NgayTao.Value.ToString("dd-MM-yyyy HH:mm")</td>
+              <td>@p.SoHd</td>
+              <td>@dayToString(p.NgayHd)</td>
+              <td>@p.IdnvNavigation.TenNv</td>
+              <td>@p.GhiChu</td>
+              <td class="last-td-column">
+                  <div class="action justify-content-end">
+                          <button type="button" onclick="ViewPhieuNhap('@p.Id')" class="text-primary">
+                              <i class="lni lni-eye"></i>
+                          </button>
+                          <a href="/QuanLy/NhapKho/download/phieunhapkho/@p.Id" class="text-success">
+                            <i class="lni lni-printer"></i>    
+                      </a>
+                  </div>
+              </td>
+          </tr>
+    }

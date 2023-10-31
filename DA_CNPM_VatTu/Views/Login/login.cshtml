@@ -1,0 +1,185 @@
+﻿@{
+    Layout = null;
+    var _dACNPMContext = new DACNPMContext();
+    List<VaiTro> vaiTros = _dACNPMContext.VaiTros.ToList();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="assets/images/favicon.svg"
+      type="image/x-icon"
+    />
+    <title>Đăng nhập</title>
+    <!-- ========== All CSS files linkup ========= -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+        <link rel="stylesheet" href="assets/css/lineicons.css" />
+    <link rel="stylesheet" href="assets/css/materialdesignicons.min.css" />
+  </head>
+  <body>
+      <section class="signin-section" style="padding: 20px;">
+        <div class="container-fluid">
+          <!-- ========== title-wrapper end ========== -->
+
+          <div class="row g-0 auth-row">
+            <div class="col-lg-6">
+              <div class="auth-cover-wrapper bg-primary-100">
+                <div class="auth-cover">
+                  <div class="title text-center">
+                    <h1 class="text-primary mb-10">CT TNHH MTV T</h1>
+                    <p class="text-medium">
+                      Quản lý bán hàng và bảo hành
+                    </p>
+                  </div>
+                  <div class="shape-image">
+                    <img src="assets/images/auth/shape.svg" alt="" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- end col -->
+            <div class="col-lg-6">
+              <div id="divLogin" class="signin-wrapper">
+                <div class="form-wrapper">
+                  <h4 class="mb-15" style="text-align: center;">LOGIN</h4>
+                  <form id="loginForm">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="input-style-3">
+                          <input type="text" placeholder="User name" id="userName"/>
+                          <span class="icon"><i class="lni lni-user"></i></span>
+                        </div>
+                      </div>
+                      <!-- end col -->
+                      <div class="col-12">
+                        <div class="input-style-3">
+                          <input type="password" placeholder="Password" id="passWord"/>
+                          <span class="icon"><i class="lni lni-lock-alt"></i></span>
+                        </div>
+                      </div>
+                      <div id="divMessage" class="col-12">
+
+                      </div>
+                      <div class="col-12">
+                        <div
+                          class="
+                            button-group
+                            d-flex
+                            justify-content-center
+                            flex-wrap
+                          "
+                        >
+                          <button
+                            class="
+                              main-btn
+                              primary-btn
+                              btn-hover
+                              w-100
+                              text-center
+                            "
+                            id="btnLogin"
+                            type="submit"
+                            style="padding: 10px 15px;height: auto;"
+                          >
+                            Sign In
+                          </button>
+                        </div>
+                      </div>
+                      <!-- end col -->
+                    </div>
+                    <!-- end row -->
+                  </form>
+                </div>
+              </div>
+              <div id="divPhanCong" class="signin-wrapper">
+                  <div class="form-wrapper">
+                      <h4 class="mb-15 text-success" style="text-align: center;">Đăng nhập thành công,</h4>
+                      <h4 class="mb-15 text-success" style="text-align: center;">Hãy chọn chi nhánh và vai trò</h4>
+                  <form id="formPhanCong">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="input-style-1">
+                          <div class="select-style-1">
+                          <label for="roles">Chi nhánh</label>
+                          <div class="select-position d-flex justify-content-between">
+                            <select id="chiNhanh" class="light-bg col-lg-9" onchange="changeChinhNhanh()">
+                                <option value="0" selected>-- Chọn chi nhánh --</option>
+                            </select>
+                          </div>
+                        </div>
+                        </div>
+                      </div>
+                      <!-- end col -->
+                      <div class="col-12">
+                        <div class="select-style-1">
+                          <label for="roles">Vai trò</label>
+                          <div class="select-position d-flex justify-content-center">
+                            <select id="roles" class="light-bg col-lg-9">
+                                
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div
+                          class="
+                            button-group
+                            d-flex
+                            justify-content-around
+                            flex-wrap
+                          ">
+                          <button
+                            class="
+                              main-btn
+                              primary-btn
+                              btn-hover
+                              w-100
+                              text-center
+                              mb-2
+                            "
+                            style="padding: 10px 15px;height: auto;"
+                            type="submit"
+                          >
+                            Xác nhận
+                          </button>
+                          <button
+                            class="
+                              main-btn
+                              lignt-btn
+                              btn-hover
+                              w-100
+                              text-center
+                            "
+                            style="padding: 10px 15px;height: auto;"
+                            type="button"
+                            id="btnHuy"
+                          >
+                            Huỷ
+                          </button>
+                          
+                        </div>
+                      </div>
+                      <!-- end col -->
+                    </div>
+                    <!-- end row -->
+                  </form>
+                  </div>
+              </div>
+            </div>
+            <!-- end col -->
+          </div>
+          <!-- end row -->
+        </div>
+      </section>
+    <!-- ========= All Javascript files linkup ======== -->
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

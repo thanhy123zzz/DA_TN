@@ -1,0 +1,190 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenPQ;
+    string toDecimal(double? d){
+        if(d==null){
+            return "";
+        }else{
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    HangHoa hh = ViewBag.Hhdvt;
+    List<HangTonKho> htks = ViewBag.giaNhaps;
+    var max = htks.Max(x => x.GiaNhap);
+}
+<div class="col-lg-8" id="tabHHDVT">
+<div class="card mb-2">
+    <div class="table-responsive" style="max-height: 300px;">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead>
+                              <tr>
+                                  <th colspan="7" class="p-0" style="border: 2px solid lightgray;">
+                                    <div class="group-btn">
+                                    <div class="d-flex">
+                                      <button onclick="showModalHHDVT(0)" disabled="@(!pqcn.Them.Value)" class="main-btn primary-btn btn-hover" style="border-radius:0" type="button" id="btn-them">
+                                        <span>Thêm mới</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                  </th>
+                              </tr>
+                              <tr class="text-center" style="background-color:lightgray;">
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Tên ĐVT
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    SL quy đổi
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Tỉ lệ lẻ
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Tỉ lệ sỉ
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Giá bán lẻ
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Giá bán sỉ
+                                  </h6>
+                                </th>
+                                <th class="last-th-column min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Thao tác
+                                  </h6>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody id="tBodyDVT">
+             <tr data-id="@hh.Id" style="background-color:aliceblue; white-space:nowrap;color: @((hh.GiaBanLe <= (max * 1.03)) || (hh.GiaBanSi <= (max * 1.02)) || (hh.GiaBanLe == null && hh.GiaBanSi == null && hh.TiLeLe == null && hh.TiLeSi == null) ? "red" : "");">
+                <td>
+                        @hh.IddvtchinhNavigation.TenDvt (Chính)
+                </td>
+                <td class="text-center">
+                    1
+                </td>
+                <td class="text-center">
+                        @toDecimal(hh.TiLeLe)
+                </td>
+                <td class="text-center">
+                        @toDecimal(hh.TiLeSi)
+                </td>
+                <td class="text-center">
+                        @toDecimal(hh.GiaBanLe)
+                </td>
+                <td class="text-center">
+                        @toDecimal(hh.GiaBanSi)
+                </td>
+                <td class="last-td-column">
+                     <div class="action justify-content-end">
+                         <button disabled="@(!pqcn.Sua.Value)"  onclick="showModalHHDVTC(@hh.Id)" class="text-primary">
+                               <i class="lni lni-pencil"></i>
+                         </button>
+                     </div>
+                </td>
+         </tr>
+                @foreach (Hhdvt hhdvt in ViewBag.Hhdvts)
+                {
+                      <tr data-id="@hhdvt.Id" style="white-space:nowrap;color: @((hhdvt.GiaBanLe <= (max * 1.03 * hhdvt.SlquyDoi)) || (hhdvt.GiaBanSi <= (max * 1.02 * hhdvt.SlquyDoi)) || (hhdvt.GiaBanLe == null && hhdvt.GiaBanSi == null && hhdvt.TiLeLe == null && hhdvt.TiLeSi == null) ? "red" : "");">
+                        <td>
+                            @hhdvt.IddvtNavigation.TenDvt
+                        </td>
+                        <td class="text-center">
+                            @hhdvt.SlquyDoi
+                        </td>
+                        <td class="text-center">
+                            @toDecimal(hhdvt.TiLeLe)
+                        </td>
+                        <td class="text-center">
+                            @toDecimal(hhdvt.TiLeSi)
+                        </td>
+                        <td class="text-center">
+                            @toDecimal(hhdvt.GiaBanLe)
+                        </td>
+                        <td class="text-center">
+                            @toDecimal(hhdvt.GiaBanSi)
+                        </td>
+                        <td class="last-td-column">
+                             <div class="action justify-content-end">
+                                 <button disabled="@(!pqcn.Sua.Value)"  onclick="showModalHHDVT(@hhdvt.Id)" class="text-primary">
+                                       <i class="lni lni-pencil"></i>
+                                 </button> 
+                                <button onclick="deleteDVTHH(@hhdvt.Id)" disabled="@(!pqcn.Xoa.Value)" class="text-danger">
+                                    <i class="lni lni-trash-can"></i>
+                                </button>
+                             </div>
+                        </td>
+                 </tr>
+                }
+</tbody>
+                        </table>
+                </div>
+</div>
+<label>Giá nhập của hàng hoá tồn kho</label>
+<div class="card mb-2">
+    <div class="table-responsive" style="max-height: 200px;">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead>
+                              <tr class="text-center" style="background-color:lightgray;">
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    ĐVT Chính
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Ngày nhập
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Hạn dùng
+                                  </h6>
+                                </th>
+                                <th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    SL Tồn
+                                  </h6>
+                                </th><th class="min-width">
+                                  <h6 class="text-sm fw-bold">
+                                    Giá nhập
+                                  </h6>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody id="tBodyGia">
+                @foreach (var ht in htks)
+                {
+                                            <tr style="white-space:nowrap;">
+                                                    <td>
+                            @ht.IdhhNavigation.IddvtchinhNavigation.TenDvt (Chính)
+                                                    </td>
+                                                    <td class="text-center">
+                            @ht.NgayNhap.Value.ToString("dd-MM-yyyy")
+                                                    </td>
+                                                    <td class="text-center">
+                            @ht.Hsd.Value.ToString("dd-MM-yyyy")
+                                                    </td>
+                                                    <td class="text-center">
+                            @toDecimal(ht.Slcon)
+                                                    </td>
+                                                    <td class="text-center">
+                            @toDecimal(ht.GiaNhap)
+                                                    </td>
+                                            </tr>
+                }
+                            </tbody>
+                        </table>
+                </div>
+</div>
+</div>

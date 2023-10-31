@@ -1,0 +1,559 @@
+﻿@{
+    PhanQuyenChucNang phanQuyenBaoCaoTon = ViewBag.phanQuyen;
+}
+<div class="tables-wrapper">
+        <div class="row">
+                <div class="col-lg-12">
+                    <div id="content" class="card-style mb-30 px-3 py-2">
+                        <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100 active" id="home-tab" onclick="offTabNhap()" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Báo cáo tổng hợp</button>
+                            </li>
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Báo cáo chi tiết</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-2">
+                            <div class="tab-pane fade active show" id="borderedTabJustifiedContent">
+                                <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                 <div class="row mb-2">
+                                    <div class="col-sm-8 col-lg-8 select-style-4">
+                                            <label for="NhhTH">Nhóm hàng hoá</label>
+                                            <select id="NhhTH" name="NhhTH" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                      <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="fromDayTH" >Từ ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" id="fromDayTH" name="fromDayTH" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text">
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="toDayTH" >Đến ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text" id="toDayTH" name="toDayTH">
+                                        </div>
+                                </div>
+                                 <div class="row mb-2 justify-content-between">
+                                  <div class="col-sm-10 col-lg-10 select-style-4">
+                                       <label for="hangHoaTH">Hàng hoá</label>
+                                           <select id="hangHoaTH" name="hangHoaTH" class="form-select w-100 my-selectize-2">
+                                        </select>
+                                   </div>
+                                   @if(phanQuyenBaoCaoTon.TimKiem.Value){
+                                  <div class="col-12 col-sm-2 col-lg-1 d-flex justify-content-end mt-1">
+                                     <button class="btn btn-light w-100" type="button" onclick="loadTableBaoCaoTongHop()">
+                                         <i class="lni lni-keyword-research d-flex justify-content-center"></i>
+                                     </button>
+                                  </div>
+                                   }
+                                </div>
+                            </div>
+                                <div class="card">
+                                    <div id="tableBaoCaoTongHop" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;">
+                                    <table id="LichSuNhap" class="table table-bordered top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                                        <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Mã hàng</th>
+                                                <th>Tên hàng</th>
+                                                <th>Tổng SL tồn</th>
+                                                <th>Tổng giá trị tồn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tBodyBaoCaoTongHop">
+                                        </tbody>
+                                    </table>
+                                    <div id="loaderTH">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="spinner-grow text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    </div>
+                                <div class="row justify-content-end text-center mt-1">
+                                    @if (phanQuyenBaoCaoTon.In.Value)
+                            {
+                                <div class="col-md-auto col-6 mb-1">
+                                    <button id="btnBaoCaoTongHopPDF" class="btn btn-outline-success" type="button" onclick="downloadBaoCaoTongHopPDF()">
+                                        <i class="lni lni-printer"></i>
+                                        Xuất PDF
+                                    </button>
+                                </div>
+                            }
+                            @if (phanQuyenBaoCaoTon.Xuat.Value)
+                            {
+                                <div class="col-md-auto col-6 mb-1">
+                                    <button id="btnBaoCaoTongHopExcel" class="btn btn-outline-success" type="button" onclick="downloadBaoCaoTongHopExcel()">
+                                            <i class="lni lni-save"></i>
+                                            Xuất Excel</button>
+                                    </div>
+                            }
+                            </div>
+                            </div>
+                        </div>
+                        <div class = "tab-content">
+                            <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                 <div class="row mb-2">
+                                     <div class="col-sm-6 col-lg-6 select-style-4">
+                                            <label for="nhaCCCT">Nhà CC</label>
+                                            <select id="nhaCCCT" name="nhaCCCT" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                    <div class="col-sm-6 col-lg-6 select-style-4">
+                                            <label for="NhhCT">Nhóm hàng hoá</label>
+                                            <select id="NhhCT" name="NhhCT" class="form-select w-100 my-selectize-2">
+                                            </select>
+                                        </div>
+                                </div>
+                                 <div class="row mb-2 justify-content-between">
+                                  <div class="col-sm-7 col-lg-7 select-style-4">
+                                       <label for="hangHoaCT">Hàng hoá</label>
+                                           <select id="hangHoaCT" name="hangHoaCT" class="form-select w-100 my-selectize-2">
+                                        </select>
+                                   </div>
+                                   <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="fromDayCT" >Từ ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" id="fromDayCT" name="fromDayCT" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text">
+                                        </div>
+                                        <div class="col-sm-2 col-lg-2 input-style-4">
+                                            <label for="toDayCT" >Đến ngày</label>
+                                            <input class="input-date" placeholder="dd-MM-yyyy" value="@DateTime.Now.ToString("dd-MM-yyyy")" type="text" id="toDayCT" name="toDayCT">
+                                        </div>
+                                        @if(phanQuyenBaoCaoTon.TimKiem.Value){
+                                      <div class="col-12 col-sm-1 col-lg-1 d-flex justify-content-end mt-1">
+                                         <button class="btn btn-light w-100" type="button" onclick="loadTableBaoCaoChiTiet()">
+                                             <i class="lni lni-keyword-research d-flex justify-content-center"></i>
+                                         </button>
+                                      </div>
+                                        }
+                                </div>
+                            </div>
+                                <div class="card">
+                            <div id="tableBaoCaoChiTiet" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;">
+                                <table class="table table-bordered table-striped top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Ngày nhập</th>
+                                            <th>Nhà cung cấp</th>
+                                            <th>Mã hàng</th>
+                                            <th>Tên hàng</th>
+                                            <th>Số lô</th>
+                                            <th>Hạn dùng</th>
+                                            <th>SL nhập</th>
+                                            <th>SL Xuất</th>
+                                            <th>SL tồn</th>
+                                            <th>ĐVT</th>
+                                            <th>Giá nhập</th>
+                                            <th>Thuế</th>
+                                            <th class="last-th-column">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tBodyBaoCaoChiTiet">
+                                    </tbody>
+                                </table>
+                                <div id="loaderCT">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="spinner-grow text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                </div>
+                                    <div class="row justify-content-end text-center mt-1">
+                                    
+                                @if (phanQuyenBaoCaoTon.In.Value)
+                                {
+                                    <div class="col-auto mb-1">
+                                        <button id="btnBaoCaoChiTietPDF" class="btn btn-outline-success" type="button" onclick="downloadBaoCaoChiTietPDF()">
+                                            <i class="lni lni-printer"></i>
+                                            Xuất PDF
+                                        </button>
+                                    </div>
+                                }
+                                @if (phanQuyenBaoCaoTon.Xuat.Value)
+                                {
+
+                                <div class="col-auto mb-1">
+                                    <button id="btnBaoCaoChiTietExcel" class="btn btn-outline-success" type="button" onclick="downloadBaoCaoChiTietExcel()">
+                                            <i class="lni lni-save"></i>
+                                            Xuất Excel</button>
+                                    </div>
+                                }
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+<script>
+$(document).ready(function () {
+    $("#loaderTH").hide();
+    $("#loaderCT").hide();
+    $('.input-date').datetimepicker({
+        locale: 'vi',
+        useStrict: true,
+        format: "DD-MM-yyyy",
+        icons: {
+            date: "lni lni-calendar",
+            up: "lni lni-angle-double-up",
+            down: "lni lni-angle-double-down",
+            previous: 'lni lni-angle-double-left',
+            next: 'lni lni-angle-double-right',
+            time: "lni lni-alarm-clock"
+        }
+    });
+    $('#hangHoaTH').selectize({
+        maxOptions: 10,
+        onChange: function (value) {
+            if (value !== "") {
+                $.ajax({
+                    url: '/QuanLy/NhapKho/api/solo',
+                    method: 'post',
+                    data: "idHh=" + value,
+                    success: function (response) {
+                        var soLoSelectize = $('#soLo')[0].selectize;
+                        soLoSelectize.clearOptions();
+                        soLoSelectize.load(function (callback) {
+                            callback(response.soLos);
+                        });
+                        $('#dvt').val(response.dvt);
+                        $('#imageHH').prop('src', response.avatar);
+                        $('#imageHH').attr('alt', response.alt);
+                    }
+                });
+            }
+        },
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenHh",
+        searchField: ["tenHh", "maHh"],
+        placeholder: '-- Hàng hoá --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/NhapKho/api/hhs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+    });
+    $('#NhhTH').selectize({
+      maxOptions: 10,
+      onFocus: function($dropdown) {
+          $('.my-selectize-2').not(this.$input).each(function() {
+          if (this.selectize) {
+            this.selectize.close();
+            this.selectize.blur();
+          }
+        });
+      },
+      valueField: "id",
+      labelField: "tenNhh",
+      searchField: ["tenNhh", "maNhh"],
+      placeholder: '-- Nhóm hàng hoá --',
+      allowEmptyOption: false,
+      preload: true,
+      load: function(query, callback) {
+          if(query!==""){
+            $.ajax({
+              data: "key="+query,
+              type: 'POST',
+              url: '/DanhMuc/HangHoa/api/nhhs'
+            }).done(function(response) {
+              callback(response);
+            });
+          }
+      },
+      loadThrottle: 400,
+    });
+    $('#nhaCCCT').selectize({
+        maxOptions: 30,
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenNcc",
+        searchField: ["tenNcc", "maNcc"],
+        placeholder: '-- Nhà cung cấp --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/NhapKho/api/nccs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+    });
+    $('#hangHoaCT').selectize({
+        maxOptions: 10,
+        onChange: function (value) {
+            if (value !== "") {
+                $.ajax({
+                    url: '/QuanLy/NhapKho/api/solo',
+                    method: 'post',
+                    data: "idHh=" + value,
+                    success: function (response) {
+                        var soLoSelectize = $('#soLo')[0].selectize;
+                        soLoSelectize.clearOptions();
+                        soLoSelectize.load(function (callback) {
+                            callback(response.soLos);
+                        });
+                        $('#dvt').val(response.dvt);
+                        $('#imageHH').prop('src', response.avatar);
+                        $('#imageHH').attr('alt', response.alt);
+                    }
+                });
+            }
+        },
+        onFocus: function ($dropdown) {
+            $('.my-selectize-2').not(this.$input).each(function () {
+                if (this.selectize) {
+                    this.selectize.close();
+                    this.selectize.blur();
+                }
+            });
+        },
+        valueField: "id",
+        labelField: "tenHh",
+        searchField: ["tenHh", "maHh"],
+        placeholder: '-- Hàng hoá --',
+        allowEmptyOption: false,
+        preload: true,
+        load: function (query, callback) {
+            if (query !== "") {
+                $.ajax({
+                    data: "key=" + query,
+                    type: 'POST',
+                    url: '/QuanLy/NhapKho/api/hhs'
+                }).done(function (response) {
+                    callback(response);
+                });
+            }
+        },
+        loadThrottle: 400,
+    });
+    $('#NhhCT').selectize({
+      maxOptions: 10,
+      onFocus: function($dropdown) {
+          $('.my-selectize-2').not(this.$input).each(function() {
+          if (this.selectize) {
+            this.selectize.close();
+            this.selectize.blur();
+          }
+        });
+      },
+      valueField: "id",
+      labelField: "tenNhh",
+      searchField: ["tenNhh", "maNhh"],
+      placeholder: '-- Nhóm hàng hoá --',
+      allowEmptyOption: false,
+      preload: true,
+      load: function(query, callback) {
+          if(query!==""){
+            $.ajax({
+              data: "key="+query,
+              type: 'POST',
+              url: '/DanhMuc/HangHoa/api/nhhs'
+            }).done(function(response) {
+              callback(response);
+            });
+          }
+      },
+      loadThrottle: 400,
+    });
+});
+function offTabNhap() {
+    $('#tabXemPhieu').addClass('d-lg-none');
+}
+
+function loadTableBaoCaoTongHop(){
+    $("#loaderTH").show();
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/search-table-baocaotonghop",
+        data: "idNhh=" + $('#NhhTH').val() + "&idHh=" + $('#hangHoaTH').val() 
+        + "&fromDay=" + $('#fromDayTH').val() + "&toDay=" + $('#toDayTH').val(),
+        success: function (result) {
+            $("#loaderTH").hide();
+            $('#tBodyBaoCaoTongHop').replaceWith(result);
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+function downloadBaoCaoTongHopPDF(){
+    $('#btnBaoCaoTongHopPDF').hide();
+    $(`<div id="spinner" class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>`).insertAfter("#btnBaoCaoTongHopPDF");
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/download/BaoCaoTongHopPDF",
+        data: "idNhh=" + $('#NhhTH').val() + "&idHh=" + $('#hangHoaTH').val() 
+        + "&fromDay=" + $('#fromDayTH').val() + "&toDay=" + $('#toDayTH').val(),
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (result) {
+            var a = document.createElement('a');
+            var url = window.URL.createObjectURL(result);
+            a.href = url;
+            a.download = "BaoCaoTongHopPDF.pdf";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+            $('#btnBaoCaoTongHopPDF').show();
+            $('#spinner').remove();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+function downloadBaoCaoTongHopExcel(){
+    $('#btnBaoCaoTongHopExcel').hide();
+    $(`<div id="spinner" class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>`).insertAfter("#btnBaoCaoTongHopExcel");
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/download/BaoCaoTongHopExcel",
+        data: "idNhh=" + $('#NhhTH').val() + "&idHh=" + $('#hangHoaTH').val() 
+        + "&fromDay=" + $('#fromDayTH').val() + "&toDay=" + $('#toDayTH').val(),
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (result) {
+            var a = document.createElement('a');
+            var url = window.URL.createObjectURL(result);
+            a.href = url;
+            a.download = "BaoCaoTongHopExcel.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+            $('#btnBaoCaoTongHopExcel').show();
+            $('#spinner').remove();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+
+function loadTableBaoCaoChiTiet(){
+    $("#loaderCT").show();
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/search-table-baocaochitiet",
+        data: "idNhh=" + $('#NhhCT').val() + "&idHh=" + $('#hangHoaCT').val() 
+        + "&fromDay=" + $('#fromDayCT').val() + "&toDay=" + $('#toDayCT').val() + "&idNcc=" + $('#nhaCCCT').val(),
+        success: function (result) {
+            $("#loaderCT").hide();
+            $('#tBodyBaoCaoChiTiet').replaceWith(result);
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+
+function downloadBaoCaoChiTietPDF(){
+    $('#btnBaoCaoChiTietPDF').hide();
+    $(`<div id="spinner" class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>`).insertAfter("#btnBaoCaoChiTietPDF");
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/download/BaoCaoChiTietPDF",
+        data: "idNhh=" + $('#NhhCT').val() + "&idHh=" + $('#hangHoaCT').val() 
+        + "&fromDay=" + $('#fromDayCT').val() + "&toDay=" + $('#toDayCT').val() + "&idNcc=" + $('#nhaCCCT').val(),
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (result) {
+            var a = document.createElement('a');
+            var url = window.URL.createObjectURL(result);
+            a.href = url;
+            a.download = "BaoCaoChiTietPDF.pdf";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+            $('#btnBaoCaoChiTietPDF').show();
+            $('#spinner').remove();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+function downloadBaoCaoChiTietExcel(){
+    $('#btnBaoCaoChiTietExcel').hide();
+    $(`<div id="spinner" class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>`).insertAfter("#btnBaoCaoChiTietExcel");
+    $.ajax({
+        type: "post",
+        url: "/QuanLy/BaoCaoTon/download/BaoCaoChiTietExcel",
+        data: "idNhh=" + $('#NhhCT').val() + "&idHh=" + $('#hangHoaCT').val() 
+        + "&fromDay=" + $('#fromDayCT').val() + "&toDay=" + $('#toDayCT').val() + "&idNcc=" + $('#nhaCCCT').val(),
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (result) {
+            var a = document.createElement('a');
+            var url = window.URL.createObjectURL(result);
+            a.href = url;
+            a.download = "BaoCaoChiTietExcel.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+            $('#btnBaoCaoChiTietExcel').show();
+            $('#spinner').remove();
+        },
+        error: function (loi) {
+            console.log(loi);
+        }
+    });
+}
+</script>

@@ -1,0 +1,58 @@
+﻿@{
+    List<ChiTietPhieuNhapTam> ctpns = ViewBag.CTPNTs;
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    List<HangHoa> hhs = ViewBag.HHs;
+    string getTenHH(int? id){
+        return hhs.FirstOrDefault(x => x.Id == id).TenHh;
+    }
+    string dayToString(DateTime? a)
+    {
+        if (a == null)
+        {
+            return "";
+        }
+        return a.Value.ToString("dd-MM-yyyy");
+    }
+    PhanQuyenChucNang phanQuyenNhapKho = ViewBag.phanQuyenNhapKho;
+}
+
+@foreach(ChiTietPhieuNhapTam item in ctpns){
+<tr>
+                  <td>@getTenHH(item.Idhh)</td>
+                  <td>@item.Dvt</td>
+                  <td>@item.SoLo</td>
+                  <td class="text-end">@toDecimal(item.Sl)</td>
+                  <td class="text-end">@toDecimal(item.DonGia)</td>
+                  <td class="text-end">@toDecimal(item.Sl*item.DonGia)</td>
+                  <td class="text-end">@toDecimal(item.Cktm)</td>
+                  <td class="text-center">@(dayToString(item.Hsd))</td>
+                  <td class="text-center">@dayToString(item.Nsx)</td>
+                  <td class="text-end">@item.Thue%</td>
+                  <td class='last-td-column'>
+                    <div class="action justify-content-end">
+                        @if (phanQuyenNhapKho.Sua.Value)
+                        {
+                            <button class="text-primary" onclick="editCtpnts(@item.Id)">
+                                  <i class="lni lni-pencil"></i>
+                            </button>
+                        }
+                        @if (phanQuyenNhapKho.Xoa.Value)
+                        {
+                            <button class="text-danger" onclick="deleteCtpnts(@item.Id)">
+                                  <i class="lni lni-trash-can"></i>
+                            </button>
+                        }
+                         </div>
+                  </td>
+                </tr>
+}

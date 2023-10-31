@@ -1,0 +1,292 @@
+﻿@{
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+}
+
+<div class="row">
+    <div class="col-lg-8 col-12 pe-0">
+              <div class="card-style mb-30 p-2">
+                <div
+                  class="
+                    title
+                    d-flex
+                    flex-wrap
+                    align-items-center
+                    justify-content-between
+                  "
+                >
+                  <div class="left">
+                    <h6 class="text-medium mb-2">Giá trị xuất nhập</h6>
+                  </div>
+                  <div class="right">
+                    <div class="select-style-1 mb-2">
+                      <div class="select-position select-sm">
+                        <select id="selectChartXuatNhap" class="light-bg" onchange="loadChartXuatNhap()">
+                          <option value="0">Tuần này</option>
+                          <option value="1">Tháng này</option>
+                          <option value="2">Năm này</option>
+                        </select>
+                      </div>
+                    </div>
+                    <!-- end select -->
+                  </div>
+                </div>
+                <!-- End Title -->
+                <div class="chart">
+                  <div id="legend3">
+                    <ul
+                      class="legend3 d-flex flex-wrap align-items-center mb-30"
+                    >
+                      <li>
+                        <div class="d-flex">
+                          <span class="bg-color primary-bg"> </span>
+                          <div class="text">
+                            <p id="tongNhap" class="text-sm text-success">
+                              <span class="text-dark" style="margin-right:3px;">Nhập kho: </span> @toDecimal(ViewBag.sumNhap) (VNĐ)
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="d-flex">
+                          <span class="bg-color purple-bg"></span>
+                          <div class="text">
+                            <p id="tongXuat" class="text-sm text-success">
+                              <span class="text-dark" style="margin-right:3px;">Xuất kho: </span> @toDecimal(ViewBag.sumXuat) (VNĐ)
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <canvas
+                    id="Chart3"
+                    style="width: 100%; height: 450px"
+                  ></canvas>
+                </div>
+              </div>
+     </div>
+    <div class="col-12 col-lg-4">
+        <div class="card-style mb-30">
+            <div class="
+                    title
+                    d-flex
+                    flex-wrap
+                    align-items-center
+                    justify-content-between
+                  ">
+                <div class="left">
+                    <h6 class="text-medium mb-2">Giá trị xuất theo nhóm hàng</h6>
+                </div>
+                <div class="right">
+
+                    <!-- end select -->
+                </div>
+            </div>
+            <!-- End Title -->
+            <div class="chart">
+                <canvas id="pieChart"
+                        style="width: 100%; height: 450px"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function(){
+    // =========== chart three start
+    loadPieChart();
+      const ctx3 = document.getElementById("Chart3").getContext("2d");
+      const chart3 = new Chart(ctx3, {
+        // The type of chart we want to create
+        type: "line", // also try bar or other graph types
+
+        // The data for our dataset
+        data: {
+          labels: @Html.Raw(ViewBag.label),
+          datasets: [
+            {
+              label: "Tổng nhập",
+              backgroundColor: "transparent",
+              borderColor: "#4a6cf7",
+              data: @Html.Raw(ViewBag.dataNhap),
+              pointBackgroundColor: "transparent",
+              pointHoverBackgroundColor: "#4a6cf7",
+              pointBorderColor: "transparent",
+              pointHoverBorderColor: "#fff",
+              pointHoverBorderWidth: 3,
+              pointBorderWidth: 5,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+            },
+            {
+              label: "Tổng xuất",
+              backgroundColor: "transparent",
+              borderColor: "#9b51e0",
+              data: @Html.Raw(ViewBag.dataXuat),
+              pointBackgroundColor: "transparent",
+              pointHoverBackgroundColor: "#9b51e0",
+              pointBorderColor: "transparent",
+              pointHoverBorderColor: "#fff",
+              pointHoverBorderWidth: 3,
+              pointBorderWidth: 5,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+            },
+          ],
+        },
+
+        // Configuration options
+        options: {
+          tooltips: {
+            intersect: false,
+            backgroundColor: "#fbfbfb",
+            titleFontColor: "#8F92A1",
+            titleFontSize: 16,
+            titleFontFamily: "Inter",
+            titleFontStyle: "400",
+            bodyFontFamily: "Inter",
+            bodyFontColor: "#171717",
+            bodyFontSize: 16,
+            multiKeyBackground: "transparent",
+            displayColors: false,
+            xPadding: 30,
+            yPadding: 15,
+            borderColor: "rgba(143, 146, 161, .1)",
+            borderWidth: 1,
+            title: false,
+            callbacks: {
+                label: function (tooltipItem, data) {
+                  var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                  var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                  return datasetLabel + ': ' + toDecimal(value);
+                }
+              }
+          },
+
+          title: {
+            display: false,
+          },
+
+          layout: {
+            padding: {
+              top: 0,
+            },
+          },
+
+          legend: false,
+
+          scales: {
+              yAxes: [
+                {
+                  ticks: {
+                    callback: function(value, index, values) {
+                      return value / 1000000 + " triệu VNĐ";
+                    }
+                  },
+                  gridLines: {
+                    display: false,
+                    drawTicks: false,
+                    drawBorder: false,
+                  }
+                },
+              ],
+              xAxes: [
+                {
+                  gridLines: {
+                    drawBorder: false,
+                    color: "rgba(143, 146, 161, .1)",
+                    zeroLineColor: "rgba(143, 146, 161, .1)",
+                  },
+                  ticks: {
+                    padding: 20,
+                  },
+                },
+              ],
+            }
+        },
+      });
+
+      // Get the select element
+    const select = document.getElementById("selectChartXuatNhap");
+
+    // Listen to the "change" event
+    select.addEventListener("change", () => {
+      var val = $('#selectChartXuatNhap').val();
+      $.ajax({
+      url: '/TrangChu/api/data',
+      method: 'post',
+      data: "val=" + val,
+      success: function (response) {
+          chart3.data.datasets[0].data = response.dataNhap;
+          chart3.data.datasets[1].data = response.dataXuat;
+          chart3.data.labels = response.label;
+          chart3.update();
+          $('#tongNhap').empty();
+          $('#tongXuat').empty();
+          $('#tongNhap').append('<span class="text-dark" style="margin-right:3px;">Nhập kho: </span>' + toDecimal(response.sumNhap) + '(VNĐ)');
+          $('#tongXuat').append('<span class="text-dark" style="margin-right:3px;">Xuất kho: </span>' + toDecimal(response.sumXuat) + '(VNĐ)');
+      }
+     });
+    });
+});
+function toDecimal(str) {
+    return parseFloat(str).toLocaleString('en-US', {
+        style: 'decimal',
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    });
+}
+function loadChartXuatNhap(){
+    var val = $('#selectChartXuatNhap').val();
+}
+
+function loadPieChart(){
+    // Lấy thẻ canvas và context để vẽ biểu đồ
+const canvas = document.getElementById("pieChart");
+const ctx = canvas.getContext("2d");
+
+// Dữ liệu của biểu đồ
+const data = {
+  labels: @Html.Raw(ViewBag.tenNhh),
+  datasets: [
+    {
+      data: @Html.Raw(ViewBag.giaTriNhh),
+      backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#8BC34A", "#9C27B0", "#2196F3", "#FF9800", "#4CAF50", "#F44336", "#673AB7"],
+      hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#8BC34A", "#9C27B0", "#2196F3", "#FF9800", "#4CAF50", "#F44336", "#673AB7"],
+    },
+  ],
+};
+
+// Tạo đối tượng Chart với type là "pie"
+const myPieChart = new Chart(ctx, {
+  type: "pie",
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      }
+    },
+    tooltips: {
+        callbacks: {
+                label: function (tooltipItem, data) {
+                  var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                  var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                  return toDecimal(value);
+                }
+        }
+    }
+  }
+ });
+}
+</script>

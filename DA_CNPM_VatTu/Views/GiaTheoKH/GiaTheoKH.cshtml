@@ -1,0 +1,124 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenGiaTheoKH;
+}
+
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content" class="card-style mb-30 p-3">
+               <div class="row">
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="col-lg-12 col-sm-12 select-style-4 mb-2">
+                                    <select id="hangHoa" class="form-select w-100 my-selectize-2">
+                                    </select>
+                                </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-6 row justify-content-between">
+                            <div class="col-lg-10 col-sm-12 select-style-4 mb-2">
+                                    <select id="KhachHang" class="form-select w-100 my-selectize-2">
+                                    </select>
+                                </div>
+                            <div class="col-lg-2 col-sm-12 mb-2">
+                                <button disabled="@(!pqcn.Them.Value)" onclick="showModal(0)" type="button" class="main-btn primary-btn btn-hover">Thêm</button>
+                            </div>
+                        </div>
+                    </div>
+               <div class="row">
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="row">
+                                <label>Giá bán chung theo từng đơn vị tính</label>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh;">
+                                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                                        <thead>
+                                            <tr class="text-center">
+                                                <th class="min-width">
+                                                    <h6 class="text-sm fw-bold">
+                                                        ĐVT
+                                                    </h6>
+                                                </th>
+                                                <th class="min-width">
+                                                    <h6 class="text-sm fw-bold">
+                                                        Tỉ lệ lẻ
+                                                    </h6>
+                                                </th>
+                                                <th class="min-width">
+                                                    <h6 class="text-sm fw-bold">
+                                                        Tỉ lệ sỉ
+                                                    </h6>
+                                                </th>
+                                                <th class="min-width">
+                                                    <h6 class="text-sm fw-bold">
+                                                        Giá bán lẻ
+                                                    </h6>
+                                                </th>
+                                                <th class="min-width">
+                                                    <h6 class="text-sm fw-bold">
+                                                        Giá bán sỉ
+                                                    </h6>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tBodyDVT">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="row">
+                                <label>Giá bán của khách hàng theo từng đơn vị tính</label>
+                            </div>
+                            <div class="card">
+                            <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh;">
+                                <table class="table table-bordered top-selling-table table-hover display nowrap">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th class="min-width">
+                                                <h6 class="text-sm fw-bold">
+                                                    ĐVT
+                                                </h6>
+                                            </th>
+                                            <th class="min-width">
+                                                <h6 class="text-sm fw-bold">
+                                                    Tỉ lệ lẻ
+                                                </h6>
+                                            </th>
+                                            <th class="min-width">
+                                                <h6 class="text-sm fw-bold">
+                                                    Tỉ lệ sỉ
+                                                </h6>
+                                            </th>
+                                            <th class="min-width">
+                                                <h6 class="text-sm fw-bold">
+                                                    Giá bán lẻ
+                                                </h6>
+                                            </th>
+                                            <th class="min-width">
+                                                <h6 class="text-sm fw-bold">
+                                                    Giá bán sỉ
+                                                </h6>
+                                            </th>
+                                            <th class="min-width last-th-column">
+                                                <h6 class="text-sm fw-bold">
+                                                    Thao tác
+                                                </h6>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tBodyGTKH">
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/GiaTheoKH.js">
+
+</script>

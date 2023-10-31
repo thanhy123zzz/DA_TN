@@ -1,0 +1,70 @@
+﻿@model GiaTheoKhachHang
+@{
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    List<DonViTinh> dvts = ViewBag.Dvts;
+}
+<div class="card-style m-30" style="border: none;">
+	<h6 class="text-center">Thông tin</h6>
+	<div class="form-group select-style-1">
+        <label for="DVT">Đơn vị tính</label>
+             <div class="select-position d-flex justify-content-between">
+                <select tabindex="1" id="DVT" class="light-bg col-lg-9" required>
+                @if(Model.IddvtNavigation!=null){
+                   <option selected value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
+                }
+                @foreach (var dvt in dvts)
+                {
+                   <option value="@dvt.Id">@dvt.TenDvt</option>
+                }
+                </select>
+            </div>
+    </div>
+    <div class="input-style-1">
+        <label for="TLLe">Tỉ lệ lẻ</label>
+        <input tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="TLSi">Tỉ lệ sỉ</label>
+        <input tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="GBLe">Giá bán lẻ</label>
+        <input tabindex="5" type="text" value="@toDecimal(Model.GiaBanLe)" id="GBLe" placeholder="Giá bán lẻ" class="text-decimal">
+    </div>
+    <div class="input-style-1">
+        <label for="GBSi">Giá bán sỉ</label>
+        <input tabindex="6" type="text" value="@toDecimal(Model.GiaBanSi)" id="GBSi" placeholder="Giá bán sỉ" class="text-decimal">
+    </div>
+</div>
+<script>
+
+$('.text-decimal').blur(function(){
+    if(/[0-9,.\-$]+/.test(this.value)){
+        const value = this.value.replace(/,/g, '');
+        this.value = parseFloat(value).toLocaleString('en-US', {
+        style: 'decimal',
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+            })
+    }
+});
+
+$('.text-decimal').focus(function(){
+    $('.text-decimal').removeClass('is-invalid')
+});
+
+function checkNumber(str) {
+        return /[0-9,.\-$]+/.test(str);
+}
+
+</script>

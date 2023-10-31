@@ -1,0 +1,218 @@
+﻿@{
+    List<NhanVien> listNV = ViewBag.NhanViens;
+
+    NhanVien getNhanVien(int? id)
+    {
+        NhanVien nv = listNV.FirstOrDefault(x => x.Id == id);
+        if (nv != null) return nv;
+        else return new NhanVien();
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy HH:mm");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    PhanQuyenChucNang phanQuyenNhaNV = ViewBag.phanQuyenNhanVien;
+}
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content" class="card-style mb-30 p-3">
+                <div class="row justify-content-between mb-2">
+                    <div class="col-auto">
+                        @if (phanQuyenNhaNV.Them.Value)
+                        {
+                            <button class="btn btn-outline-primary"
+                                    onclick="showModalEdit(0)" value="0"
+                                    data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                Thêm mới
+                            </button>
+                        }
+                    </div>
+                    <div class="col-auto">
+                        @if (phanQuyenNhaNV.TimKiem.Value)
+                        {
+                            <form id="formTimKiem" class="row justify-content-between">
+                                <div class="col-auto">
+                                    <div class="select-style-1 mb-0">
+                                        <div class="select-position select-sm">
+                                            <select class="light-bg" id="active" onchange="changeActive()">
+                                                <option value="true">Hiện tại</option>
+                                                <option value="false">Tất cả</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="text" class="form-control" id="search" placeholder="Tìm kiếm..." />
+                                </div>
+                                <div class="col-auto">
+                                    <button title="Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light">
+                                        <span class="lni lni-keyword-research"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <!-- End Title -->
+                <div class="card">
+                    <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh;">
+                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead>
+                                <tr class="text-center">
+                                    <th class="first-th-column">
+                                        <h6 class="text-sm fw-bold">#</h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">Mã NV</h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Tên NV
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Địa chỉ
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Quê quán
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            SĐT
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            Email
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            CMND/CCCD
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Giới tính
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày sinh
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Nhóm NV
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Tài khoản
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Mật khẩu
+                                        </h6>
+                                    </th>
+                                    <th class="last-th-column min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Thao tác
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tBody">
+                                @foreach (NhanVien nv in ViewBag.NhanVienTables)
+                                {
+                                    <tr>
+                                        <td class="first-td-column">
+                                            <div class="product">
+                                                <div class="image">
+                                                    <img class='image-modal' src="@(nv.Avatar == null ? "" : $"{nv.Avatar}")" alt='@nv.TenNv'>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class='text-center'>@nv.MaNv</td>
+                                        <td>@nv.TenNv</td>
+                                        <td>@nv.DiaChi</td>
+                                        <td>@(nv.QueQuan)</td>
+                                        <td>@nv.Sdt</td>
+                                        <td>@nv.Email</td>
+                                        <td>@(nv.Cccd)</td>
+                                        <td>@(nv.GioiTinh.Value == true ? "Nam" : "Nữ")</td>
+                                        <td>@(nv.NgaySinh.Value.Date.ToString("dd-MM-yyyy"))</td>
+                                        <td>@(nv.IdnnvNavigation == null ? "" : nv.IdnnvNavigation.TenNnv)</td>
+                                        <td>@(nv.IdtkNavigation == null ? "" : nv.IdtkNavigation.TaiKhoan)</td>
+                                        <td>@(nv.IdtkNavigation == null ? "" : nv.IdtkNavigation.MatKhau)</td>
+                                        <td class="last-td-column">
+                                            <div class="action justify-content-end">
+                                                @if (phanQuyenNhaNV.Sua.Value)
+                                                {
+                                                    <button onclick="showModalEdit(@nv.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="lni lni-pencil"></i>
+                                                    </button>
+                                                }
+                                                @if (phanQuyenNhaNV.Xoa.Value)
+                                                {
+                                                    <button onclick="deleteNV(@nv.Id)" class="text-danger">
+                                                        @if (nv.Active.Value)
+                                                        {
+                                                            <i class="lni lni-trash-can"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="lni lni-spinner-arrow"></i>
+                                                        }
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="loader">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-grow text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Table -->
+                    </div>
+                </div>
+                <nav id="pages" aria-label="Page navigation example" class="m-2">
+                  <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                      <a class="page-link disabled" href="" id="prePage">
+                          <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" id="currentPage" href="#">1</a></li>
+                    <li class="page-item">
+                      <a class="page-link" href="#" id="nextPage" >
+                          <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/NhanVien.js">
+</script>

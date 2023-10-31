@@ -1,0 +1,59 @@
+﻿@{
+    PhanQuyen pq = ViewBag.PhanQuyen;
+    List<PhanQuyenChucNang> pqcns = pq.PhanQuyenChucNangs.ToList();
+    List<ChucNang> cns = ViewBag.ChucNangs;
+}
+<tbody id="tBodyCN">
+    @foreach(ChucNang cn in cns){
+     var pqcn = pqcns.FirstOrDefault(x => x.IdchucNang == cn.Id && x.Idpq == pq.Id) ?? new PhanQuyenChucNang() {
+         Them = false,
+         Sua = false,
+         Xoa = false,
+         TimKiem = false,
+         In = false,
+         Xuat = false,
+         Idpq = pq.Id
+     };
+                                <tr data-id-pqcn="@pqcn.Id" data-id-pq="@pqcn.Idpq">
+                                    <td class="idCN" data-id-cn="@cn.Id">
+                                        @cn.TenChucNang
+                                    </td>
+                                    
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 nhap-check" type="checkbox" checked="@pqcn.Them.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 sua-check" type="checkbox" checked="@pqcn.Sua.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 xoa-check" type="checkbox" checked="@pqcn.Xoa.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 tim-check" type="checkbox" checked="@pqcn.TimKiem.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 in-check" type="checkbox" checked="@pqcn.In.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style">
+                                            <input class="form-check-input m-0 xuat-check" type="checkbox" checked="@pqcn.Xuat.Value">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center checkbox-style checkbox-success">
+                                            <input class="form-check-input m-0 row-check" type="checkbox" >
+                                        </div>
+                                    </td>
+                                </tr>
+     }
+</tbody>

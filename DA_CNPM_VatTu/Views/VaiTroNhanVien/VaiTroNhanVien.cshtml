@@ -1,0 +1,90 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenPQ;
+}
+
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-md-4 col-12 mb-2 pe-md-0">
+            <div class="card">
+                <div style="overflow-x:auto;overflow-y:auto; max-height:500px">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th colspan="2" class="p-0" style="border: 2px solid lightgray;">
+                                    <div class="group-btn">
+                                        <div class="d-flex justify-content-end">
+                                            <input placeholder="Tìm kiếm" id="searchNV" type="text" style="height: 38px;" class="w-100" disabled="@(!pqcn.TimKiem.Value)">
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr class="text-center" style="background-color:lightgray;">
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Mã nhân viên
+                                    </h6>
+                                </th>
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Tên nhân viên
+                                    </h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBodyNhanVien">
+                            @foreach (NhanVien nv in ViewBag.nhanViens)
+                            {
+                                <tr style="cursor:pointer" data-id="@nv.Id">
+                                    <td class="text-center">
+                                        @nv.MaNv
+                                    </td>
+                                    <td>
+                                        @nv.TenNv
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 col-12">
+            <div class="card">
+                <div style="overflow-x:auto;overflow-y:auto; max-height:500px">
+                    <table class="table table-bordered top-selling-table table-hover display nowrap">
+                        <thead style="position: sticky; top: 0;">
+                            <tr>
+                                <th colspan="2" class="p-0" style="border: 2px solid lightgray;">
+                                    <div class="group-btn">
+                                        <div class="d-flex">
+                                            <button onclick="showModalVaiTro(0)" disabled="@(!pqcn.Them.Value)" class="main-btn primary-btn btn-hover" style="border-radius:0" type="button" id="btn-them">
+                                                <span>Thêm mới</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr class="text-center" style="background-color:lightgray;">
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Vai trò
+                                    </h6>
+                                </th>
+                                <th class="min-width">
+                                    <h6 class="text-sm fw-bold">
+                                        Thao tác
+                                    </h6>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tBodyPhanQuyen">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/Vaitronhanvien.js">
+    
+</script>

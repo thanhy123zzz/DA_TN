@@ -1,0 +1,20 @@
+﻿@{
+    PhanQuyenChucNang pqcn = ViewBag.PhanQuyenPQ;
+}
+
+<tbody id="tBodyPhanQuyen">
+    @foreach(PhanQuyenNhanVien pqnv in ViewBag.PhanQuyenNhanViens){
+                              <tr>
+                                  <td>
+                                      @pqnv.IdpqNavigation.IdvtNavigation.TenVaiTro
+                                  </td>
+                                  <td>
+                                      <div class="action justify-content-end">
+                                              <button onclick="deletePhanQuyen(@pqnv.Id)" disabled="@(!pqcn.Xoa.Value)" class="text-danger">
+                                              <i class="lni lni-trash-can"></i>
+                                          </button>
+                                         </div>
+                                  </td>
+                              </tr>
+                              }
+                            </tbody>

@@ -1,0 +1,53 @@
+﻿@{
+    DACNPMContext _dACNPMContext = new DACNPMContext();
+    PhanQuyenChucNang phanQuyenDVT = ViewBag.phanQuyenDVT;
+    List<NhanVien> _nvs = ViewBag.nvs;
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy HH:mm");
+        }
+        else
+        {
+            return "";
+        }
+    }
+    DonViTinh dvt = ViewBag.dvt;
+    NhanVien getNhanVien(int? id)
+    {
+        var nv = _nvs.Find(x => x.Id == id);
+        if (nv != null) return nv;
+        else return new NhanVien();
+    }
+}
+                              <tr>
+                                <td>@dvt.MaDvt</td>
+                                <td>@dvt.TenDvt</td>
+                                <td>@getNhanVien(dvt.Nvtao).TenNv</td>
+                                <td>@formatDay(@dvt.NgayTao)</td>
+                                <td>@getNhanVien(dvt.Nvsua).TenNv</td>
+                                <td>@formatDay(@dvt.NgaySua)</td>
+                                <td>
+                                        <div class="action justify-content-end">
+                                        @if(phanQuyenDVT.Sua.Value){
+                                         <button onclick="showModalEdit(@dvt.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                            <i class="lni lni-pencil"></i>
+                                         </button> 
+                                        }
+                                            @if (phanQuyenDVT.Xoa.Value)
+                                            {
+                                                <button onclick="deleteDVT(@dvt.Id)" class="text-danger">
+                                                    @if (dvt.Active.Value)
+                                                    {
+                                                        <i class="lni lni-trash-can"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="lni lni-spinner-arrow"></i>
+                                                    }
+                                                </button>
+                                            }
+                                        </div>
+                                </td>
+                              </tr>
