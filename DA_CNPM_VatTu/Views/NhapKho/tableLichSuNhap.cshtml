@@ -11,16 +11,16 @@
     @foreach (PhieuNhapKho p in ViewBag.ListPhieuNhap)
     {
           <tr>
-              <td>@p.SoPn</td>
+              <td class="text-center">@p.SoPn</td>
               <td>@p.IdnccNavigation.TenNcc</td>
-              <td>@p.NgayTao.Value.ToString("dd-MM-yyyy HH:mm")</td>
+              <td class="text-center">@p.NgayTao.Value.ToString("dd-MM-yyyy HH:mm")</td>
               <td>@p.SoHd</td>
-              <td>@dayToString(p.NgayHd)</td>
+              <td class="text-center">@dayToString(p.NgayHd)</td>
               <td>@p.IdnvNavigation.TenNv</td>
               <td>@p.GhiChu</td>
               <td class="last-td-column">
-                  <div class="action justify-content-end">
-                          <button type="button" onclick="ViewPhieuNhap('@p.Id')" class="text-primary">
+                  <div class="action justify-content-center">
+                          <button type="button" value="@p.Id" class="text-primary btn-view-pn">
                               <i class="lni lni-eye"></i>
                           </button>
                           <a href="/QuanLy/NhapKho/download/phieunhapkho/@p.Id" class="text-success">

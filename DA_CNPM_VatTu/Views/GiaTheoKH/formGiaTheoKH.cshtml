@@ -11,9 +11,11 @@
             return d.Value.ToString("#,##0.00");
         }
     }
+    bool loaiKh = ViewBag.LoaiKh;
     List<DonViTinh> dvts = ViewBag.Dvts;
 }
 <div class="card-style m-30" style="border: none;">
+    <input type="hidden" value="@(loaiKh ? 1 : 0)" id="LoaiKh"/>
 	<h6 class="text-center">Thông tin</h6>
 	<div class="form-group select-style-1">
         <label for="DVT">Đơn vị tính</label>

@@ -6,111 +6,102 @@ function getValue(str) {
     return Number(str.replace(/[^0-9.-]+/g, ""));
 }
 function onloadPage() {
-    $('#hangHoa').selectize({
-        maxOptions: 10,
-        onChange: function (value) {
-            if (value !== "") {
-                $.ajax({
-                    type: "post",
-                    url: "/QuyDinh/GiaTheoKH/load-hhdvt",
-                    data: "idHh=" + value,
-                    success: function (result) {
-                        $('#tBodyDVT').replaceWith(result);
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
-            if ($('#KhachHang').val() !== "") {
-                $.ajax({
-                    type: "post",
-                    url: "/QuyDinh/GiaTheoKH/load-gtkh",
-                    data: "idHh=" + value + "&idKh=" + $('#KhachHang').val(),
-                    success: function (result) {
-                        $('#tBodyGTKH').replaceWith(result);
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
-        },
-        onFocus: function ($dropdown) {
-            $('.my-selectize-2').not(this.$input).each(function () {
-                if (this.selectize) {
-                    this.selectize.close();
-                    this.selectize.blur();
+    $.ajax({
+        type: 'POST',
+        url: '/QuanLy/NhapKho/api/hhs'
+    }).done(function (response) {
+        $('#hangHoa').selectize({
+            maxOptions: 30,
+            onChange: function (value) {
+                if (value !== "") {
+                    $.ajax({
+                        type: "post",
+                        url: "/QuyDinh/GiaTheoKH/load-hhdvt",
+                        data: "idHh=" + value,
+                        success: function (result) {
+                            $('#tBodyDVT').replaceWith(result);
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
                 }
-            });
-        },
-        valueField: "id",
-        labelField: "tenHh",
-        searchField: ["tenHh", "maHh"],
-        placeholder: '-- Hàng hoá --',
-        allowEmptyOption: false,
-        preload: true,
-        load: function (query, callback) {
-            if (query !== "") {
-                $.ajax({
-                    data: "key=" + query,
-                    type: 'POST',
-                    url: '/QuanLy/NhapKho/api/hhs'
-                }).done(function (response) {
-                    callback(response);
+                if ($('#KhachHang').val() !== "") {
+                    $.ajax({
+                        type: "post",
+                        url: "/QuyDinh/GiaTheoKH/load-gtkh",
+                        data: "idHh=" + value + "&idKh=" + $('#KhachHang').val(),
+                        success: function (result) {
+                            $('#tBodyGTKH').replaceWith(result);
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
+            },
+            onFocus: function ($dropdown) {
+                $('.my-selectize-2').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
                 });
-            }
-        },
-        loadThrottle: 400,
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Hàng hoá --',
+            allowEmptyOption: false,
+            loadThrottle: 400,
+            options: response
+        });
     });
-    $('#KhachHang').selectize({
-        maxOptions: 10,
-        onChange: function (value) {
-            if (value !== "" && $('#hangHoa').val() !== "") {
-                $.ajax({
-                    type: "post",
-                    url: "/QuyDinh/GiaTheoKH/load-gtkh",
-                    data: "idHh=" + $('#hangHoa').val() + "&idKh=" + value,
-                    success: function (result) {
-                        $('#tBodyGTKH').replaceWith(result);
-                    },
-                    error: function (loi) {
-                        console.log(loi);
+    $.ajax({
+        type: 'POST',
+        url: '/QuyDinh/GiaTheoKH/api/khs'
+    }).done(function (response) {
+        $('#KhachHang').selectize({
+            options: response,
+            maxOptions: 50,
+            onChange: function (value) {
+                if (value !== "" && $('#hangHoa').val() !== "") {
+                    $.ajax({
+                        type: "post",
+                        url: "/QuyDinh/GiaTheoKH/load-gtkh",
+                        data: "idHh=" + $('#hangHoa').val() + "&idKh=" + value,
+                        success: function (result) {
+                            $('#tBodyGTKH').replaceWith(result);
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
+            },
+            onFocus: function ($dropdown) {
+                $('.my-selectize-2').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
                     }
                 });
-            }
-        },
-        onFocus: function ($dropdown) {
-            $('.my-selectize-2').not(this.$input).each(function () {
-                if (this.selectize) {
-                    this.selectize.close();
-                    this.selectize.blur();
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Khách hàng --',
+            allowEmptyOption: false,
+            loadThrottle: 400,
+            render: {
+                item: function (item, escape) {
+                    return '<div>' + escape(item.ten + ' (' + item.loai + ')') + '</div>';
+                },
+                option: function (item, escape) {
+                    return `<div class="px-2 py-1"><b>${item.ten}</b> - [${item.loai}]</div>`;
                 }
-            });
-        },
-        valueField: "id",
-        labelField: "tenKh",
-        searchField: ["tenKh", "maKh"],
-        placeholder: '-- Khách hàng --',
-        allowEmptyOption: false,
-        preload: true,
-        load: function (query, callback) {
-            if (query !== "") {
-                $.ajax({
-                    data: "key=" + query,
-                    type: 'POST',
-                    url: '/QuyDinh/GiaTheoKH/api/khs'
-                }).done(function (response) {
-                    callback(response);
-                });
-            }
-        },
-        loadThrottle: 400,
-        render: {
-            item: function (item, escape) {
-                return '<div>' + escape(item.tenKh + ' (' + item.loai + ')') + '</div>';
-            }
-        },
+            },
+        });
     });
 }
 
@@ -140,11 +131,21 @@ function toDecimal(str) {
         minimumFractionDigits: 2
     });
 }
-$('#btnModal').on('click', (e) => {
-    if ($('#TLLe').val() === "" && $('#TLSi').val() === "" && $('#GBLe').val() === "" && $('#GBSi').val() === "") {
-        $('.text-decimal').addClass("is-invalid");
-        return false;
+$('#btnModal').on('click', function (event) {
+    if ($('#LoaiKh').val() == 1) {
+        if ($('#TLSi').val() === "" && $('#GBSi').val() === "") {
+            $('#TLSi').addClass("is-invalid");
+            $('#GBSi').addClass("is-invalid");
+            return false;
+        }
+    } else {
+        if ($('#TLLe').val() === "" && $('#GBLe').val() === "") {
+            $('#TLLe').addClass("is-invalid");
+            $('#GBLe').addClass("is-invalid");
+            return false;
+        }
     }
+    
 
     fetch("/QuyDinh/GiaTheoKH/update-gtkh", {
         method: 'POST',

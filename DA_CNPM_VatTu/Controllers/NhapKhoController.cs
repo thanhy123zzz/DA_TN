@@ -2,6 +2,7 @@
 using DA_CNPM_VatTu.Models;
 using DA_CNPM_VatTu.Models.Entities;
 using DA_CNPM_VatTu.Models.MapData;
+using DA_CNPM_VatTu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -14,6 +15,8 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Claims;
+using WkHtmlToPdfDotNet;
+using WkHtmlToPdfDotNet.Contracts;
 
 namespace DA_CNPM_VatTu.Controllers
 {
@@ -28,8 +31,11 @@ namespace DA_CNPM_VatTu.Controllers
         private List<NhanVien> _nvs;
         private readonly IMemoryCache _memoryCache;
         private readonly IMapper _mapper;
+        private readonly IConverter _converter;
         public NhapKhoController(ILogger<DonViTinhController> logger,
-            ICompositeViewEngine viewEngine, IMemoryCache memoryCache, IWebHostEnvironment hostingEnvironment, IMapper mapper)
+            ICompositeViewEngine viewEngine, IMemoryCache memoryCache, 
+            IWebHostEnvironment hostingEnvironment, IMapper mapper,
+            IConverter converter)
         {
             _dACNPMContext = new DACNPMContext();
             _logger = logger;
@@ -37,22 +43,16 @@ namespace DA_CNPM_VatTu.Controllers
             _memoryCache = memoryCache;
             _hostingEnvironment = hostingEnvironment;
             _mapper = mapper;
+            _converter = converter;
         }
         [HttpGet]
         public async Task<IActionResult> NhapKho()
         {
-            var ncc = getListNhaCC();
-            var hh = getListHH();
-            var ctpn = getListCTPN();
-            var ctpnt = GetListCTPNT();
-            var p = GetPhanQuyenNhapKho();
-            await Task.WhenAll(ncc, hh, ctpn, p, ctpnt);
+            var p = await GetPhanQuyenNhapKho();
 
             ViewBag.SoPhieuNhap = getSoPhieu().Result;
-            ViewBag.CTPNTs = ctpnt.Result;
-            ViewBag.HHs = getListHH().Result;
-            ViewBag.phanQuyenNhapKho = p.Result;
-            ViewData["title"] = p.Result.IdchucNangNavigation.TenChucNang;
+            ViewBag.phanQuyenNhapKho = p;
+            ViewData["title"] = p.IdchucNangNavigation.TenChucNang;
             return View();
         }
         [HttpPost("api/hhs")]
@@ -60,26 +60,356 @@ namespace DA_CNPM_VatTu.Controllers
         {
             return Ok(await _dACNPMContext.HangHoas.Select(x => new
             {
-                Id = x.Id,
-                TenHh = x.TenHh.Trim(),
-                MaHh = x.MaHh,
+                id = x.Id,
+                ten = x.TenHh.Trim(),
+                ma = x.MaHh,
                 TenDonViTinh = x.IddvtchinhNavigation.TenDvt,
                 soLos = x.ChiTietPhieuNhaps.Select(x=>x.SoLo).Distinct().ToList()
-            }).OrderBy(x => x.TenHh).ToListAsync());
+            }).OrderBy(x => x.ten).ToListAsync());
         }
-
+        [HttpPost("api/getSoPhieuNhap")]
+        public async Task<IActionResult> getSoPhieuNhap()
+        {
+            return Ok(await getSoPhieu());
+        }
         [HttpPost("api/nccs")]
         public async Task<IActionResult> searchNhaCC()
         {
             var listPQnv = await getListNhaCC();
             return Ok(listPQnv.Select(x => new
             {
-                Id = x.Id,
-                TenNcc = x.TenNcc,
-                MaNcc = x.MaNcc
+                id = x.Id,
+                ten = x.TenNcc,
+                ma = x.MaNcc
             }).ToList());
         }
-        [HttpPost("api/solo")]
+        [HttpPost("add-pn")]
+        public async Task<IActionResult> addPN([FromBody] PhieuNhapKhoMap phieuNhapKhoMap)
+        {
+            PhieuNhapKho phieuNhap = _mapper.Map<PhieuNhapKho>(phieuNhapKhoMap);
+            var tran = _dACNPMContext.Database.BeginTransaction();
+            try
+            {
+                int _userId = int.Parse(User.Identity.Name);
+                int idCn = int.Parse(User.FindFirstValue("IdCn"));
+                phieuNhap.SoPn = await getSoPhieu();
+                phieuNhap.Idnv = _userId;
+                phieuNhap.Active = true;
+                phieuNhap.Idcn = idCn;
+
+                await _dACNPMContext.PhieuNhapKhos.AddAsync(phieuNhap);
+                await _dACNPMContext.SaveChangesAsync();
+
+                List<HangTonKho> listHt = new List<HangTonKho>();
+                foreach (var t in phieuNhap.ChiTietPhieuNhaps)
+                {
+                    HangTonKho sl = new HangTonKho();
+                    sl.Idctpn = t.Id;
+                    sl.Slcon = Math.Round((double)t.Sl, 2);
+                    sl.Idcn = idCn;
+                    sl.NgayNhap = t.NgayTao;
+                    sl.Thue = t.Thue;
+                    sl.Cktm = t.Cktm;
+                    sl.GiaNhap = t.DonGia;
+                    sl.Hsd = t.Hsd;
+                    sl.Idhh = t.Idhh;
+                    listHt.Add(sl);
+                }
+                await _dACNPMContext.HangTonKhos.AddRangeAsync(listHt);
+                await _dACNPMContext.SaveChangesAsync();
+
+                var SoTT = await _dACNPMContext.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
+                SoTT.Stt += 1;
+                _dACNPMContext.SoThuTus.Update(SoTT);
+                _dACNPMContext.SaveChanges();
+
+                await tran.CommitAsync();
+
+                return Ok(new ResponseModel()
+                {
+                    statusCode = 200,
+                    message = "Thành công! Phiếu nhập của bạn có số phiếu là: " + phieuNhap.SoPn,
+                });
+            }
+            catch (Exception e)
+            {
+                tran.Rollback();
+                return Ok(new ResponseModel()
+                {
+                    statusCode = 500,
+                    message = "Thất bại!"
+                });
+            }
+
+        }
+        [HttpPost("loadTableLichSuNhap")]
+        public async Task<IActionResult> loadTableLichSuNhap(string fromDay, string toDay, string soPhieuLS, string soHDLS, int nhaCC, int hhLS)
+        {
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            List<PhieuNhapKho> listPhieu = _dACNPMContext.PhieuNhapKhos
+                .Include(x => x.IdnccNavigation)
+                .Include(x => x.IdnvNavigation)
+                .Include(x => x.ChiTietPhieuNhaps)
+            .AsParallel()
+            .Where(x => x.NgayTao.Value.Date >= FromDay
+                && x.NgayTao.Value.Date <= ToDay
+                && x.Idcn == idCn
+                && x.Active == true)
+            .OrderByDescending(x => x.Id)
+            .ToList();
+            if (nhaCC == 0 && hhLS == 0)
+            {
+                ViewBag.ListPhieuNhap = listPhieu.AsParallel().Where(x => (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS) ?? false))
+                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper())));
+            }
+            else
+            {
+
+                ViewBag.ListPhieuNhap = listPhieu.AsParallel().Where(x => (hhLS == 0 ? true : (x.ChiTietPhieuNhaps.Where(y => y.Idhh == hhLS).Count() > 0 ? true : false))
+                && (nhaCC == 0 ? true : x.Idncc == nhaCC)
+                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper()))
+                && (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS.ToUpper()) ?? false)));
+            }
+
+            return PartialView("tableLichSuNhap");
+        }
+        [HttpPost("ViewThongTinPhieuNhap")]
+        public IActionResult ViewThongTinPhieuNhap(int idPN)
+        {
+            var phieu = _dACNPMContext.PhieuNhapKhos
+                .Include(x => x.ChiTietPhieuNhaps)
+                .Include(x => x.IdnccNavigation)
+                .Include(x => x.IdnvNavigation)
+                .AsParallel()
+                .FirstOrDefault(x => x.Id == idPN);
+            ViewBag.HangHoas = getListHH().Result;
+            return PartialView(phieu);
+        }
+
+        [Route("download/phieunhapkho/{id:int}")]
+        public async Task<IActionResult> downloadPhieuNhap(int id)
+        {
+            var phieu = await _dACNPMContext.PhieuNhapKhos
+                .Include(x => x.ChiTietPhieuNhaps)
+                .ThenInclude(x => x.IdhhNavigation)
+                .ThenInclude(x => x.IddvtchinhNavigation)
+                .Include(x => x.IdnccNavigation)
+                .Include(x => x.IdnvNavigation)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            ViewBag.PhieuNhap = phieu;
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("PhieuNhapKhoPDF");
+            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
+
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
+
+            return File(pdfBytes, "application/pdf", phieu.SoPn + ".pdf");
+        }
+        [HttpPost("download/BaoCaoPhieuNhap")]
+        public async Task<IActionResult> downloadBaoCaoPhieuNhap(string fromDay, string toDay, string soPhieuLS, string soHDLS, int nhaCCLS, int hangHoaLS)
+        {
+            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            ViewBag.tuNgay = fromDay;
+            ViewBag.denNgay = toDay;
+
+            List<PhieuNhapKho> listPhieu = await _dACNPMContext.PhieuNhapKhos
+             .Include(x => x.IdnccNavigation)
+            .Include(x => x.IdnvNavigation)
+            .Include(x => x.ChiTietPhieuNhaps)
+            .Where(x => x.Active == true
+                && x.NgayTao.Value.Date >= FromDay
+                && x.NgayTao.Value.Date <= ToDay)
+            .OrderByDescending(x => x.Id)
+            .ToListAsync();
+
+            if (nhaCCLS == 0 && hangHoaLS == 0)
+            {
+                listPhieu = listPhieu.Where(x => (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS) ?? false))
+                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper()))).ToList();
+            }
+            else
+            {
+                listPhieu = listPhieu.AsParallel().Where(x => (hangHoaLS == 0 ? true : (x.ChiTietPhieuNhaps.Where(y => y.Idhh == hangHoaLS).Count() > 0 ? true : false))
+                && (nhaCCLS == 0 ? true : x.Idncc == nhaCCLS)
+                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper()))
+                && (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS.ToUpper()) ?? false))).ToList();
+            }
+
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("BaoCaoNhapKhoPDF", listPhieu);
+            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
+
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
+
+            return File(pdfBytes, "application/pdf", "BaoCaoNhapKho.pdf");
+        }
+        async Task<string> getSoPhieu()
+        {
+            var context = new DACNPMContext();
+            //ID chi nhánh
+            int cn = int.Parse(User.FindFirstValue("IdCn"));
+
+            DateTime d = DateTime.Now;
+            string ngayThangNam = d.ToString("yyMMdd");
+
+            QuyDinhMa qd = await context.QuyDinhMas.FindAsync(1);
+            string SoPhieu = cn + "_" + qd.TiepDauNgu + ngayThangNam;
+            var list = await context.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
+            int stt;
+            if (list == null)
+            {
+                SoThuTu sttt = new SoThuTu();
+                sttt.Ngay = DateTime.ParseExact(DateTime.Now.ToString("dd-MM-yyyy"), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                sttt.Stt = 0;
+                sttt.Loai = "NhapKho";
+                await context.SoThuTus.AddAsync(sttt);
+                context.SaveChanges();
+                stt = 1;
+            }
+            else
+            {
+                stt = list.Stt + 1;
+            }
+            SoPhieu += stt;
+            while (true)
+            {
+                if (qd.DoDai == SoPhieu.Length) break;
+                SoPhieu = SoPhieu.Insert(SoPhieu.Length - stt.ToString().Length, "0");
+            }
+            return SoPhieu;
+        }
+        async Task<List<NhaCungCap>> getListNhaCC()
+        {
+            int _userId = int.Parse(User.Identity.Name);
+            return await _memoryCache.GetOrCreateAsync("NhaCC_" + _userId, async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                return _dACNPMContext.NhaCungCaps.ToList();
+            });
+        }
+        async Task<List<HangHoa>> getListHH()
+        {
+            int _userId = int.Parse(User.Identity.Name);
+            return await _memoryCache.GetOrCreateAsync("HangHoas_" + _userId, async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                return _dACNPMContext.HangHoas
+                                .Include(x => x.IddvtchinhNavigation)
+                                .Include(x => x.IdhsxNavigation)
+                                .Include(x => x.IdnsxNavigation)
+                                .Include(x => x.IdnhhNavigation)
+                                .ToList();
+            });
+        }
+        async Task<List<ChiTietPhieuNhap>> getListCTPN()
+        {
+            int _userId = int.Parse(User.Identity.Name);
+            return await _memoryCache.GetOrCreateAsync("CTPNs_" + _userId, async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                return _dACNPMContext.ChiTietPhieuNhaps
+                                .ToList();
+            });
+        }
+        async Task<PhanQuyenChucNang> GetPhanQuyenNhapKho()
+        {
+            int idPq = int.Parse(User.FindFirstValue("IdPq"));
+
+            return await _dACNPMContext.PhanQuyenChucNangs
+                .Include(x => x.IdchucNangNavigation)
+                .FirstOrDefaultAsync(x => x.Idpq == idPq
+                && x.IdchucNangNavigation.MaChucNang.Equals("QL_NhapKho"));
+        }
+        async Task<List<ChiTietPhieuNhapTam>> GetListCTPNT()
+        {
+            int _userId = int.Parse(User.Identity.Name);
+            return await _memoryCache.GetOrCreateAsync("CTPNTs_" + _userId, async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                return _dACNPMContext.ChiTietPhieuNhapTams.Where(x => x.Host == GetLocalIPAddress())
+                                .ToList();
+            });
+        }
+        string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
+        }
+        public string ConvertViewToString(ControllerContext controllerContext, PartialViewResult pvr, ICompositeViewEngine _viewEngine)
+        {
+            using (StringWriter writer = new StringWriter())
+            {
+                ViewEngineResult vResult = _viewEngine.FindView(controllerContext, pvr.ViewName, false);
+                ViewContext viewContext = new ViewContext(controllerContext, vResult.View, pvr.ViewData, pvr.TempData, writer, new HtmlHelperOptions());
+
+                vResult.View.RenderAsync(viewContext);
+
+                return writer.GetStringBuilder().ToString();
+            }
+        }
+        /*[HttpPost("api/solo")]
         public async Task<IActionResult> searchSoLo(int idHh)
         {
             var listPQnv = await getListCTPN();
@@ -254,258 +584,6 @@ namespace DA_CNPM_VatTu.Controllers
                 .ToList();
             ViewBag.SoLos = sls;
             return PartialView("GroupChitietPhieuNhap", ctpnt);
-        }
-        [HttpPost("add-pn")]
-        public async Task<IActionResult> addPN([FromBody] PhieuNhapKhoMap phieuNhapKhoMap)
-        {
-            PhieuNhapKho phieuNhap = _mapper.Map<PhieuNhapKho>(phieuNhapKhoMap);
-            var tran = _dACNPMContext.Database.BeginTransaction();
-            try
-            {
-                int _userId = int.Parse(User.Identity.Name);
-                int idCn = int.Parse(User.FindFirstValue("IdCn"));
-                phieuNhap.SoPn = await getSoPhieu();
-                phieuNhap.Idnv = _userId;
-                phieuNhap.Active = true;
-                phieuNhap.Idcn = idCn;
-
-                await _dACNPMContext.PhieuNhapKhos.AddAsync(phieuNhap);
-                await _dACNPMContext.SaveChangesAsync();
-
-                List<HangTonKho> listHt = new List<HangTonKho>();
-                foreach (var t in phieuNhap.ChiTietPhieuNhaps)
-                {
-                    HangTonKho sl = new HangTonKho();
-                    sl.Idctpn = t.Id;
-                    sl.Slcon = Math.Round((double)t.Sl, 2);
-                    sl.Idcn = idCn;
-                    sl.NgayNhap = t.NgayTao;
-                    sl.Thue = t.Thue;
-                    sl.Cktm = t.Cktm;
-                    sl.GiaNhap = t.DonGia;
-                    sl.Hsd = t.Hsd;
-                    sl.Idhh = t.Idhh;
-                    listHt.Add(sl);
-                }
-                await _dACNPMContext.HangTonKhos.AddRangeAsync(listHt);
-                await _dACNPMContext.SaveChangesAsync();
-
-                var SoTT = await _dACNPMContext.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
-                SoTT.Stt += 1;
-                _dACNPMContext.SoThuTus.Update(SoTT);
-                _dACNPMContext.SaveChanges();
-
-                await tran.CommitAsync();
-
-                return Ok(new ResponseModel()
-                {
-                    statusCode = 200,
-                    message = "Thành công! Phiếu nhập của bạn có số phiếu là: " + phieuNhap.SoPn,
-                });
-            }
-            catch (Exception e)
-            {
-                tran.Rollback();
-                return Ok(new ResponseModel()
-                {
-                    statusCode = 500,
-                    message = "Thất bại!"
-                });
-            }
-
-        }
-        [HttpPost("loadTableLichSuNhap")]
-        public async Task<IActionResult> loadTableLichSuNhap(string fromDay, string toDay, string soPhieuLS, string soHDLS, int nhaCC, int hhLS)
-        {
-            int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-            List<PhieuNhapKho> listPhieu = _dACNPMContext.PhieuNhapKhos
-                .Include(x => x.IdnccNavigation)
-                .Include(x => x.IdnvNavigation)
-                .Include(x => x.ChiTietPhieuNhaps)
-            .AsParallel()
-            .Where(x => x.NgayTao.Value.Date >= FromDay
-                && x.NgayTao.Value.Date <= ToDay
-                && x.Idcn == idCn
-                && x.Active == true)
-            .OrderByDescending(x => x.Id)
-            .ToList();
-            if (nhaCC == 0 && hhLS == 0)
-            {
-                ViewBag.ListPhieuNhap = listPhieu.AsParallel().Where(x => (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS) ?? false))
-                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper())));
-            }
-            else
-            {
-
-                ViewBag.ListPhieuNhap = listPhieu.AsParallel().Where(x => (hhLS == 0 ? true : (x.ChiTietPhieuNhaps.Where(y => y.Idhh == hhLS).Count() > 0 ? true : false))
-                && (nhaCC == 0 ? true : x.Idncc == nhaCC)
-                && (soPhieuLS == null ? true : x.SoPn.Contains(soPhieuLS.ToUpper()))
-                && (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS.ToUpper()) ?? false)));
-            }
-
-            return PartialView("tableLichSuNhap");
-        }
-        [HttpPost("ViewThongTinPhieuNhap")]
-        public IActionResult ViewThongTinPhieuNhap(int idPN)
-        {
-            var phieu = _dACNPMContext.PhieuNhapKhos
-                .Include(x => x.ChiTietPhieuNhaps)
-                .Include(x => x.IdnccNavigation)
-                .Include(x => x.IdnvNavigation)
-                .AsParallel()
-                .FirstOrDefault(x => x.Id == idPN);
-            ViewBag.HangHoas = getListHH().Result;
-            return PartialView(phieu);
-        }
-
-        [Route("download/phieunhapkho/{id:int}")]
-        public IActionResult downloadPhieuNhap(int id)
-        {
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1280;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
-
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
-
-            var pdf = fullView.ConvertUrl(currentUrl + "/QuanLy/NhapKho/phieuNhapKhoPDF/" + id);
-
-            var pdfBytes = pdf.Save();
-            return File(pdfBytes, "application/pdf", "PhieuNhap.pdf");
-        }
-        [HttpPost("download/BaoCaoPhieuNhap")]
-        public IActionResult downloadBaoCaoPhieuNhap(string fromDay, string toDay, string soPhieuLS, string soHDLS, int nhaCCLS, int hangHoaLS)
-        {
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1280;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
-
-            var url = Url.Action("viewBaoCaoPhieuNhapPDF", "Common", new { fromDay = fromDay, toDay = toDay, soPhieuLS = soPhieuLS, soHDLS = soHDLS, nhaCC = nhaCCLS, hhLS = hangHoaLS });
-
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}" + url;
-
-            var pdf = fullView.ConvertUrl(currentUrl);
-
-            var pdfBytes = pdf.Save();
-            return File(pdfBytes, "application/pdf", "BaoCaoPhieuNhap.pdf");
-        }
-        async Task<string> getSoPhieu()
-        {
-            var context = new DACNPMContext();
-            //ID chi nhánh
-            int cn = int.Parse(User.FindFirstValue("IdCn"));
-
-            DateTime d = DateTime.Now;
-            string ngayThangNam = d.ToString("yyMMdd");
-
-            QuyDinhMa qd = await context.QuyDinhMas.FindAsync(1);
-            string SoPhieu = cn + "_" + qd.TiepDauNgu + ngayThangNam;
-            var list = await context.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
-            int stt;
-            if (list == null)
-            {
-                SoThuTu sttt = new SoThuTu();
-                sttt.Ngay = DateTime.ParseExact(DateTime.Now.ToString("dd-MM-yyyy"), "dd-MM-yyyy", CultureInfo.InvariantCulture);
-                sttt.Stt = 0;
-                sttt.Loai = "NhapKho";
-                await context.SoThuTus.AddAsync(sttt);
-                context.SaveChanges();
-                stt = 1;
-            }
-            else
-            {
-                stt = list.Stt + 1;
-            }
-            SoPhieu += stt;
-            while (true)
-            {
-                if (qd.DoDai == SoPhieu.Length) break;
-                SoPhieu = SoPhieu.Insert(SoPhieu.Length - stt.ToString().Length, "0");
-            }
-            return SoPhieu;
-        }
-        async Task<List<NhaCungCap>> getListNhaCC()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("NhaCC_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.NhaCungCaps.ToList();
-            });
-        }
-        async Task<List<HangHoa>> getListHH()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("HangHoas_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.HangHoas
-                                .Include(x => x.IddvtchinhNavigation)
-                                .Include(x => x.IdhsxNavigation)
-                                .Include(x => x.IdnsxNavigation)
-                                .Include(x => x.IdnhhNavigation)
-                                .ToList();
-            });
-        }
-        async Task<List<ChiTietPhieuNhap>> getListCTPN()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("CTPNs_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.ChiTietPhieuNhaps
-                                .ToList();
-            });
-        }
-        async Task<PhanQuyenChucNang> GetPhanQuyenNhapKho()
-        {
-            int idPq = int.Parse(User.FindFirstValue("IdPq"));
-
-            return await _dACNPMContext.PhanQuyenChucNangs
-                .Include(x => x.IdchucNangNavigation)
-                .FirstOrDefaultAsync(x => x.Idpq == idPq
-                && x.IdchucNangNavigation.MaChucNang.Equals("QL_NhapKho"));
-        }
-        async Task<List<ChiTietPhieuNhapTam>> GetListCTPNT()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("CTPNTs_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.ChiTietPhieuNhapTams.Where(x => x.Host == GetLocalIPAddress())
-                                .ToList();
-            });
-        }
-        string GetLocalIPAddress()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
-        }
-        public string ConvertViewToString(ControllerContext controllerContext, PartialViewResult pvr, ICompositeViewEngine _viewEngine)
-        {
-            using (StringWriter writer = new StringWriter())
-            {
-                ViewEngineResult vResult = _viewEngine.FindView(controllerContext, pvr.ViewName, false);
-                ViewContext viewContext = new ViewContext(controllerContext, vResult.View, pvr.ViewData, pvr.TempData, writer, new HtmlHelperOptions());
-
-                vResult.View.RenderAsync(viewContext);
-
-                return writer.GetStringBuilder().ToString();
-            }
-        }
+        }*/
     }
 }

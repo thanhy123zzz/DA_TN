@@ -29,11 +29,6 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpGet("/TrangChu")]
         public async Task<IActionResult> Index()
         {
-            string mytext = "Hàng hoá test";
-            var encrpyText = _dataProtector.Protect(mytext);
-            var un = _dataProtector.Unprotect(_dACNPMContext.HangHoas.Find(530).TenHh);
-            /*var a = _dACNPMContext.HangHoas.AsEnumerable().Where(x => IsBase64String(x.TenHh) ? _dataProtector.Unprotect(x.TenHh).Contains("test") : false).ToList();*/
-
             string format = "dd-MM-yyyy";
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
             List<string> results = new List<string>();

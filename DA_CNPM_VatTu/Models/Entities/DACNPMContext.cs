@@ -45,6 +45,7 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual DbSet<PhieuXuatKho> PhieuXuatKhos { get; set; } = null!;
         public virtual DbSet<QuyDinhMa> QuyDinhMas { get; set; } = null!;
         public virtual DbSet<SoThuTu> SoThuTus { get; set; } = null!;
+        public virtual DbSet<ThongTinDoanhNghiep> ThongTinDoanhNghieps { get; set; } = null!;
         public virtual DbSet<TinhGiaXuat> TinhGiaXuats { get; set; } = null!;
         public virtual DbSet<VaiTro> VaiTros { get; set; } = null!;
 
@@ -1066,19 +1067,16 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.HasOne(d => d.IdcnNavigation)
                     .WithMany(p => p.PhieuNhapKhos)
                     .HasForeignKey(d => d.Idcn)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuNhapK__IDCN__40058253");
 
                 entity.HasOne(d => d.IdnccNavigation)
                     .WithMany(p => p.PhieuNhapKhos)
                     .HasForeignKey(d => d.Idncc)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuNhap__IDNCC__32AB8735");
 
                 entity.HasOne(d => d.IdnvNavigation)
                     .WithMany(p => p.PhieuNhapKhos)
                     .HasForeignKey(d => d.Idnv)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuNhapK__IDNV__339FAB6E");
             });
 
@@ -1126,19 +1124,16 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.HasOne(d => d.IdcnNavigation)
                     .WithMany(p => p.PhieuXuatKhos)
                     .HasForeignKey(d => d.Idcn)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuXuatK__IDCN__625A9A57");
 
                 entity.HasOne(d => d.IdkhNavigation)
                     .WithMany(p => p.PhieuXuatKhos)
                     .HasForeignKey(d => d.Idkh)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuXuatK__IDKH__6166761E");
 
                 entity.HasOne(d => d.IdnvNavigation)
                     .WithMany(p => p.PhieuXuatKhos)
                     .HasForeignKey(d => d.Idnv)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__PhieuXuatK__IDNV__634EBE90");
             });
 
@@ -1168,6 +1163,33 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.Property(e => e.Ngay).HasColumnType("datetime");
 
                 entity.Property(e => e.Stt).HasColumnName("STT");
+            });
+
+            modelBuilder.Entity<ThongTinDoanhNghiep>(entity =>
+            {
+                entity.ToTable("ThongTinDoanhNghiep");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.ChuTk).HasMaxLength(200);
+
+                entity.Property(e => e.DiaChi).HasMaxLength(500);
+
+                entity.Property(e => e.DienThoai).HasMaxLength(50);
+
+                entity.Property(e => e.Email).HasMaxLength(50);
+
+                entity.Property(e => e.Mst)
+                    .HasMaxLength(50)
+                    .HasColumnName("MST");
+
+                entity.Property(e => e.NganHang).HasMaxLength(50);
+
+                entity.Property(e => e.SoTk).HasMaxLength(50);
+
+                entity.Property(e => e.TenDoanhNghiep).HasMaxLength(500);
             });
 
             modelBuilder.Entity<TinhGiaXuat>(entity =>

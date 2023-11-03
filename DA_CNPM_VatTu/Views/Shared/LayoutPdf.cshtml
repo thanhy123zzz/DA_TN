@@ -1,0 +1,151 @@
+﻿@{
+    ThongTinDoanhNghiep tt = ViewBag.ttDoanhNghiep;
+}
+<style type="text/css">
+    .flex {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .title {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+    }
+
+        .title > div {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+        }
+
+    .border {
+        border: 1px solid;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    td {
+        padding: 3px;
+        font-size: 16px;
+    }
+
+    .row-info {
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    th {
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        background-color: whitesmoke;
+    }
+
+    .card {
+        margin-bottom: 15px;
+        font-size: 24px;
+    }
+
+        .card.mb-1 > div {
+            margin-bottom: 3px;
+        }
+
+    p {
+        margin: 0;
+    }
+
+        p > b {
+            padding: 3px 5px 3px 5px;
+        }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-end {
+        text-align: end;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .w-75 {
+        width: 75%;
+    }
+
+    .w-70 {
+        width: 70%;
+    }
+
+    .w-60 {
+        width: 60%;
+    }
+
+    .w-55 {
+        width: 55%;
+    }
+
+    .w-50 {
+        width: 50%;
+    }
+
+    .w-45 {
+        width: 45%;
+    }
+
+    .w-40 {
+        width: 40%;
+    }
+
+    .w-34 {
+        width: 34%;
+    }
+
+    .w-33 {
+        width: 33%;
+    }
+
+    .w-30 {
+        width: 30%;
+    }
+
+    .w-25 {
+        width: 25%;
+    }
+
+    .w-20 {
+        width: 20%;
+    }
+
+    .mb-0 {
+        margin: 0;
+    }
+</style>
+<header class="flex card" style="display: -webkit-box; display: -webkit-flex;display: flex;margin-bottom:20px;">
+    <div class="flex" style="font-size:16px;">
+        <div>
+            <img style="width:80px; height:80px; border: 1px solid;margin-right: 20px;" src="data:image/png;base64,@ViewBag.logo" />
+        </div>
+        <div>
+            <div style="font-size:16px">
+                @tt.TenDoanhNghiep
+            </div>
+            <div style="font-size:16px">
+                @tt.DiaChi
+            </div>
+            <div style="font-size:16px">
+                Điện thoại: @tt.DienThoai – Email: @tt.Email - MST: @tt.Mst
+            </div>
+            <div style="font-size:16px;">
+                Tài khoản: @tt.SoTk .Ngân hàng: @tt.NganHang .Chủ TK: @tt.ChuTk.
+            </div>
+        </div>
+    </div>
+</header>
+@RenderBody()

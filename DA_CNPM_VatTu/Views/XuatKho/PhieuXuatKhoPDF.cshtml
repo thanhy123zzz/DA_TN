@@ -1,9 +1,9 @@
 ﻿@{
     Layout = "/Views/Shared/LayoutPdf.cshtml";
-    PhieuNhapKho pn = ViewBag.PhieuNhap;
-    var tienHang = pn.ChiTietPhieuNhaps.Sum(ct => ct.DonGia * ct.Sl);
-    var TongChiecKhau = pn.ChiTietPhieuNhaps.Sum(ct => (ct.DonGia * ct.Sl * ct.Cktm) / 100);
-    var TongThue = pn.ChiTietPhieuNhaps.Sum(ct => (((ct.DonGia * ct.Sl) - ((ct.DonGia * ct.Sl * ct.Cktm) / 100)) * ct.Thue) / 100);
+    PhieuXuatKho px = ViewBag.PhieuXuat;
+    var tienHang = px.ChiTietPhieuXuats.Sum(ct => ct.DonGia * ct.Sl);
+    var TongChiecKhau = px.ChiTietPhieuXuats.Sum(ct => (ct.DonGia * ct.Sl * ct.Cktm) / 100);
+    var TongThue = px.ChiTietPhieuXuats.Sum(ct => (((ct.DonGia * ct.Sl) - ((ct.DonGia * ct.Sl * ct.Cktm) / 100)) * ct.Thue) / 100);
     var TongTra = tienHang - TongChiecKhau + TongThue;
 }
 <style>
@@ -18,41 +18,41 @@
 <div class="title card" style="margin-left:0; display:block;">
     <div style="width:100%">
         <h1 style="font-size: x-large;font-weight: 700;text-align: center; margin: 0;">
-            PHIẾU NHẬP KHO
+            PHIẾU XUẤT KHO
         </h1>
     </div>
 </div>
 <div class="info card">
     <div class="row-info text-center">
-        Số phiếu: <b>@pn.SoPn</b>, Ngày tạo: <b>@pn.NgayTao.Value.ToString("dd-MM-yyyy")</b>
+        Số phiếu: <b>@px.SoPx</b>, Ngày tạo: <b>@px.NgayTao.Value.ToString("dd-MM-yyyy")</b>
     </div>
     <div class="row-info text-center">
-        Số HĐ: <a>@pn.SoHd</a>, Ngày HĐ: @pn.NgayHd?.ToString("dd-MM-yyyy")
+        Số HĐ: <a>@px.SoHd</a>, Ngày HĐ: @px.NgayHd?.ToString("dd-MM-yyyy")
     </div>
     <div class="row-info">
         <div class="flex w-100">
             <div>
-                Nhà cung cấp: <b>@pn.IdnccNavigation.TenNcc</b>
+                Tên khách hàng: <b>@px.IdkhNavigation.TenKh</b>
             </div>
         </div>
         <div class="flex">
             <div>
-                Địa chỉ: <b>@pn.IdnccNavigation.DiaChi</b>
+                Địa chỉ: <b>@px.IdkhNavigation.DiaChi</b>
             </div>
         </div>
         <div class="flex">
             <div class="w-50">
-                Điện thoại: <b>@pn.IdnccNavigation.Sdt</b>
+                Điện thoại: <b>@px.IdkhNavigation.Sdt</b>
             </div>
             <div class="w-50">
-                Email: <b>@pn.IdnccNavigation.Email</b>
+                Email: <b>@px.IdkhNavigation.Email</b>
             </div>
         </div>
     </div>
     <div class="row-info">
         <div class="flex w-100">
             <div>
-                Ghi chú: @pn.GhiChu
+                Ghi chú: @px.GhiChu
             </div>
         </div>
     </div>
@@ -62,19 +62,19 @@
         <thead>
             <tr>
                 <th style="width:3%">STT</th>
-                <th style="width:30%">Tên hàng hóa</th>
-                <th style="width:8%">Hạn dùng</th>
-                <th style="width:8%">ĐVT nhập</th>
-                <th style="width:8%">SL nhập</th>
-                <th style="width:8%">Giá nhập</th>
+                <th style="width:8%">Mã hàng</th>
+                <th style="width:30%">Tên hàng</th>
+                <th style="width:8%">ĐVT xuất</th>
+                <th style="width:8%">SL xuất</th>
+                <th style="width:8%">Đơn giá</th>
                 <th style="width:4%">%CK</th>
                 <th style="width:4%">%VAT</th>
                 <th style="width:12%">Thành tiền</th>
             </tr>
             <tr>
                 <th style="width:3%">A</th>
-                <th style="width:30%">B</th>
-                <th style="width:8%">C</th>
+                <th style="width:8%">B</th>
+                <th style="width:30%">C</th>
                 <th style="width:8%">D</th>
                 <th style="width:8%">1</th>
                 <th style="width:8%">2</th>
@@ -85,22 +85,22 @@
         </thead>
         <tbody>
             @{
-                int i = 1;
+                int index = 0;
             }
-            @foreach (ChiTietPhieuNhap ct in pn.ChiTietPhieuNhaps)
+            @foreach (ChiTietPhieuXuat ct in px.ChiTietPhieuXuats)
             {
+                index++;
                 <tr>
-                    <td class="text-center">@i</td>
-                    <td class="">@ct.IdhhNavigation?.TenHh</td>
-                    <td class="text-center">@ct.Hsd?.ToString("dd-MM-yyyy")</td>
-                    <td class="">@ct.IdhhNavigation.IddvtchinhNavigation?.TenDvt</td>
-                    <td class="text-end">@ct.Sl.ToString("#,##0.##")</td>
-                    <td class="text-end">@ct.DonGia.ToString("#,##0.##")</td>
-                    <td class="text-end">@ct.Cktm?.ToString("#,##0.##")</td>
-                    <td class="text-end">@ct.Thue?.ToString("#,##0.##")</td>
-                    <td class="text-end">@((ct.Sl * ct.DonGia).ToString("#,##0.##"))</td>
+                    <td class="text-center">@index</td>
+                    <td class="text-center">@ct.IdhhNavigation.MaHh</td>
+                    <td class="text-start">@ct.IdhhNavigation.TenHh</td>
+                    <td>@ct.IdhhNavigation.IddvtchinhNavigation.TenDvt</td>
+                    <td class="text-end">@ct.Sl?.ToString("#,##0.##")</td>
+                    <td class="text-end">@ct.DonGia?.ToString("#,##0.##")</td>
+                    <td class="text-end">@ct.Cktm</td>
+                    <td class="text-end">@ct.Thue</td>
+                    <td class="text-end">@((ct.DonGia * ct.Sl)?.ToString("#,##0.##"))</td>
                 </tr>
-                i++;
             }
         </tbody>
     </table>
@@ -108,7 +108,7 @@
 <div class="">
     <div class="flex" style="border: 1px solid black; padding:5px; font-size:16px; letter-spacing: 0.5px">
         <div class="w-25">
-            Tiền hàng: @tienHang.ToString("#,##0.##")
+            Tiền hàng: @tienHang?.ToString("#,##0.##")
         </div>
         <div class="w-25">
             Tiền CK: @TongChiecKhau?.ToString("#,##0.##")

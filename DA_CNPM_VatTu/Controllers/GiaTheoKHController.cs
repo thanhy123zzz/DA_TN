@@ -42,18 +42,19 @@ namespace DA_CNPM_VatTu.Controllers
             return PartialView("loadTableDVTHH");
         }
         [HttpPost("api/khs")]
-        public async Task<IActionResult> optionsKH(string key)
+        public async Task<IActionResult> optionsKH()
         {
-            var dvts = getListKH().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaKh + " " + x.TenKh).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(dvts.Select(x => new
-            {
-                ID = x.Id,
-                MaKh = x.MaKh,
-                TenKh = x.TenKh,
-                loai = x.LoaiKh.Value ? "Sỉ" : "Lẻ"
-            }).ToList());
+            var dvts = await _dACNPMContext.KhachHangs
+                .Where(x => x.Active == true)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    ma = x.MaKh,
+                    ten = x.TenKh,
+                    loai = x.LoaiKh.Value ? "Sỉ" : "Lẻ"
+                })
+                .ToListAsync();
+            return Ok(dvts);
         }
 
         [HttpPost("load-gtkh")]
@@ -85,10 +86,12 @@ namespace DA_CNPM_VatTu.Controllers
                 .Where(x => x.Idhh == idHh && x.Active == true && x.Idkh == idKh)
                 .Select(x => x.IddvtNavigation)
                 .ToList();
-
+            var kh = await _dACNPMContext.KhachHangs
+                .FirstOrDefaultAsync(x => x.Id == idKh);
             var dvts = listDvt.AsParallel()
                 .Where(x => !listDVTKH.Any(y => y.Id == x.Id)).ToList();
             ViewBag.Dvts = dvts;
+            ViewBag.LoaiKh = kh.LoaiKh;
             if (gtkh == null)
             {
                 GiaTheoKhachHang g = new GiaTheoKhachHang();

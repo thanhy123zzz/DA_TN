@@ -1,0 +1,134 @@
+﻿@model List<PhieuXuatKho>
+@{
+    Layout = "/Views/Shared/LayoutPdf.cshtml";
+    string toDecimal(double? d)
+    {
+        return d.Value.ToString("#,##0");
+    }
+}
+<style>
+    th {
+        font-size: 15px;
+    }
+
+    td {
+        font-size: 15px;
+    }
+</style>
+<div class="title card" style="margin-left:0; display:block;">
+    <div style="width:100%">
+        <h1 style="font-size: x-large;font-weight: 700;text-align: center; margin: 0;">
+            BÁO CÁO PHIẾU XUẤT KHO
+        </h1>
+    </div>
+</div>
+<div class="info card">
+    <div class="row-info text-center">
+        Từ ngày: <b>@ViewBag.tuNgay</b>, Đến ngày: <b>@ViewBag.denNgay</b>
+    </div>
+</div>
+<div class="table card">
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <th class="text-center">Ngày tạo</th>
+                <th class="text-center">Số phiếu</th>
+                <th class="text-center">Ngày HĐ</th>
+                <th class="text-center">Số HĐ</th>
+                <th class="text-center">Khách hàng</th>
+                <th class="text-center">∑ Tiền hàng</th>
+                <th class="text-center">∑ Tiền CK</th>
+                <th class="text-center">∑ VAT</th>
+                <th class="text-center">∑ Phải trả</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                double tongTH = 0;
+                double tongCK = 0;
+                double tongThue = 0;
+                double tongThanhToan = 0;
+            }
+            @foreach (PhieuXuatKho pn in Model)
+            {
+                <tr>
+                    @{
+                        var ListCTPNT = pn.ChiTietPhieuXuats.ToList();
+                        var TienHang = Math.Round(ListCTPNT.Sum(x => x.Sl * x.DonGia).Value, 2);
+                        var TienCK = Math.Round(ListCTPNT.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100).Value, 2);
+                        var TienThue = Math.Round(ListCTPNT.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100).Value, 2);
+                        var TienThanhToan = Math.Round(TienHang - TienCK + TienThue, 2);
+                        tongTH += TienHang;
+                        tongCK += TienCK;
+                        tongThue += TienThue;
+                        tongThanhToan += TienThanhToan;
+                    }
+                    <td class="text-center">@pn.NgayTao.Value.ToString("dd-MM-yy")</td>
+                    <td class="text-center">@pn.SoPx</td>
+                    <td class="text-center">@pn.NgayHd.Value.ToString("dd-MM-yy")</td>
+                    <td class="text-center">@pn.SoHd</td>
+                    <td class="text-start">@pn.IdkhNavigation.TenKh</td>
+                    <td class="text-end">@toDecimal(TienHang)</td>
+                    <td class="text-end">@toDecimal(TienCK)</td>
+                    <td class="text-end">@toDecimal(TienThue)</td>
+                    <td class="text-end">@toDecimal(TienThanhToan)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="">
+    <div class="flex" style="border: 1px solid black; padding:5px; font-size:16px; letter-spacing: 0.5px">
+        <div class="w-25">
+            Tiền hàng: @tongTH.ToString("#,##0.##")
+        </div>
+        <div class="w-25">
+            Tiền CK: @tongCK.ToString("#,##0.##")
+        </div>
+        <div class="w-25">
+            Tiền thuế: @tongThue.ToString("#,##0.##")
+        </div>
+        <div class="w-25">
+            Phải trả: @tongThanhToan.ToString("#,##0.##")
+        </div>
+    </div>
+</div>
+<div style="page-break-inside:avoid;">
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+            </div>
+            <div class="w-33 text-center">
+            </div>
+            <div class="w-33 text-center">
+                <em>Ngày ... Tháng ... Năm ...</em>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+                Thủ trưởng đơn vị
+            </div>
+            <div class="w-33 text-center">
+                Kế toán
+            </div>
+            <div class="w-33 text-center">
+                Người lập phiếu
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="flex" style="font-size:12px;">
+            <div class="w-34 text-center">
+                (ký, họ tên, đóng dấu)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+        </div>
+    </div>
+</div>

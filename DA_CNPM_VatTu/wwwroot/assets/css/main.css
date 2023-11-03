@@ -39,10 +39,6 @@ button, input, optgroup, select, textarea {
     text-align:end;
 }
 
-.text-decimal:read-only{
-    background-color:aliceblue;
-}
-
 th, td {
     padding: 8px;
     text-align: left;

@@ -1,4 +1,7 @@
-﻿using DA_CNPM_VatTu.Models.Entities;
+﻿using AutoMapper;
+using DA_CNPM_VatTu.Models.Entities;
+using DA_CNPM_VatTu.Models.MapData;
+using DA_CNPM_VatTu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,9 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SelectPdf;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Claims;
+using WkHtmlToPdfDotNet;
+using WkHtmlToPdfDotNet.Contracts;
 
 namespace DA_CNPM_VatTu.Controllers
 {
@@ -24,14 +30,20 @@ namespace DA_CNPM_VatTu.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private List<NhanVien> _nvs;
         private readonly IMemoryCache _memoryCache;
+        private readonly IMapper _mapper;
+        private readonly IConverter _converter;
         public XuatKhoController(ILogger<XuatKhoController> logger,
-            ICompositeViewEngine viewEngine, IMemoryCache memoryCache, IWebHostEnvironment hostingEnvironment)
+            ICompositeViewEngine viewEngine, IMemoryCache memoryCache, 
+            IWebHostEnvironment hostingEnvironment, IMapper mapper,
+            IConverter converter)
         {
             _dACNPMContext = new DACNPMContext();
             _logger = logger;
             _viewEngine = viewEngine;
             _memoryCache = memoryCache;
             _hostingEnvironment = hostingEnvironment;
+            _mapper = mapper;
+            _converter = converter;
         }
         [HttpGet]
         public async Task<IActionResult> XuatKho()
@@ -53,44 +65,56 @@ namespace DA_CNPM_VatTu.Controllers
             return View();
         }
         [HttpPost("api/khs")]
-        public async Task<IActionResult> optionsKH(string key)
+        public async Task<IActionResult> optionsKH()
         {
-            var dvts = getListKH().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaKh + " " + x.TenKh).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(dvts.Select(x => new
-            {
-                ID = x.Id,
-                MaKh = x.MaKh,
-                TenKh = x.TenKh,
-                loai = x.LoaiKh.Value ? "Sỉ" : "Lẻ"
-            }).ToList());
+            var khs = await _dACNPMContext.KhachHangs
+                .Where(x => x.Active.Value)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    ten = x.TenKh,
+                    ma = x.MaKh
+                })
+                .ToListAsync();
+            return Ok(khs);
         }
         [HttpPost("api/hhs")]
-        public async Task<IActionResult> searchHH(string key)
+        public async Task<IActionResult> searchHH()
         {
-            var hhs = await getListHH();
-            var idhhs = GetListCTPXT().Result.ToList();
-            var vts = hhs.AsParallel()
-                .Where(x =>
-                (x.TenHh + " " + x.MaHh).ToLower().Contains(key.ToLower())
-                && x.Active == true
-                && !idhhs.Any(y => y.Idhh == x.Id)
-                )
-                .ToList();
-            return Ok(vts.Select(x => new
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            return Ok(await _dACNPMContext.HangHoas.Select(x => new
             {
-                Id = x.Id,
-                TenHh = x.TenHh,
-                MaHh = x.MaHh
-            }).ToList());
+                id = x.Id,
+                ten = x.TenHh.Trim(),
+                ma = x.MaHh,
+                hinh = x.Avatar,
+                dvts = x.Hhdvts.Where(y=>y.Active == true).Select(y => new
+                {
+                    id = y.IddvtNavigation.Id,
+                    ten = y.IddvtNavigation.TenDvt,
+                    ma = y.IddvtNavigation.MaDvt,
+                }).ToList(),
+                dvtChinh = new
+                {
+                    id = x.Iddvtchinh,
+                    ten = x.IddvtchinhNavigation.TenDvt,
+                    ma = x.IddvtchinhNavigation.MaDvt
+                },
+                slTon = x.HangTonKhos.Where(y => y.Idcn == idCn).Sum(y => y.Slcon)
+            }).OrderBy(x => x.ten).ToListAsync());
+        }
+        [HttpPost("api/getSoPhieuXuat")]
+        public async Task<IActionResult> getSoPhieuXuat()
+        {
+            return Ok(await getSoPhieu());
         }
         [HttpPost("load-tthh")]
         public async Task<IActionResult> loadTTHH(int idHh, int idKh, int idDvt)
         {
             var kh = getListKH().Result.FirstOrDefault(x => x.Id == idKh);
-            int idCn = int.Parse(User.FindFirstValue("IdCn"));
             var loaiKh = kh.LoaiKh.Value;
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            
             // các loại đơn vị tính của hàng hoá
             var hhdvts = await _dACNPMContext
                 .Hhdvts.Include(x => x.IddvtNavigation)
@@ -109,32 +133,20 @@ namespace DA_CNPM_VatTu.Controllers
                 slQuyDoi = x.SlquyDoi
             });
             // lấy hàng tồn
-            var hangTons = _dACNPMContext.HangTonKhos
+            var hangTons = await _dACNPMContext.HangTonKhos
                 .Include(x => x.IdctpnNavigation)
                 .Where(x => x.Idhh == idHh && x.Idcn == idCn).ToListAsync();
-            // nếu không còn hàng tồn trong kho
-            await hangTons;
-            if (hangTons.Result.Count == 0)
+            if (hangTons.Count == 0)
             {
-                return Ok(new
-                {
-                    dvts = resultDvt,
-                    slCon = 0,
-                    donGia = 0,
-                    messages = new
-                    {
-                        message = "Hết hàng trong kho!",
-                        color = "bg-danger"
-                    },
-                    avatar = hh.Avatar
-                });
+                return Ok(0);
             }
+            // nếu không còn hàng tồn trong kho
             // cách xuất
             var cachXuat = _dACNPMContext.CachXuats.Find(1);
-            HangTonKho hangTon = await getDonGia(hangTons.Result);
+            HangTonKho hangTon = await getDonGia(hangTons);
             var giaNhap = hangTon.GiaNhap;
             var thue = hangTon.Thue;
-            var slCon = hangTons.Result
+            var slCon = hangTons
             .AsParallel().Sum(x => x.Slcon);
 
             // chọn hàng hoá
@@ -151,28 +163,14 @@ namespace DA_CNPM_VatTu.Controllers
                     // sỉ
                     if (loaiKh)
                     {
-                        return Ok(new
-                        {
-                            dvts = resultDvt,
-                            slCon = slCon,
-                            donGia = giaTheoKH.GiaBanSi == null
-                            ? getDonGia(giaTheoKH.TiLeSi, giaNhap, thue)
-                            : giaTheoKH.GiaBanSi,
-                            avatar = hh.Avatar
-                        });
+                        return Ok(giaTheoKH.GiaBanSi == null ? getDonGia(giaTheoKH.TiLeSi, giaNhap, thue) : giaTheoKH.GiaBanSi);
                     }
                     // lẻ
                     else
                     {
-                        return Ok(new
-                        {
-                            dvts = resultDvt,
-                            slCon = slCon,
-                            donGia = giaTheoKH.GiaBanLe == null
+                        return Ok(giaTheoKH.GiaBanLe == null
                             ? getDonGia(giaTheoKH.TiLeLe, giaNhap, thue)
-                            : giaTheoKH.GiaBanLe,
-                            avatar = hh.Avatar
-                        });
+                            : giaTheoKH.GiaBanLe);
                     }
                 }
                 //nếu không tồn tại thì sét giá theo nhóm hàng hoá
@@ -192,24 +190,12 @@ namespace DA_CNPM_VatTu.Controllers
                                 // sỉ
                                 if (loaiKh)
                                 {
-                                    return Ok(new
-                                    {
-                                        dvts = resultDvt,
-                                        slCon = slCon,
-                                        donGia = getDonGia(h.TiLeSi, giaNhap, thue),
-                                        avatar = hh.Avatar
-                                    });
+                                    return Ok(getDonGia(h.TiLeSi, giaNhap, thue));
                                 }
                                 // lẻ
                                 else
                                 {
-                                    return Ok(new
-                                    {
-                                        dvts = resultDvt,
-                                        slCon = slCon,
-                                        donGia = getDonGia(h.TiLeLe, giaNhap, thue),
-                                        avatar = hh.Avatar
-                                    });
+                                    return Ok(getDonGia(h.TiLeLe, giaNhap, thue));
                                 }
                             }
                         }
@@ -217,28 +203,16 @@ namespace DA_CNPM_VatTu.Controllers
                         // sỉ
                         if (loaiKh)
                         {
-                            return Ok(new
-                            {
-                                dvts = resultDvt,
-                                slCon = slCon,
-                                donGia = hh.GiaBanSi == null
+                            return Ok(hh.GiaBanSi == null
                                 ? getDonGia(hh.TiLeSi, giaNhap, thue)
-                                : hh.GiaBanSi,
-                                avatar = hh.Avatar
-                            });
+                                : hh.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
-                            return Ok(new
-                            {
-                                dvts = resultDvt,
-                                slCon = slCon,
-                                donGia = hh.GiaBanLe == null
+                            return Ok(hh.GiaBanLe == null
                                 ? getDonGia(hh.TiLeLe, giaNhap, thue)
-                                : hh.GiaBanLe,
-                                avatar = hh.Avatar
-                            });
+                                : hh.GiaBanLe);
                         }
                     }
                     // giá tnhh không có thì xét giá bán chung
@@ -247,28 +221,16 @@ namespace DA_CNPM_VatTu.Controllers
                         // sỉ
                         if (loaiKh)
                         {
-                            return Ok(new
-                            {
-                                dvts = resultDvt,
-                                slCon = slCon,
-                                donGia = hh.GiaBanSi == null
+                            return Ok(hh.GiaBanSi == null
                                 ? getDonGia(hh.TiLeSi, giaNhap, thue)
-                                : hh.GiaBanSi,
-                                avatar = hh.Avatar
-                            });
+                                : hh.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
-                            return Ok(new
-                            {
-                                dvts = resultDvt,
-                                slCon = slCon,
-                                donGia = hh.GiaBanLe == null
+                            return Ok(hh.GiaBanLe == null
                                 ? getDonGia(hh.TiLeLe, giaNhap, thue)
-                                : hh.GiaBanLe,
-                                avatar = hh.Avatar
-                            });
+                                : hh.GiaBanLe);
                         }
                     }
                 }
@@ -290,24 +252,16 @@ namespace DA_CNPM_VatTu.Controllers
                     // sỉ
                     if (loaiKh)
                     {
-                        return Ok(new
-                        {
-                            slCon = slConQuyDoi,
-                            donGia = giaTheoKH.GiaBanSi == null
+                        return Ok(giaTheoKH.GiaBanSi == null
                             ? getDonGia(giaTheoKH.TiLeSi, giaNhap * slQuyDoi, thue)
-                            : giaTheoKH.GiaBanSi,
-                        });
+                            : giaTheoKH.GiaBanSi);
                     }
                     // lẻ
                     else
                     {
-                        return Ok(new
-                        {
-                            slCon = slConQuyDoi,
-                            donGia = giaTheoKH.GiaBanLe == null
+                        return Ok(giaTheoKH.GiaBanLe == null
                             ? getDonGia(giaTheoKH.TiLeLe, giaNhap * slQuyDoi, thue)
-                            : giaTheoKH.GiaBanLe,
-                        });
+                            : giaTheoKH.GiaBanLe);
                     }
                 }
                 // xét tới giá theo nhóm hàng hoá
@@ -326,20 +280,12 @@ namespace DA_CNPM_VatTu.Controllers
                                 // sỉ
                                 if (loaiKh)
                                 {
-                                    return Ok(new
-                                    {
-                                        slCon = slConQuyDoi,
-                                        donGia = getDonGia(h.TiLeSi, giaNhap * slQuyDoi, thue),
-                                    });
+                                    return Ok(getDonGia(h.TiLeSi, giaNhap * slQuyDoi, thue));
                                 }
                                 // lẻ
                                 else
                                 {
-                                    return Ok(new
-                                    {
-                                        slCon = slConQuyDoi,
-                                        donGia = getDonGia(h.TiLeLe, giaNhap * slQuyDoi, thue),
-                                    });
+                                    return Ok(getDonGia(h.TiLeLe, giaNhap * slQuyDoi, thue));
                                 }
                             }
                         }
@@ -348,24 +294,16 @@ namespace DA_CNPM_VatTu.Controllers
                         // sỉ
                         if (loaiKh)
                         {
-                            return Ok(new
-                            {
-                                slCon = slConQuyDoi,
-                                donGia = hhdvt.GiaBanSi == null
+                            return Ok(hhdvt.GiaBanSi == null
                                 ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue)
-                                : hhdvt.GiaBanSi,
-                            });
+                                : hhdvt.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
-                            return Ok(new
-                            {
-                                slCon = slConQuyDoi,
-                                donGia = hhdvt.GiaBanLe == null
+                            return Ok(hhdvt.GiaBanLe == null
                                 ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue)
-                                : hhdvt.GiaBanLe,
-                            });
+                                : hhdvt.GiaBanLe);
                         }
                     }
                     // giá tnhh không có thì xét giá bán chung
@@ -375,30 +313,23 @@ namespace DA_CNPM_VatTu.Controllers
                         // sỉ
                         if (loaiKh)
                         {
-                            return Ok(new
-                            {
-                                slCon = slConQuyDoi,
-                                donGia = hhdvt.GiaBanSi == null
+                            return Ok(hhdvt.GiaBanSi == null
                                 ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue)
-                                : hhdvt.GiaBanSi,
-                            });
+                                : hhdvt.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
-                            var r = new
-                            {
-                                slCon = slConQuyDoi,
-                                donGia = hhdvt.GiaBanLe == null
+                            var r = hhdvt.GiaBanLe == null
                                 ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue)
-                                : hhdvt.GiaBanLe,
-                            };
+                                : hhdvt.GiaBanLe;
                             return Ok(r);
                         }
                     }
                 }
             }
         }
+        
         [HttpPost("add-ctpxt")]
         public async Task<IActionResult> addCTPXT(int idHH, float ThueXuat, float SL, float DonGia,
         float ChietKhau, int idDvt)
@@ -567,9 +498,10 @@ namespace DA_CNPM_VatTu.Controllers
             });
         }
         [HttpPost("add-px")]
-        public async Task<IActionResult> addPN(string NgayHD, string NgayXuat,
-            string GhiChu, int IdKh, string SoHD)
+        public async Task<IActionResult> addPN([FromBody] PhieuXuatKhoMap phieuXuatKhoMap)
         {
+            PhieuXuatKho px = _mapper.Map<PhieuXuatKho>(phieuXuatKhoMap);
+            List<ChiTietPhieuXuat> pxCts = _mapper.Map<List<ChiTietPhieuXuat>>(phieuXuatKhoMap.ChiTietPhieuXuatMaps);
             int _userId = int.Parse(User.Identity.Name);
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
 
@@ -588,25 +520,17 @@ namespace DA_CNPM_VatTu.Controllers
                 .Include(x => x.IdctpnNavigation)
                 .OrderBy(x => x.Hsd).ToList();
             }
-            // lấy danh sách chi tiết phiếu xuất tạm
-            var ctpxts = await GetListCTPXT();
             var tran = _dACNPMContext.Database.BeginTransaction();
             try
             {
-                PhieuXuatKho px = new PhieuXuatKho();
-                px.NgayHd = DateTime.ParseExact(NgayHD, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-                px.NgayTao = DateTime.ParseExact(NgayXuat, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture);
                 px.Active = true;
                 px.Idcn = idCn;
                 px.Idnv = _userId;
                 px.SoPx = await getSoPhieu();
-                px.GhiChu = GhiChu;
-                px.Idkh = IdKh;
-                px.SoHd = SoHD;
                 _dACNPMContext.PhieuXuatKhos.Add(px);
                 _dACNPMContext.SaveChanges();
 
-                foreach (ChiTietPhieuXuatTam t in ctpxts)
+                foreach (ChiTietPhieuXuat t in pxCts)
                 {
                     double slq = 0;
                     foreach (HangTonKho slhhc in hangTons.Where(x => x.Idhh == t.Idhh))
@@ -622,7 +546,7 @@ namespace DA_CNPM_VatTu.Controllers
                         ct.Nvtao = px.Idnv;
                         ct.NgayTao = px.NgayTao;
                         ct.Active = true;
-                        HangHoa hangHoa = getListHH().Result.FirstOrDefault(x => x.Id == t.Idhh);
+                        HangHoa hangHoa = await _dACNPMContext.HangHoas.FindAsync(t.Idhh);
                         double? slquydoi = 0;
                         //nếu mà đơn vị tính là đơn vị tính chính
                         if (t.Iddvt == hangHoa.Iddvtchinh)
@@ -667,7 +591,6 @@ namespace DA_CNPM_VatTu.Controllers
                             _dACNPMContext.SaveChanges();
                         }
                     }
-                    _dACNPMContext.ChiTietPhieuXuatTams.Remove(t);
                     _dACNPMContext.SaveChanges();
                 }
                 var SoTT = await _dACNPMContext.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("XuatKho"));
@@ -675,8 +598,6 @@ namespace DA_CNPM_VatTu.Controllers
                 _dACNPMContext.SoThuTus.Update(SoTT);
                 _dACNPMContext.SaveChanges();
                 tran.Commit();
-                _memoryCache.Remove("CTPXTs_" + _userId);
-                _memoryCache.Remove("CTPXs_" + _userId);
                 return Ok(new
                 {
                     statusCode = 200,
@@ -741,40 +662,114 @@ namespace DA_CNPM_VatTu.Controllers
             return PartialView(phieu);
         }
         [Route("download/phieuxuatkho/{id:int}")]
-        public IActionResult downloadPhieuXuat(int id)
+        public async Task<IActionResult> downloadPhieuXuat(int id)
         {
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1280;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            var phieu = await _dACNPMContext.PhieuXuatKhos
+                .Include(x => x.ChiTietPhieuXuats)
+                .ThenInclude(x => x.IdhhNavigation)
+                .ThenInclude(x => x.IddvtchinhNavigation)
+                .Include(x => x.IdkhNavigation)
+                .Include(x => x.IdnvNavigation)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            ViewBag.PhieuXuat = phieu;
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("PhieuXuatKhoPDF");
+            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
 
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
 
-            var pdf = fullView.ConvertUrl(currentUrl + "/QuanLy/XuatKho/phieuXuatKhoPDF/" + id);
-
-            var pdfBytes = pdf.Save();
-            return File(pdfBytes, "application/pdf", "PhieuXuat.pdf");
+            return File(pdfBytes, "application/pdf", phieu.SoPx + ".pdf");
         }
         [HttpPost("download/BaoCaoPhieuXuat")]
-        public IActionResult downloadBaoCaoPhieuXuat(string fromDay, string toDay, string soPhieuLS, string soHDLS, int KhachHangLS, int hangHoaLS)
+        public async Task<IActionResult> downloadBaoCaoPhieuXuat(string fromDay, string toDay, string soPhieuLS, string soHDLS, int KhachHangLS, int hangHoaLS)
         {
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1280;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            ViewBag.tuNgay = fromDay;
+            ViewBag.denNgay = toDay;
 
-            var url = Url.Action("viewBaoCaoPhieuXuatPDF", "Common", new { fromDay = fromDay, toDay = toDay, soPhieuLS = soPhieuLS, soHDLS = soHDLS, KhLs = KhachHangLS, hhLS = hangHoaLS });
+            List<PhieuXuatKho> listPhieu = await _dACNPMContext.PhieuXuatKhos
+             .Include(x => x.IdkhNavigation)
+            .Include(x => x.IdnvNavigation)
+            .Include(x => x.ChiTietPhieuXuats)
+            .Where(x => x.Active == true
+                && x.NgayTao.Value.Date >= FromDay
+                && x.NgayTao.Value.Date <= ToDay)
+            .OrderByDescending(x => x.Id)
+            .ToListAsync();
 
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}" + url;
+            if (KhachHangLS == 0 && hangHoaLS == 0)
+            {
+                listPhieu = listPhieu.Where(x => (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS) ?? false))
+                && (soPhieuLS == null ? true : x.SoPx.Contains(soPhieuLS.ToUpper()))).ToList();
+            }
+            else
+            {
+                listPhieu = listPhieu.AsParallel().Where(x => (hangHoaLS == 0 ? true : (x.ChiTietPhieuXuats.Where(y => y.Idhh == hangHoaLS).Count() > 0 ? true : false))
+                && (KhachHangLS == 0 ? true : x.Idkh == KhachHangLS)
+                && (soPhieuLS == null ? true : x.SoPx.Contains(soPhieuLS.ToUpper()))
+                && (soHDLS == null ? true : (x.SoHd?.Contains(soHDLS.ToUpper()) ?? false))).ToList();
+            }
 
-            var pdf = fullView.ConvertUrl(currentUrl);
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("BaoCaoXuatKhoPDF", listPhieu);
+            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
 
-            var pdfBytes = pdf.Save();
-            return File(pdfBytes, "application/pdf", "BaoCaoPhieuXuat.pdf");
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
+
+            return File(pdfBytes, "application/pdf", "BaoCaoXuatKho.pdf");
         }
         double? getDonGia(double? tiLe, double? GiaNhap, double? Vat)
         {
@@ -925,6 +920,17 @@ namespace DA_CNPM_VatTu.Controllers
                 ht = hangTons.OrderByDescending(x => x.NgayNhap).FirstOrDefault();
             }
             return ht;
+        }
+
+        async Task<dynamic> getGiaKhachHang(int idKh, int idHh, int idDvt)
+        {
+            double donGia = 0;
+            return donGia;
+        }
+        async Task<dynamic> getGiaTheoNhomHh(int idHh, int idDvt)
+        {
+            double donGia = 0;
+            return donGia;
         }
     }
 }

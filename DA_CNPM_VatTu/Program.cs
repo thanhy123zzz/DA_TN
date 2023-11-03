@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using WkHtmlToPdfDotNet.Contracts;
+using WkHtmlToPdfDotNet;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,6 +26,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     });
 builder.Services.AddMemoryCache();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 var app = builder.Build();
 

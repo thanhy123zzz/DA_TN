@@ -6,6 +6,12 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/assets/js/XuatKho.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/XuatKho.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/assets/js/custom.min.js",
     "inputFiles": [
       "wwwroot/assets/js/custom.js"

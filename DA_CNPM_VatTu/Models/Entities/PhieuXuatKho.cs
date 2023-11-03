@@ -11,10 +11,10 @@ namespace DA_CNPM_VatTu.Models.Entities
         }
 
         public int Id { get; set; }
-        public string SoPx { get; set; } = null!;
-        public int Idkh { get; set; }
-        public int Idcn { get; set; }
-        public int Idnv { get; set; }
+        public string? SoPx { get; set; }
+        public int? Idkh { get; set; }
+        public int? Idcn { get; set; }
+        public int? Idnv { get; set; }
         public string? SoHd { get; set; }
         public DateTime? NgayHd { get; set; }
         public string? GhiChu { get; set; }
@@ -24,9 +24,9 @@ namespace DA_CNPM_VatTu.Models.Entities
         public bool? Active { get; set; }
         public int? Idtt { get; set; }
 
-        public virtual ChiNhanh IdcnNavigation { get; set; } = null!;
-        public virtual KhachHang IdkhNavigation { get; set; } = null!;
-        public virtual NhanVien IdnvNavigation { get; set; } = null!;
+        public virtual ChiNhanh? IdcnNavigation { get; set; }
+        public virtual KhachHang? IdkhNavigation { get; set; }
+        public virtual NhanVien? IdnvNavigation { get; set; }
         public virtual ICollection<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; }
     }
 }

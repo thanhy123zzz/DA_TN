@@ -1,9 +1,4 @@
 ﻿@{
-    List<HangHoa> hhs = ViewBag.HHs;
-    string getTenHH(int? id)
-    {
-        return hhs.FirstOrDefault(x => x.Id == id).TenHh;
-    }
     string toDecimal(double? d)
     {
         if (d == null)
@@ -15,11 +10,6 @@
             return d.Value.ToString("#,##0.00");
         }
     }
-    List<ChiTietPhieuNhapTam> ctpnts = ViewBag.CTPNTs;
-    var TienHang = ctpnts.Sum(x => x.Sl * x.DonGia);
-    var TienCK = ctpnts.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
-    var TienThue = ctpnts.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
-    var TienThanhToan = TienHang - TienCK + TienThue;
     string dayToString(DateTime? a)
     {
         if (a == null)
@@ -38,7 +28,7 @@
                         <!-- Bordered Tabs Justified -->
                         <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                             <li class="nav-item flex-fill" role="presentation">
-                                <button class="nav-link w-100 active" id="home-tab" onclick="offTabNhap()" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Phiếu nhập kho</button>
+                                <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Phiếu nhập kho</button>
                             </li>
                             <li class="nav-item flex-fill" role="presentation">
                                 <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Lịch sử nhập kho</button>
@@ -168,37 +158,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="tBodyCtpn">
-                                                @foreach (ChiTietPhieuNhapTam item in ViewBag.CTPNTs)
-                                                {
-                                                    <tr>
-                                                        <td>@getTenHH(item.Idhh)</td>
-                                                        <td>@item.Dvt</td>
-                                                        <td>@item.SoLo</td>
-                                                        <td class="text-end">@toDecimal(item.Sl)</td>
-                                                        <td class="text-end">@toDecimal(item.DonGia)</td>
-                                                        <td class="text-end">@toDecimal(item.Sl*item.DonGia)</td>
-                                                        <td class="text-end">@toDecimal(item.Cktm)</td>
-                                                        <td class="text-center">@dayToString(item.Hsd)</td>
-                                                        <td class="text-center">@dayToString(item.Nsx)</td>
-                                                        <td class="text-end">@item.Thue%</td>
-                                                        <td class='last-td-column'>
-                                                            <div class="action justify-content-end">
-                                                                @if (phanQuyenNhapKho.Sua.Value)
-                                                                {
-                                                                    <button class="text-primary" onclick="editCtpnts(@item.Id)">
-                                                                        <i class="lni lni-pencil"></i>
-                                                                    </button>
-                                                                }
-                                                                @if (phanQuyenNhapKho.Xoa.Value)
-                                                                {
-                                                                    <button class="text-danger" onclick="deleteCtpnts(@item.Id)">
-                                                                        <i class="lni lni-trash-can"></i>
-                                                                    </button>
-                                                                }
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                }
                                             </tbody>
                                         </table>
                                     </div>
@@ -207,27 +166,30 @@
                                         <div class="row">
                                             <div class="col-sm-3 col-lg-3 input-style-4">
                                                 <label>Tiền hàng</label>
-                                                <input class="input-number-float" id="TienHang" type="text" readonly placeholder="Tiền Hàng" value="@toDecimal(TienHang)">
+                                                <input class="input-number-float" id="TienHang" type="text" readonly placeholder="Tiền Hàng">
                                             </div>
                                             <div class="col-sm-3 col-lg-3 input-style-4">
                                                 <label>Tiền CK</label>
-                                                <input class="input-number-float" id="TienCK" type="text" readonly  placeholder="Tiền chiết khấu" value="@toDecimal(TienCK)">
+                                                <input class="input-number-float" id="TienCK" type="text" readonly  placeholder="Tiền chiết khấu">
                                             </div>
                                             <div class="col-sm-3 col-lg-3 input-style-4">
                                                 <label>Tiền thuế</label>
-                                                <input class="input-number-float" id="TienThue" type="text" readonly  placeholder="Tiền thuế" value="@toDecimal(TienThue)">
+                                                <input class="input-number-float" id="TienThue" type="text" readonly  placeholder="Tiền thuế">
                                             </div>
                                             <div class="col-sm-3 col-lg-3 input-style-4">
                                                 <label>Phải trả</label>
-                                                <input class="input-number-float" id="TienThanhToan" type="text" readonly  placeholder="Tổng phải trả" value="@toDecimal(TienThanhToan)">
+                                                <input class="input-number-float" id="TienThanhToan" type="text" readonly  placeholder="Tổng phải trả">
                                             </div>
                                         </div>
                                     </div>  
-                                <div class="row">
+                                <div class="row justify-content-end">
+                                    <div class="col-auto">
+                                        <button class="btn btn-secondary" type="button" id="btnXoaTrang">Xoá trắng</button>
+                                    </div>
                                     @if (phanQuyenNhapKho.Them.Value)
                                    {
-                                        <div class="d-flex justify-content-end">
-                                          <button class="btn btn-primary col-lg-2 col-sm-2" type="button" id="btnTaoPhieu">Tạo phiếu</button>
+                                        <div class="col-auto">
+                                          <button class="btn btn-primary" type="button" id="btnTaoPhieu">Tạo phiếu</button>
                                         </div>
                                    }
                                  </div>
@@ -260,25 +222,25 @@
                                     
                                       <div class="col-sm-2 col-lg-2 input-style-4">
                                          <label for="soPhieuLS">Số phiếu</label>
-                                        <input class="form-control" type="text" name="soPhieuLS" id="soPhieuLS" placeholder="Số phiếu"/>
+                                        <input type="text" name="soPhieuLS" id="soPhieuLS" placeholder="Số phiếu"/>
                                     </div>
                                     <div class="col-sm-2 col-lg-2 input-style-4">
                                          <label for="soHDLS">Số HĐ</label>
-                                        <input class="form-control" type="text" name="soHDLS" id="soHDLS" placeholder="Số hoá đơn"/>
+                                        <input type="text" name="soHDLS" id="soHDLS" placeholder="Số hoá đơn"/>
                                     </div>
                                     @if (phanQuyenNhapKho.TimKiem.Value)
                                     {
                                       <div class="col-sm-1 col-lg-1 d-flex justify-content-end mt-1">
-                                         <button class="btn btn-light w-100" type="button" onclick="loadTableLichSuNhap()">
+                                         <button class="btn btn-light w-100" type="button" id="btnLoadLsNhap">
                                              <i class="lni lni-keyword-research d-flex justify-content-center"></i>
                                          </button>
                                       </div>
                                     }
                                     </div>
                             </div>
-                            <div class="card">
-                                <div id="tableLichSuNhap" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;">
-                                    <table id="LichSuNhap" class="table table-bordered table-striped top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                            <div class="card mb-2">
+                            <div id="tableLichSuNhap" class="table-responsive vh-md-50">
+                                    <table id="LichSuNhap" class="table table-bordered top-selling-table table-hover display nowrap">
                                         <thead>
                                             <tr>
                                                 <th>Số phiếu</th>
@@ -294,13 +256,6 @@
                                         <tbody id="tBodyLSNhap">
                                         </tbody>
                                     </table>
-                                    <div id="loader">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="spinner-grow text-primary" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="row">

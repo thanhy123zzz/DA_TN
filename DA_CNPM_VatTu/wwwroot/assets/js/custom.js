@@ -72,8 +72,8 @@ function configCb(datas) {
             data.el.selectize({
                 maxOptions: 50,
                 valueField: "id",
-                labelField: "tenNcc",
-                searchField: ["tenNcc", "maNcc"],
+                labelField: "ten",
+                searchField: ["ten", "ma"],
                 placeholder: data.placeholder,
                 loadThrottle: 400,
                 options: response
@@ -157,6 +157,7 @@ function formatNumberWithElement(inputs) {
 function formatNumberFloatWithElement(inputs) {
     inputs.each(function () {
         var min = $(this).attr('min');
+        var max = $(this).attr('max');
         var input = $(this).inputmask({
             alias: "numeric",
             radixPoint: ".",
@@ -166,7 +167,8 @@ function formatNumberFloatWithElement(inputs) {
             digitsOptional: true,
             allowMinus: false,
             prefix: "",
-            min: min ? parseFloat(min) : 0
+            min: min ? parseFloat(min) : 0,
+            max: parseFloat(max)
         });
         input.on("blur", function () {
             $(this).trigger('keyup');
@@ -192,7 +194,33 @@ function getDataFromTr(tr) {
     // Chuyển đối tượng formData thành chuỗi serialized
     return formData;
 }
+function getDateTimeNow() {
+    // Lấy ngày giờ hiện tại
+    var currentDate = new Date();
 
+    // Lấy các thành phần ngày, tháng, năm, giờ và phút
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1; // Tháng bắt đầu từ 0, cần +1 để đúng
+    var year = currentDate.getFullYear();
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+
+    // Chuyển đổi thành định dạng "dd-MM-yyyy HH:mm"
+    return ("0" + day).slice(-2) + "-" + ("0" + month).slice(-2) + "-" + year + " " + ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2);
+}
+
+function getDateNow() {
+    // Lấy ngày giờ hiện tại
+    var currentDate = new Date();
+
+    // Lấy các thành phần ngày, tháng và năm
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1; // Ghi chú: Tháng trong JavaScript bắt đầu từ 0
+    var year = currentDate.getFullYear();
+
+    // Định dạng chuỗi ngày tháng
+    return (day < 10 ? '0' : '') + day + '-' + (month < 10 ? '0' : '') + month + '-' + year;
+}
 function showModalDanger(content) {
     var myModal = new bootstrap.Modal(document.getElementById("modal-danger"), {
     });
@@ -233,4 +261,16 @@ function showToast(message, statusCode) {
             $('#toast').removeClass("bg-danger");
         }, 5000);
     }
+}
+function showLoader(table) {
+    table.after(`<div id="loader">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="spinner-grow text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>`);
+}
+function hideLoader() {
+    $('#loader').remove();
 }
