@@ -263,6 +263,7 @@ function getRowPhieuNhapCt() {
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Thue" style="min-width: 60px;"/></td>
         <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Hsd" style="min-width: 110px;"/></td>
+        <td><textarea autocomplete="off" class="form-control form-table" name="GhiChu" style="min-width: 220px;" rows="1"></textarea></td>
         <td class='last-td-column'>
             <div class="action justify-content-center">
                 <button class="text-danger btn-remove-ct">

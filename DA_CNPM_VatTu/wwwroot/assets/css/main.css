@@ -74,7 +74,7 @@ th {
     position: sticky;
     left: 0;
     background-color: lightgray !important;
-    z-index: 10;
+    z-index: 11;
 }
 .selectize-control.search_products::before {
     -moz-transition: opacity 0.2s;

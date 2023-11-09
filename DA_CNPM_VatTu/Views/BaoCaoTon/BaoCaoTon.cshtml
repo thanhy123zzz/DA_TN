@@ -7,7 +7,7 @@
                     <div id="content" class="card-style mb-30 px-3 py-2">
                         <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="borderedTabJustified" role="tablist">
                             <li class="nav-item flex-fill" role="presentation">
-                                <button class="nav-link w-100 active" id="home-tab" onclick="offTabNhap()" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Báo cáo tổng hợp</button>
+                                <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#borderedTabJustifiedContent" type="button" role="tab" aria-controls="home" aria-selected="true">Báo cáo tổng hợp</button>
                             </li>
                             <li class="nav-item flex-fill" role="presentation">
                                 <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-justified-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Báo cáo chi tiết</button>
@@ -15,11 +15,11 @@
                         </ul>
                         <div class="tab-content pt-2">
                             <div class="tab-pane fade active show" id="borderedTabJustifiedContent">
-                                <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                <div class="form-group p-2 mb-2 card" id="groupTTSearchLichSu">
                                  <div class="row mb-2">
                                     <div class="col-sm-8 col-lg-8 select-style-4">
                                             <label for="NhhTH">Nhóm hàng hoá</label>
-                                            <select id="NhhTH" name="NhhTH" class="form-select w-100 my-selectize-2">
+                                            <select id="NhhTH" name="NhhTH" class="form-select w-100 my-selectize-2 cbNhomHangHoa">
                                             </select>
                                         </div>
                                       <div class="col-sm-2 col-lg-2 input-style-4">
@@ -34,7 +34,7 @@
                                  <div class="row mb-2 justify-content-between">
                                   <div class="col-sm-10 col-lg-10 select-style-4">
                                        <label for="hangHoaTH">Hàng hoá</label>
-                                           <select id="hangHoaTH" name="hangHoaTH" class="form-select w-100 my-selectize-2">
+                                        <select id="hangHoaTH" name="hangHoaTH" class="form-select w-100 my-selectize-2 cbHangHoa">
                                         </select>
                                    </div>
                                    @if(phanQuyenBaoCaoTon.TimKiem.Value){
@@ -47,8 +47,8 @@
                                 </div>
                             </div>
                                 <div class="card">
-                                    <div id="tableBaoCaoTongHop" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;">
-                                    <table id="LichSuNhap" class="table table-bordered top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                                    <div id="tableBaoCaoTongHop" class="table-responsive vh-md-50">
+                                    <table id="tableTongHop" class="table table-bordered top-selling-table table-hover display nowrap" >
                                         <thead>
                                             <tr>
                                                 <th>STT</th>
@@ -61,13 +61,6 @@
                                         <tbody id="tBodyBaoCaoTongHop">
                                         </tbody>
                                     </table>
-                                    <div id="loaderTH">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="spinner-grow text-primary" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                                     </div>
                                 <div class="row justify-content-end text-center mt-1">
@@ -93,23 +86,23 @@
                         </div>
                         <div class = "tab-content">
                             <div class="tab-pane fade" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
-                                <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                <div class="form-group p-2 mb-2 card" id="groupTTSearchLichSu">
                                  <div class="row mb-2">
                                      <div class="col-sm-6 col-lg-6 select-style-4">
                                             <label for="nhaCCCT">Nhà CC</label>
-                                            <select id="nhaCCCT" name="nhaCCCT" class="form-select w-100 my-selectize-2">
+                                            <select id="nhaCCCT" name="nhaCCCT" class="form-select w-100 my-selectize-2 cbNhaCC">
                                             </select>
                                         </div>
                                     <div class="col-sm-6 col-lg-6 select-style-4">
                                             <label for="NhhCT">Nhóm hàng hoá</label>
-                                            <select id="NhhCT" name="NhhCT" class="form-select w-100 my-selectize-2">
+                                            <select id="NhhCT" name="NhhCT" class="form-select w-100 my-selectize-2 cbNhomHangHoa">
                                             </select>
                                         </div>
                                 </div>
                                  <div class="row mb-2 justify-content-between">
                                   <div class="col-sm-7 col-lg-7 select-style-4">
                                        <label for="hangHoaCT">Hàng hoá</label>
-                                           <select id="hangHoaCT" name="hangHoaCT" class="form-select w-100 my-selectize-2">
+                                           <select id="hangHoaCT" name="hangHoaCT" class="form-select w-100 my-selectize-2 cbHangHoa">
                                         </select>
                                    </div>
                                    <div class="col-sm-2 col-lg-2 input-style-4">
@@ -130,8 +123,8 @@
                                 </div>
                             </div>
                                 <div class="card">
-                            <div id="tableBaoCaoChiTiet" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;">
-                                <table class="table table-bordered table-striped top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
+                            <div id="tableBaoCaoChiTiet" class="table-responsive vh-md-50">
+                                <table id="tableChiTiet" class="table table-bordered table-striped top-selling-table table-hover display nowrap">
                                     <thead>
                                         <tr>
                                             <th>STT</th>
@@ -153,13 +146,6 @@
                                     <tbody id="tBodyBaoCaoChiTiet">
                                     </tbody>
                                 </table>
-                                <div id="loaderCT">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="spinner-grow text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                                 </div>
                                     <div class="row justify-content-end text-center mt-1">
@@ -189,7 +175,8 @@
                 </div>
         </div>
     </div>
-<script>
+<script src="/assets/js/BaoCaoTonKho.js" defer asp-append-version="true"></script>
+@*<script>
 $(document).ready(function () {
     $("#loaderTH").hide();
     $("#loaderCT").hide();
@@ -556,4 +543,4 @@ function downloadBaoCaoChiTietExcel(){
         }
     });
 }
-</script>
+</script>*@

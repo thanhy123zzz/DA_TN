@@ -1,4 +1,9 @@
-﻿namespace DA_CNPM_VatTu.Services
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DA_CNPM_VatTu.Services
 {
     public static class CommonServices
     {
@@ -17,6 +22,18 @@
             string base64String = Convert.ToBase64String(imageBytes);
 
             return base64String;
+        }
+        public static string ConvertViewToString(ControllerContext controllerContext, PartialViewResult pvr, ICompositeViewEngine _viewEngine)
+        {
+            using (StringWriter writer = new StringWriter())
+            {
+                ViewEngineResult vResult = _viewEngine.FindView(controllerContext, pvr.ViewName, false);
+                ViewContext viewContext = new ViewContext(controllerContext, vResult.View, pvr.ViewData, pvr.TempData, writer, new HtmlHelperOptions());
+
+                vResult.View.RenderAsync(viewContext);
+
+                return writer.GetStringBuilder().ToString();
+            }
         }
     }
 }

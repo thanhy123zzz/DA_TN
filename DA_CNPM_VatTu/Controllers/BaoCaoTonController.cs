@@ -1,4 +1,5 @@
 ﻿using DA_CNPM_VatTu.Models.Entities;
+using DA_CNPM_VatTu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
@@ -7,9 +8,12 @@ using Microsoft.Extensions.Caching.Memory;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SelectPdf;
+using System;
 using System.Drawing;
 using System.Globalization;
 using System.Security.Claims;
+using WkHtmlToPdfDotNet;
+using WkHtmlToPdfDotNet.Contracts;
 
 namespace DA_CNPM_VatTu.Controllers
 {
@@ -23,14 +27,17 @@ namespace DA_CNPM_VatTu.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private List<NhanVien> _nvs;
         private readonly IMemoryCache _memoryCache;
+        private readonly IConverter _converter;
         public BaoCaoTonController(ILogger<BaoCaoTonController> logger,
-            ICompositeViewEngine viewEngine, IMemoryCache memoryCache, IWebHostEnvironment hostingEnvironment)
+            ICompositeViewEngine viewEngine, IMemoryCache memoryCache
+            , IWebHostEnvironment hostingEnvironment, IConverter converter)
         {
             _dACNPMContext = new DACNPMContext();
             _logger = logger;
             _viewEngine = viewEngine;
             _memoryCache = memoryCache;
             _hostingEnvironment = hostingEnvironment;
+            _converter = converter;
         }
         [HttpGet]
         public IActionResult BaoCaoTon()
@@ -64,22 +71,62 @@ namespace DA_CNPM_VatTu.Controllers
             return PartialView("tableBaoCaoTongHop");
         }
         [HttpPost("download/BaoCaoTongHopPDF")]
-        public IActionResult downloadBaoCaoTongHopPDF(int idNhh, int idHh, string fromDay, string toDay)
+        public async Task<IActionResult> downloadBaoCaoTongHopPDF(int idNhh, int idHh, string fromDay, string toDay)
         {
+            var _dACNPMContext = new DACNPMContext();
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1280;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var hangTons = await _dACNPMContext.HangTonKhos
+                    .Include(x => x.IdhhNavigation)
+                    .Include(x => x.IdhhNavigation.IdnhhNavigation)
+                    .Where(x => (idNhh == 0 ? true : x.IdhhNavigation.Idnhh == idNhh)
+                    && (idHh == 0 ? true : x.Idhh == idHh)
+                    && x.NgayNhap.Value.Date >= FromDay
+                    && x.NgayNhap.Value.Date <= ToDay
+                    && x.Idcn == idCn)
+                    .ToListAsync();
+            var Nhhs = hangTons
+                    .Select(x => x.IdhhNavigation.IdnhhNavigation)
+                    .Distinct()
+                    .ToList();
+            ViewBag.Nhhs = Nhhs;
+            ViewBag.hangTons = hangTons;
+            ViewBag.TuNgay = fromDay;
+            ViewBag.DenNgay = toDay;
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("BaoCaoTongHopPDF");
+            string viewContent = CommonServices.ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
 
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
-            var url = Url.Action("viewBaoCaoTongHopPDF", "Common", new { fromDay = fromDay, toDay = toDay, idNhh = idNhh, idHh = idHh, idCn = idCn });
-            var pdf = fullView.ConvertUrl(currentUrl + url);
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
 
-            var pdfBytes = pdf.Save();
-            return File(pdfBytes, "application/pdf", "BaoCaoTongHopPDF.pdf");
+            return File(pdfBytes, "application/pdf", "BaoCaoHangTonTongHop.pdf");
         }
         [HttpPost("download/BaoCaoTongHopExcel")]
         public async Task<IActionResult> downloadBaoCaoTongHopExcel(int idNhh, int idHh, string fromDay, string toDay)
@@ -238,6 +285,33 @@ namespace DA_CNPM_VatTu.Controllers
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
             DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var chiTietPhieuNhaps = await _dACNPMContext.ChiTietPhieuNhaps
+                    .Include(x => x.IdhhNavigation)
+                    .Include(x => x.IdhhNavigation.IddvtchinhNavigation)
+                    .Include(x => x.IdhhNavigation.IdnhhNavigation)
+                    .Include(x => x.ChiTietPhieuXuats)
+                    .Include(x => x.HangTonKhos)
+                    .Include(x => x.IdpnNavigation)
+                    .Include(x => x.IdpnNavigation.IdnccNavigation)
+                    .Where(x => (idNhh == 0 ? true : x.IdhhNavigation.Idnhh == idNhh)
+                    && (idNcc == 0 ? true : x.IdpnNavigation.Idncc == idNcc)
+                    && (idHh == 0 ? true : x.Idhh == idHh)
+                    && x.NgayTao.Value.Date >= FromDay
+                    && x.NgayTao.Value.Date <= ToDay
+                    && x.IdpnNavigation.Idcn == idCn
+                    && x.HangTonKhos.Count > 0)
+                    .OrderBy(x => x.IdhhNavigation.TenHh)
+                    .ToListAsync();
+            ViewBag.chiTietPhieuNhaps = chiTietPhieuNhaps;
+            return PartialView("tableBaoCaoChiTiet");
+        }
+        [HttpPost("download/BaoCaoChiTietPDF")]
+        public async Task<IActionResult> downloadBaoCaoChiTietPDF(int idNhh, int idHh, string fromDay, string toDay, int idNcc)
+        {
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            var _dACNPMContext = new DACNPMContext();
+            DateTime FromDay = DateTime.ParseExact(fromDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime ToDay = DateTime.ParseExact(toDay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             var chiTietPhieuNhaps = _dACNPMContext.ChiTietPhieuNhaps
                     .Include(x => x.IdhhNavigation)
                     .Include(x => x.IdhhNavigation.IddvtchinhNavigation)
@@ -252,30 +326,44 @@ namespace DA_CNPM_VatTu.Controllers
                     && (idHh == 0 ? true : x.Idhh == idHh)
                     && x.NgayTao.Value.Date >= FromDay
                     && x.NgayTao.Value.Date <= ToDay
-                    && x.IdpnNavigation.Idcn == idCn
-                    && x.HangTonKhos.Count > 0
-                    )
+                    && x.IdpnNavigation.Idcn == idCn)
                     .OrderBy(x => x.IdhhNavigation.TenHh)
                     .ToList();
             ViewBag.chiTietPhieuNhaps = chiTietPhieuNhaps;
-            return PartialView("tableBaoCaoChiTiet");
-        }
-        [HttpPost("download/BaoCaoChiTietPDF")]
-        public IActionResult downloadBaoCaoChiTietPDF(int idNhh, int idHh, string fromDay, string toDay, int idNcc)
-        {
-            int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            var fullView = new HtmlToPdf();
-            fullView.Options.WebPageWidth = 1920;
-            fullView.Options.PdfPageSize = PdfPageSize.A4;
-            fullView.Options.MarginTop = 20;
-            fullView.Options.MarginBottom = 20;
-            fullView.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            ViewBag.TuNgay = fromDay;
+            ViewBag.DenNgay = toDay;
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("BaoCaoChiTietPDF");
+            string viewContent = CommonServices.ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
 
-            var currentUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
-            var url = Url.Action("viewBaoCaoChiTietPDF", "Common", new { fromDay = fromDay, toDay = toDay, idNhh = idNhh, idHh = idHh, idCn = idCn, idNcc = idNcc });
-            var pdf = fullView.ConvertUrl(currentUrl + url);
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Landscape,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
 
-            var pdfBytes = pdf.Save();
             return File(pdfBytes, "application/pdf", "BaoCaoChiTietPDF.pdf");
         }
         [HttpPost("download/BaoCaoChiTietExcel")]

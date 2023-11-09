@@ -7,7 +7,7 @@
                     <div id="content" class="card-style mb-30 p-4" >
                         <div class = "tab-content pt-2">
                             <div class="tab-pane fade active show" id="bordered-justified-profile" role="tabpanel" aria-labelledby="profile-tab">
-                                <div class="form-group p-2 mb-2" id="groupTTSearchLichSu" style="border-radius: 5px; border: 1px solid black;">
+                                <div class="form-group p-2 mb-2 card" id="groupTTSearchLichSu">
                                  <div class="row mb-2">
                                      <div class="col-sm-8 col-lg-8 select-style-4">
                                             <label for="KhachHang">Khách hàng</label>
@@ -43,34 +43,28 @@
                                 }
                                 </div>
                             </div>
-                                <div id="tableBaoCaoChiTiet" class="table-responsive" style="max-height:500px;overflow-x: auto;white-space:nowrap;"> 
-                                       <table class="table table-bordered table-striped top-selling-table table-hover display nowrap" style="width:100%;max-height:500px">
-                                                <thead>
-                                                    <tr>
-                                                        <th>STT</th>
-                                                        <th>Ngày bán</th>
-                                                        <th>Khách hàng</th>
-                                                        <th>Mã hàng</th>
-                                                        <th>Tên hàng</th>
-                                                        <th>Số lượng bán</th>
-                                                        <th>ĐVT</th>
-                                                        <th>Giá bán</th>
-                                                        <th>Kiểu bảo hành</th>
-                                                        <th class="last-th-column">Trạng thái</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="tBody">
-
-                                                </tbody>
-                                            </table>
-                                            <div id="loaderCT">
-                                           <div class="d-flex justify-content-center">
-                                                <div class="spinner-grow text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                           </div>
-                                            </div>
-                                        </div>
+                                <div class="card">
+                                    <div id="tableBaoCaoChiTiet" class="table-responsive vh-md-50">
+                                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>Ngày bán</th>
+                                                    <th>Khách hàng</th>
+                                                    <th>Mã hàng</th>
+                                                    <th>Tên hàng</th>
+                                                    <th>Số lượng bán</th>
+                                                    <th>ĐVT</th>
+                                                    <th>Giá bán</th>
+                                                    <th>Kiểu bảo hành</th>
+                                                    <th class="last-th-column">Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tBody">
+                                            </tbody>
+                                        </table>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,151 +73,53 @@
     </div>
 <script>
 $(document).ready(function () {
-    $("#loaderCT").hide();
-    $('.input-date').datetimepicker({
-        locale: 'vi',
-        useStrict: true,
-        format: "DD-MM-yyyy",
-        icons: {
-            date: "lni lni-calendar",
-            up: "lni lni-angle-double-up",
-            down: "lni lni-angle-double-down",
-            previous: 'lni lni-angle-double-left',
-            next: 'lni lni-angle-double-right',
-            time: "lni lni-alarm-clock"
-        }
-    });
-    $('#KhachHang').selectize({
-        maxOptions: 30,
-        onFocus: function ($dropdown) {
-            $('.my-selectize-2').not(this.$input).each(function () {
-                if (this.selectize) {
-                    this.selectize.close();
-                    this.selectize.blur();
-                }
-            });
-        },
-        valueField: "id",
-        labelField: "tenKh",
-        searchField: ["tenKh", "maKh"],
-        placeholder: '-- Khách hàng --',
-        allowEmptyOption: false,
-        preload: true,
-        load: function (query, callback) {
-            if (query !== "") {
-                $.ajax({
-                    data: "key=" + query,
-                    type: 'POST',
-                    url: '/QuanLy/XuatKho/api/khs'
-                }).done(function (response) {
-                    callback(response);
-                });
-            }
-        },
-        loadThrottle: 400,
-        render: {
-            item: function (item, escape) {
-                return '<div>' + escape(item.tenKh + ' (' + item.loai + ')') + '</div>';
-            }
-        },
-    });
-
-    $('#hangHoaTH').selectize({
-        maxOptions: 10,
-        onChange: function (value) {
-            if (value !== "") {
-                $.ajax({
-                    url: '/QuanLy/NhapKho/api/solo',
-                    method: 'post',
-                    data: "idHh=" + value,
-                    success: function (response) {
-                        var soLoSelectize = $('#soLo')[0].selectize;
-                        soLoSelectize.clearOptions();
-                        soLoSelectize.load(function (callback) {
-                            callback(response.soLos);
-                        });
-                        $('#dvt').val(response.dvt);
-                        $('#imageHH').prop('src', response.avatar);
-                        $('#imageHH').attr('alt', response.alt);
+    configDate();
+        $.ajax({
+            type: 'POST',
+            url: '/QuanLy/XuatKho/api/khs'
+        }).done(function (response) {
+            $('#KhachHang').selectize({
+                maxOptions: 50,
+                valueField: "id",
+                labelField: "ten",
+                searchField: ["ten", "ma"],
+                placeholder: '-- Khách hàng --',
+                allowEmptyOption: false,
+                loadThrottle: 400,
+                options: response,
+                render: {
+                    item: function (item, escape) {
+                        return '<div>' + escape(item.ten + ' (' + item.loai + ')') + '</div>';
+                    },
+                    option: function (item, escape) {
+                        return `<div class="px-2 py-1"><b>${item.ten}</b> - [${item.loai}]</div>`;
                     }
-                });
-            }
-        },
-        onFocus: function ($dropdown) {
-            $('.my-selectize-2').not(this.$input).each(function () {
-                if (this.selectize) {
-                    this.selectize.close();
-                    this.selectize.blur();
-                }
+                },
             });
-        },
-        valueField: "id",
-        labelField: "tenHh",
-        searchField: ["tenHh", "maHh"],
-        placeholder: '-- Hàng hoá --',
-        allowEmptyOption: false,
-        preload: true,
-        load: function (query, callback) {
-            if (query !== "") {
-                $.ajax({
-                    data: "key=" + query,
-                    type: 'POST',
-                    url: '/QuanLy/NhapKho/api/hhs'
-                }).done(function (response) {
-                    callback(response);
-                });
-            }
-        },
-        loadThrottle: 400,
-    });
-    $('#hangHoaCT').selectize({
-        maxOptions: 10,
-        onChange: function (value) {
-            if (value !== "") {
-                $.ajax({
-                    url: '/QuanLy/NhapKho/api/solo',
-                    method: 'post',
-                    data: "idHh=" + value,
-                    success: function (response) {
-                        var soLoSelectize = $('#soLo')[0].selectize;
-                        soLoSelectize.clearOptions();
-                        soLoSelectize.load(function (callback) {
-                            callback(response.soLos);
-                        });
-                        $('#dvt').val(response.dvt);
-                        $('#imageHH').prop('src', response.avatar);
-                        $('#imageHH').attr('alt', response.alt);
-                    }
-                });
-            }
-        },
-        onFocus: function ($dropdown) {
-            $('.my-selectize-2').not(this.$input).each(function () {
-                if (this.selectize) {
-                    this.selectize.close();
-                    this.selectize.blur();
-                }
+        });
+        $.ajax({
+            type: 'POST',
+            url: '/QuanLy/NhapKho/api/hhs'
+        }).done(function (response) {
+            $('#hangHoaCT').selectize({
+                maxOptions: 50,
+                valueField: "id",
+                labelField: "ten",
+                searchField: ["ten", "ma"],
+                placeholder: '-- Hàng hoá --',
+                allowEmptyOption: false,
+                options: response,
+                loadThrottle: 400,
+                render: {
+                    option: function (item, escape) {
+                        return `<div class="px-2 py-1"><b>[${item.ma}]</b> - ${item.ten}</div>`;
+                    },
+                    no_results: function (data, escape) {
+                        return '<div class="no-results">Không tìm thấy dữ liệu </div>';
+                    },
+                },
             });
-        },
-        valueField: "id",
-        labelField: "tenHh",
-        searchField: ["tenHh", "maHh"],
-        placeholder: '-- Hàng hoá --',
-        allowEmptyOption: false,
-        preload: true,
-        load: function (query, callback) {
-            if (query !== "") {
-                $.ajax({
-                    data: "key=" + query,
-                    type: 'POST',
-                    url: '/QuanLy/NhapKho/api/hhs'
-                }).done(function (response) {
-                    callback(response);
-                });
-            }
-        },
-        loadThrottle: 400,
-    });
+        });
 });
 
 function loadTableBaoCaoChiTiet(){

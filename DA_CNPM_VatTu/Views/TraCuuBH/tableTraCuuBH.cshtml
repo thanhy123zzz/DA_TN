@@ -20,18 +20,18 @@
 @foreach (ChiTietPhieuXuat p in ViewBag.BHCT)
 {
               <tr>
-                  <td>@i</td>
-                  <td>@p.IdpxNavigation.NgayTao.Value.ToString("dd-MM-yyyy")</td>
+                  <td class="text-center">@i</td>
+                  <td class="text-center">@p.IdpxNavigation.NgayTao.Value.ToString("dd-MM-yyyy")</td>
                   <td>@p.IdpxNavigation.IdkhNavigation.TenKh</td>
-                  <td>@p.IdhhNavigation.MaHh</td>
+                  <td class="text-center">@p.IdhhNavigation.MaHh</td>
                   <td>@p.IdhhNavigation.TenHh</td>
-                  <td>@p.Sl</td>
+                  <td class="text-end">@p.Sl</td>
                   <td>@p.IddvtNavigation.TenDvt</td>
-                  <td>@p.DonGia.Value.ToString("#,##0.00")</td>
+                  <td class="text-end">@p.DonGia.Value.ToString("#,##0.00")</td>
                   <td>@(p.IdhhNavigation.IdbaoHanhNavigation == null ? "" : p.IdhhNavigation.IdbaoHanhNavigation.TenBh)</td>
-                  <td class="last-td-column">
-            @if (getTT(p.IdhhNavigation.IdbaoHanhNavigation, p.IdpxNavigation.NgayTao))
-            {
+                  <td class="last-td-column text-center">
+                    @if (getTT(p.IdhhNavigation.IdbaoHanhNavigation, p.IdpxNavigation.NgayTao))
+                    {
                         <span class="status-btn success-btn">Còn bảo hành</span>
                     }else{
                         <span class="status-btn close-btn">Hết bảo hành</span>

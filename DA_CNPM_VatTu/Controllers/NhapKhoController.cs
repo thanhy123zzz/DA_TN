@@ -27,11 +27,11 @@ namespace DA_CNPM_VatTu.Controllers
         private DACNPMContext _dACNPMContext;
         private ICompositeViewEngine _viewEngine;
         private readonly ILogger<DonViTinhController> _logger;
+        private readonly IConverter _converter;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private List<NhanVien> _nvs;
         private readonly IMemoryCache _memoryCache;
         private readonly IMapper _mapper;
-        private readonly IConverter _converter;
         public NhapKhoController(ILogger<DonViTinhController> logger,
             ICompositeViewEngine viewEngine, IMemoryCache memoryCache, 
             IWebHostEnvironment hostingEnvironment, IMapper mapper,
@@ -103,6 +103,11 @@ namespace DA_CNPM_VatTu.Controllers
                 List<HangTonKho> listHt = new List<HangTonKho>();
                 foreach (var t in phieuNhap.ChiTietPhieuNhaps)
                 {
+                    var hh = await _dACNPMContext.HangHoas.FirstOrDefaultAsync(x => x.Id == t.Idhh);
+                    t.NgayTao = phieuNhap.NgayTao;
+                    t.Nvtao = _userId;
+                    t.Tgbh = hh.IdbaoHanhNavigation == null ? null : hh.IdbaoHanhNavigation.SoNgay;
+                    t.Idbh = hh.IdbaoHanh;
                     HangTonKho sl = new HangTonKho();
                     sl.Idctpn = t.Id;
                     sl.Slcon = Math.Round((double)t.Sl, 2);

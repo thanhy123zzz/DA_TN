@@ -1,0 +1,133 @@
+﻿@{
+    Layout = "/Views/Shared/LayoutPdf.cshtml";
+    List<HangTonKho> hangTons = ViewBag.hangTons;
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.00");
+        }
+    }
+    double? tongGiaTri = 0;
+}
+<style>
+    th {
+        font-size: 15px;
+    }
+
+    td {
+        font-size: 15px;
+    }
+</style>
+<div class="title card" style="margin-left:0; display:block;">
+    <div style="width:100%">
+        <h1 style="font-size: x-large;font-weight: 700;text-align: center; margin: 0;">
+            BÁO CÁO HÀNG TỒN KHO TỔNG HỢP
+        </h1>
+    </div>
+</div>
+<div class="info card">
+    <div class="row-info text-center">
+        Từ ngày: @ViewBag.TuNgay, Đến ngày: @ViewBag.DenNgay
+    </div>
+</div>
+<div class="table card">
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã hàng</th>
+                <th>Tên hàng</th>
+                <th>Tổng SL tồn</th>
+                <th>Tổng giá trị tồn</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (NhomHangHoa n in ViewBag.Nhhs)
+            {
+                <tr style="background-color: aliceblue; font-weight:700">
+                    <td colspan="5">@n.TenNhh</td>
+                </tr>
+                var htNhh = hangTons.Where(x => x.IdhhNavigation.Idnhh == n.Id)
+                .DistinctBy(x => x.IdhhNavigation)
+                .ToList();
+                int stt = 1;
+                foreach (HangTonKho ht in htNhh)
+                {
+                    var hhHangTons = hangTons
+                    .Where(x => x.Idhh == ht.Idhh)
+                    .ToList();
+                    var sumSl = hhHangTons.Sum(x => x.Slcon);
+                    var sumGia = hhHangTons.Sum(x => (x.Slcon * x.GiaNhap));
+                    tongGiaTri += sumGia;
+                    <tr>
+                        <td class="text-center">@stt</td>
+                        <td>@ht.IdhhNavigation.MaHh</td>
+                        <td>@ht.IdhhNavigation.TenHh</td>
+                        <td class="text-end">@toDecimal(sumSl)</td>
+                        <td class="text-end">@toDecimal(sumGia)</td>
+                    </tr>
+                    stt += 1;
+                }
+            }
+            <tr>
+                <td colspan="4" style="background-color: lightgray !important;
+                               position: sticky;padding: 10px 5px;
+                               bottom:0; text-align:start!important;
+							   font-weight:700">
+                    Tổng giá trị
+                </td>
+                <td style="
+                                                        background-color: lightgray !important;
+                                                        position: sticky;padding: 10px 5px;
+                                                        bottom:0; text-align:end!important;
+                                                        font-weight:700">
+                    @toDecimal(tongGiaTri) (VNĐ)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div style="page-break-inside:avoid;">
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+            </div>
+            <div class="w-33 text-center">
+            </div>
+            <div class="w-33 text-center">
+                <em>Ngày ... Tháng ... Năm ...</em>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+                Thủ trưởng đơn vị
+            </div>
+            <div class="w-33 text-center">
+                Kế toán
+            </div>
+            <div class="w-33 text-center">
+                Người lập phiếu
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="flex" style="font-size:12px;">
+            <div class="w-34 text-center">
+                (ký, họ tên, đóng dấu)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+        </div>
+    </div>
+</div>

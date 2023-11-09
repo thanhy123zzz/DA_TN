@@ -73,7 +73,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     id = x.Id,
                     ten = x.TenKh,
-                    ma = x.MaKh
+                    ma = x.MaKh,
+                    loai = x.LoaiKh == true ? "Sỉ" : "Lẻ"
                 })
                 .ToListAsync();
             return Ok(khs);

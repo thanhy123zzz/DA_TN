@@ -135,17 +135,16 @@ namespace DA_CNPM_VatTu.Controllers
             }).ToList());
         }
         [HttpPost("api/nhhs")]
-        public async Task<IActionResult> optionNhh(string key)
+        public async Task<IActionResult> optionNhh()
         {
-            var nhhs = getListNhomHH().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaNhh + " " + x.TenNhh).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(nhhs.Select(x => new
+            var nhhs = _dACNPMContext.NhomHangHoas
+                .Where(x => x.Active == true);
+            return Ok(await nhhs.Select(x => new
             {
-                ID = x.Id,
-                MaNhh = x.MaNhh,
-                TenNhh = x.TenNhh,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaNhh,
+                ten = x.TenNhh,
+            }).ToListAsync());
         }
         [HttpPost("api/nsx")]
         public async Task<IActionResult> optionNsx(string key)

@@ -26,7 +26,7 @@
     </div>
     <div class="input-style-1">
         <label for="Slquydoi">SL quy đổi</label>
-        <input tabindex="2" type="text" value="@toDecimal(Model.SlquyDoi)" id="Slquydoi" placeholder="Số lượng quy đổi">
+        <input tabindex="2" type="text" value="@toDecimal(Model.SlquyDoi)" id="Slquydoi" placeholder="Số lượng quy đổi" class="text-decimal">
     </div>
     <div class="input-style-1">
         <label for="TLLe">Tỉ lệ lẻ</label>
@@ -46,6 +46,7 @@
     </div>
 </div>
 <script>
+
 $('#DVT').selectize({
   maxOptions: 10,
   onFocus: function($dropdown) {
@@ -76,16 +77,8 @@ $('#DVT').selectize({
   loadThrottle: 400,
 });
 
-$('input[type="text"]').blur(function(){
-    if(/[0-9,.\-$]+/.test(this.value)){
-        const value = this.value.replace(/,/g, '');
-        this.value = parseFloat(value).toLocaleString('en-US', {
-        style: 'decimal',
-            maximumFractionDigits: 2,
-            minimumFractionDigits: 2
-            })
-    }
-});
+    formatNumberFloatWithElement($('.text-decimal'));
+
 $('.text-decimal').focus(function(){
     $('.text-decimal').removeClass('is-invalid')
 });

@@ -4,46 +4,47 @@
 
     <div class="row">
         <div class="col-lg-4 pe-0">
-            <div class="card-style mb-2 p-3">
+            <div class="card mb-2 p-3">
                 <div class="form-check form-switch toggle-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="toggleSwitch1" onchange="showHHGiaLo()">
                                 <label class="form-check-label" for="toggleSwitch1">Hàng hoá có thể lỗ</label>
                 </div>
-                <input placeholder="Tìm kiếm" class="form-control mb-1" id="search" type="text" disabled="@(!pqcn.TimKiem.Value)">
+                <input placeholder="Tìm kiếm" class="form-control mb-2" id="search" type="text" disabled="@(!pqcn.TimKiem.Value)">
+                <div class="card">
+                    <div class="table-responsive" style="max-height:65vh;">
+                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead>
+                                <tr>
+                                    <th class="first-th-column text-center">
+                                        <h6 class="text-sm fw-bold ">
+                                            Mã HH
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            Tên HH
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tBodyHangHoa">
+                                @foreach (HangHoa hh in ViewBag.HHs)
+                                {
+                                    <tr style="cursor:pointer" data-id="@hh.Id">
+                                        <td class="text-center first-td-column">
+                                            @hh.MaHh
+                                        </td>
+                                        <td>
+                                            @hh.TenHh
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        <div class="card">
-            <div class="table-responsive" style="max-height:65vh;">
-                <table class="table table-bordered top-selling-table table-hover display nowrap">
-                    <thead>
-                        <tr>
-                            <th class="first-th-column text-center">
-                                <h6 class="text-sm fw-bold ">
-                                    Mã HH
-                                </h6>
-                            </th>
-                            <th>
-                                <h6 class="text-sm fw-bold">
-                                    Tên HH
-                                </h6>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="tBodyHangHoa">
-                        @foreach (HangHoa hh in ViewBag.HHs)
-                        {
-                            <tr style="cursor:pointer" data-id="@hh.Id">
-                                <td class="text-center first-td-column">
-                                    @hh.MaHh
-                                </td>
-                                <td>
-                                    @hh.TenHh
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        
         </div>
         <div class="col-lg-8" id="tabHHDVT">
             <div class="card mb-2">
