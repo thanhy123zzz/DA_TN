@@ -26,25 +26,33 @@
             updateGiaTongTien();
         }
     });
-    $(document).on('keyup', 'input[name="Sl"]', function () {
+    $(document).on('keyup', 'input.SlDvt', function () {
         var tr = $(this).closest('tr');
         var soLuongNhap = parseFloat($(this).inputmask('unmaskedvalue'));
-        var donGiaNhap = parseFloat(tr.find('input[name="DonGia"]').inputmask('unmaskedvalue'));
+        var donGiaNhap = parseFloat(tr.find('input.DonGiaDvt').inputmask('unmaskedvalue'));
 
         // thay đổi thành tiền
         if (donGiaNhap != "") {
             tr.find('input.ThanhTien').val(soLuongNhap * donGiaNhap);
             updateGiaTongTien();
+
+            var slqd = parseFloat(tr.find('input.slqd').inputmask('unmaskedvalue'));
+            tr.find('input[name="Sl"]').val(slqd * soLuongNhap);
+            tr.find('input[name="DonGia"]').val(donGiaNhap / slqd);
         }
     });
-    $(document).on('keyup', 'input[name="DonGia"]', function () {
+    $(document).on('keyup', 'input.DonGiaDvt', function () {
         var tr = $(this).closest('tr');
         var donGiaNhap = parseFloat($(this).inputmask('unmaskedvalue'));
-        var soLuongNhap = parseFloat(tr.find('input[name="Sl"]').inputmask('unmaskedvalue'));
+        var soLuongNhap = parseFloat(tr.find('input.SlDvt').inputmask('unmaskedvalue'));
 
         if (soLuongNhap != "") {
             tr.find('input.ThanhTien').val(soLuongNhap * donGiaNhap);
             updateGiaTongTien();
+
+            var slqd = parseFloat(tr.find('input.slqd').inputmask('unmaskedvalue'));
+            tr.find('input[name="Sl"]').val(slqd * soLuongNhap);
+            tr.find('input[name="DonGia"]').val(donGiaNhap / slqd);
         }
     });
 
@@ -52,21 +60,24 @@
     $(document).on('keyup', 'input.ThanhTien', function () {
         var tr = $(this).closest('tr');
         var thanhTien = $(this).inputmask('unmaskedvalue');
-        var soLuongNhap = tr.find('input[name="Sl"]').inputmask('unmaskedvalue');
-        var donGiaNhap = tr.find('input[name="DonGia"]').inputmask('unmaskedvalue');
+        var soLuongNhap = tr.find('input.SlDvt').inputmask('unmaskedvalue');
+        var donGiaNhap = tr.find('input.DonGiaDvt').inputmask('unmaskedvalue');
 
         // thay đổi thành tiền
         if (donGiaNhap !== "" || soLuongNhap !== "") {
             if (soLuongNhap !== "") {
-                tr.find('input[name="DonGia"]').val(thanhTien / soLuongNhap);
+                tr.find('input.DonGiaDvt').val(thanhTien / soLuongNhap);
                 updateGiaTongTien();
                 return;
             }
             if (donGiaNhap !== "") {
-                tr.find('input[name="Sl"]').val(thanhTien / donGiaNhap);
+                tr.find('input.SlDvt').val(thanhTien / donGiaNhap);
                 updateGiaTongTien();
                 return;
             }
+            var slqd = parseFloat(tr.find('input.slqd').inputmask('unmaskedvalue'));
+            tr.find('input[name="Sl"]').val(slqd * soLuongNhap);
+            tr.find('input[name="DonGia"]').val(donGiaNhap / slqd);
         }
     });
     $(document).on('keyup', 'input[name="Cktm"], input[name="Thue"]', function () {
@@ -194,6 +205,14 @@
             }
         });
     });
+    $(document).on('change', 'select.dvt', function () {
+        
+        var tr = $(this).closest('tr');
+        var slqd = $(this).find('option:selected').data('slqd');
+        
+        tr.find('input.slqd').val(slqd);
+        tr.find('input.SlDvt').keyup();
+    })
 });
 function loadTable() {
     $.ajax({
@@ -254,16 +273,23 @@ function xoaTrangPhieuXuatKho() {
 function getRowPhieuNhapCt() {
     return `<tr>
         <td><select class="form-select form-table" name="Idhh" style="width: 300px;"></select></td>
-        <td><input autocomplete="off" class="form-control form-table dvt" type="text" readonly style="min-width: 80px;"/></td>
-        <td><select class="form-select form-table" name="SoLo" style="width: 120px;"></select></td>
-        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;"/></td>
-        <td><input autocomplete="off" class="form-control form-table input-number-float" name="DonGia" style="min-width: 120px;"/></td>
+        <td>
+            <select class="select-control form-table dvt" style="width: 80px; height: 30px">
+                
+            </select>
+        </td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float slqd" style="min-width: 60px;" readonly/></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float SlDvt" style="min-width: 80px;"/></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float DonGiaDvt" style="min-width: 120px;"/></td>
         <td><input autocomplete="off" class="form-control form-table ThanhTien input-number-float" style="min-width: 140px;"/></td>
-        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Cktm" style="min-width: 60px;"/></td>
-        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Thue" style="min-width: 60px;"/></td>
+        <td><select class="form-select form-table" name="SoLo" style="width: 120px;"></select></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Cktm" max="100" style="min-width: 60px;"/></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Thue" max="100" style="min-width: 60px;"/></td>
         <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Hsd" style="min-width: 110px;"/></td>
         <td><textarea autocomplete="off" class="form-control form-table" name="GhiChu" style="min-width: 220px;" rows="1"></textarea></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;" readonly/></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float" name="DonGia" style="min-width: 120px;" readonly/></td>
         <td class='last-td-column'>
             <div class="action justify-content-center">
                 <button class="text-danger btn-remove-ct">
@@ -326,7 +352,16 @@ function dropDownHhChange(cbHangHoa, value) {
                 soLo: item
             });
         });
-        tr.find('input.dvt').val(option.tenDonViTinh);
+        var cbDvt = tr.find('select.dvt');
+        cbDvt.empty();
+        var dvts = ``;
+        option.dvts.unshift(option.dvtChinh);
+        option.dvts.forEach(function (item) {
+            dvts += `<option value="${item.id}" data-slqd="${item.slqd}">${item.ten}</option>`
+        })
+        cbDvt.append(dvts);
+        tr.find('input.slqd').val(1);
+
         var cbSoLo = tr.find('select[name="SoLo"]');
 
         if (cbSoLo[0].selectize) {

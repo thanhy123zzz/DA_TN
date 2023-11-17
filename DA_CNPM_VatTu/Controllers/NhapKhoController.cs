@@ -63,8 +63,21 @@ namespace DA_CNPM_VatTu.Controllers
                 id = x.Id,
                 ten = x.TenHh.Trim(),
                 ma = x.MaHh,
-                TenDonViTinh = x.IddvtchinhNavigation.TenDvt,
-                soLos = x.ChiTietPhieuNhaps.Select(x=>x.SoLo).Distinct().ToList()
+                soLos = x.ChiTietPhieuNhaps.Select(x=>x.SoLo).Distinct().ToList(),
+                dvts = x.Hhdvts.Where(y => y.Active == true).Select(y => new
+                {
+                    id = y.IddvtNavigation.Id,
+                    ten = y.IddvtNavigation.TenDvt,
+                    ma = y.IddvtNavigation.MaDvt,
+                    slqd = y.SlquyDoi
+                }).ToList(),
+                dvtChinh = new
+                {
+                    id = x.Iddvtchinh,
+                    ten = x.IddvtchinhNavigation.TenDvt,
+                    ma = x.IddvtchinhNavigation.MaDvt,
+                    slqd = 1
+                },
             }).OrderBy(x => x.ten).ToListAsync());
         }
         [HttpPost("api/getSoPhieuNhap")]
