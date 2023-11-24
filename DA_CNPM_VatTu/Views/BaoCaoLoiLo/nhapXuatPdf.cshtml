@@ -1,0 +1,130 @@
+﻿@{
+    Layout = "/Views/Shared/LayoutPdf.cshtml";
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.##");
+        }
+    }
+    double? tongGiaTri = 0;
+}
+<style>
+    th {
+        font-size: 15px;
+    }
+
+    td {
+        font-size: 15px;
+    }
+</style>
+<div class="title card" style="margin-left:0; display:block;">
+    <div style="width:100%">
+        <h1 style="font-size: x-large;font-weight: 700;text-align: center; margin: 0;">
+            BÁO CÁO GIÁ TRỊ NHẬP XUẤT
+        </h1>
+    </div>
+</div>
+<div class="info card">
+    <div class="row-info text-center">
+        Từ ngày: @ViewBag.TuNgay, Đến ngày: @ViewBag.DenNgay
+    </div>
+</div>
+<div class="table card">
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <th>Thời gian</th>
+                <th>Tổng PN</th>
+                <th>Tổng GT nhập</th>
+                <th>Tổng PX</th>
+                <th>Tổng GT xuất</th>
+                <th>Tổng lợi nhuận</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var data in ViewBag.Datas)
+            {
+                <tr>
+                    <td class="text-center">
+                        @data.ngay
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.tongPn)
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.tongGtPn)
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.tongPx)
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.tongGtPx)
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.loiNhuan)
+                    </td>
+                </tr>
+                tongGiaTri += data.loiNhuan;
+            }
+            <tr>
+                <td colspan="5" style="background-color: lightgray !important;
+                               position: sticky;padding: 10px 5px;
+                               bottom:0; text-align:start!important;
+							   font-weight:700">
+                    Tổng lợi nhuận
+                </td>
+                <td style="
+                                                        background-color: lightgray !important;
+                                                        position: sticky;padding: 10px 5px;
+                                                        bottom:0; text-align:end!important;
+                                                        font-weight:700">
+                    @toDecimal(tongGiaTri) (VNĐ)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div style="page-break-inside:avoid;">
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+            </div>
+            <div class="w-33 text-center">
+            </div>
+            <div class="w-33 text-center">
+                <em>Ngày ... Tháng ... Năm ...</em>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+                Thủ trưởng đơn vị
+            </div>
+            <div class="w-33 text-center">
+                Kế toán
+            </div>
+            <div class="w-33 text-center">
+                Người lập phiếu
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="flex" style="font-size:12px;">
+            <div class="w-34 text-center">
+                (ký, họ tên, đóng dấu)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+        </div>
+    </div>
+</div>

@@ -28,14 +28,16 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var pqcn = await GetPhanQuyenHHDVT();
             ViewBag.PhanQuyenPQ = pqcn;
-            ViewBag.HHs = getListHH().Result.AsParallel().Take(10).ToList();
+            ViewBag.HHs = getListHH().Result.OrderBy(x=>x.TenHh.Trim()).ToList();
             ViewData["title"] = pqcn.IdchucNangNavigation.TenChucNang;
             return View();
         }
         [HttpPost("search-hh")]
         public async Task<IActionResult> searchHH(string key, bool tt)
         {
-            if (tt)
+			var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+			var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
+			if (tt)
             {
                 var hangTons = _dACNPMContext.HangTonKhos
                     .Include(x => x.IdhhNavigation)
@@ -43,10 +45,10 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => ((x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * 1.03))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * 1.02))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * 1.03 * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * 1.02 * y.SlquyDoi))
+                    .Where(x => ((x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
                     || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
                     ) && (key == null ? true : (x.Key.TenHh + " " + x.Key.MaHh).ToLower().Contains(key.ToLower()))
                     )
@@ -76,8 +78,7 @@ namespace DA_CNPM_VatTu.Controllers
                             Id = x.Id,
                             TenHh = x.TenHh,
                             MaHh = x.MaHh
-                        })
-                        .Take(10)
+                        }).OrderBy(x=>x.TenHh)
                         .ToList(),
                     });
                 }
@@ -99,24 +100,41 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpPost("load-hhdvt")]
         public async Task<IActionResult> loadHHDVT(int idHh, bool tt)
         {
-            ViewBag.Hhdvts = getListHHdvt().Result.AsParallel()
+            /*ViewBag.Hhdvts = getListHHdvt().Result.AsParallel()
                 .Where(x => x.Idhh == idHh && x.Active == true).ToList();
 
             ViewBag.Hhdvt = getListHH().Result.AsParallel().FirstOrDefault(x => x.Id == idHh);
 
             ViewBag.PhanQuyenPQ = await GetPhanQuyenHHDVT();
-
+            ViewBag.Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+            ViewBag.Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
             ViewBag.giaNhaps = _dACNPMContext.HangTonKhos
                 .Include(x => x.IdhhNavigation.IddvtchinhNavigation)
                 .OrderByDescending(x => x.GiaNhap)
                 .Where(x => x.Idhh == idHh).ToList();
-            return PartialView("loadTableDVTHH");
-
+            return PartialView("loadTableDVTHH");*/
+            var ht =  _dACNPMContext.HangTonKhos
+                .Include(x=>x.IdhhNavigation.IddvtchinhNavigation)
+                .Where(x => x.Idhh == idHh).OrderByDescending(x => x.NgayNhap);
+            var maxTon = ht.Max(x => x.GiaNhap * (1 - x.Cktm / 100) * (1 + x.Thue / 100));
+            return Ok(new
+            {
+                hh = await _dACNPMContext.HangHoas.Include(x=>x.IddvtchinhNavigation).FirstOrDefaultAsync(x=>x.Id == idHh),
+                hhDvts = await _dACNPMContext.Hhdvts
+                .Include(x=>x.IddvtNavigation)
+                .Where(x => x.Idhh == idHh && x.Active == true).ToListAsync(),
+                hangTonKhos = await ht.ToListAsync(),
+                maxTon,
+                si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe,
+                le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe,
+            });
         }
         [HttpGet("change-tt")]
         public async Task<IActionResult> changeTT(bool tt)
         {
-            if (tt)
+			var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+			var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
+			if (tt)
             {
                 var hangTons = _dACNPMContext.HangTonKhos
                     .Include(x => x.IdhhNavigation)
@@ -124,10 +142,10 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * 1.03))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * 1.02))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * 1.03 * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * 1.02 * y.SlquyDoi))
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
                     || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
                     )
                     .Select(x => new
@@ -135,7 +153,7 @@ namespace DA_CNPM_VatTu.Controllers
                         Id = x.Key.Id,
                         TenHh = x.Key.TenHh,
                         MaHh = x.Key.MaHh,
-                    })
+                    }).OrderBy(x=>x.TenHh)
                     .ToList();
                 return Ok(new
                 {
@@ -146,12 +164,12 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 return Ok(new
                 {
-                    data = getListHH().Result.AsParallel().Take(10).Select(x => new
+                    data = getListHH().Result.Select(x => new
                     {
                         Id = x.Id,
                         TenHh = x.TenHh,
                         MaHh = x.MaHh
-                    })
+                    }).OrderBy(x=>x.TenHh)
                 });
             }
 
@@ -160,11 +178,9 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> show_Modal_hhdvt(int idHhdvt, int idHh)
         {
             ViewBag.IdHH = idHh;
-            var a = getListDVT();
-            var hhdvt = getListHHdvt().Result.AsParallel().FirstOrDefault(x => x.Id == idHhdvt);
+            var hhdvt = await _dACNPMContext.Hhdvts.Include(x=>x.IddvtNavigation).FirstOrDefaultAsync(x => x.Id == idHhdvt);
             PartialViewResult partialViewResult = PartialView("formHHDVT", hhdvt == null ? new Hhdvt() : hhdvt);
             string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-            Task.WaitAll(a);
             return Ok(new
             {
                 view = viewContent,
@@ -175,11 +191,9 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> show_Modal_hhdvtc(int idHh)
         {
             ViewBag.IdHH = idHh;
-            var a = getListDVT();
-            var hh = getListHH().Result.AsParallel().FirstOrDefault(x => x.Id == idHh);
+            var hh = await _dACNPMContext.HangHoas.Include(x=>x.IddvtchinhNavigation).FirstOrDefaultAsync(x => x.Id == idHh);
             PartialViewResult partialViewResult = PartialView("formHHDVTC", hh);
             string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-            Task.WaitAll(a);
             return Ok(new
             {
                 view = viewContent,
@@ -187,21 +201,24 @@ namespace DA_CNPM_VatTu.Controllers
             });
         }
         [HttpPost("api/dvts")]
-        public async Task<IActionResult> optionDVTS(string key, int idHh)
+        public async Task<IActionResult> optionDVTS(int idHh, int idDvt)
         {
-            var dvtChinh = getListHH().Result.AsParallel().FirstOrDefault(x => x.Id == idHh).IddvtchinhNavigation;
-            var listDvt = getListHHdvt().Result.AsParallel()
+            var dvtChinh = getListHH().Result.FirstOrDefault(x => x.Id == idHh).Iddvtchinh;
+            var listDvt = getListHHdvt().Result
                 .Where(x => x.Idhh == idHh && x.Active == true)
-                .Select(x => x.IddvtNavigation).ToList();
+                .Select(x => x.Iddvt).ToList();
             listDvt.Add(dvtChinh);
-
-            var dvts = getListDVT().Result.AsParallel()
-                .Where(x => !listDvt.Any(y => y.Id == x.Id)).ToList();
-            return Ok(dvts.Where(x => (x.MaDvt + " " + x.TenDvt).ToLower().Contains(key.ToLower())).Select(x => new
+            if (idDvt != null)
             {
-                ID = x.Id,
-                MaDvt = x.MaDvt,
-                TenDvt = x.TenDvt,
+                listDvt.Remove(idDvt);
+            }
+            var dvts = getListDVT().Result
+                .Where(x => !listDvt.Any(y => y == x.Id)).ToList();
+            return Ok(dvts.Select(x => new
+            {
+                id = x.Id,
+                ma = x.MaDvt,
+                ten = x.TenDvt,
             }).ToList());
         }
         [HttpPost("update-hhdvt")]
@@ -212,6 +229,10 @@ namespace DA_CNPM_VatTu.Controllers
             bool tt = hhdvt.Active.Value;
             try
             {
+                var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+                var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
+                ViewBag.Si = Si;
+                ViewBag.Le = Le;
                 if (hhdvt.Id == 0)
                 {
                     hhdvt.Active = true;
@@ -257,8 +278,8 @@ namespace DA_CNPM_VatTu.Controllers
                 ViewBag.PhanQuyenPQ = await GetPhanQuyenHHDVT();
                 PartialViewResult partialViewResult = PartialView("loadTableDVTHH");
                 string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-
-                if (tt)
+				
+				if (tt)
                 {
                     var hangTons = _dACNPMContext.HangTonKhos
                     .Include(x => x.IdhhNavigation)
@@ -266,10 +287,10 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * 1.03))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * 1.02))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * 1.03 * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * 1.02 * y.SlquyDoi))
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
                     || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
                     )
                     .Select(x => new
@@ -318,6 +339,10 @@ namespace DA_CNPM_VatTu.Controllers
             bool tt = hh.Active.Value;
             try
             {
+                var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+                var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
+                ViewBag.Si = Si;
+                ViewBag.Le = Le;
                 var hhdvtDB = await _dACNPMContext.HangHoas.FindAsync(hh.Id);
 
                 hhdvtDB.Iddvtchinh = hh.Iddvtchinh;
@@ -346,8 +371,7 @@ namespace DA_CNPM_VatTu.Controllers
                 ViewBag.PhanQuyenPQ = await GetPhanQuyenHHDVT();
                 PartialViewResult partialViewResult = PartialView("loadTableDVTHH");
                 string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-
-                if (tt)
+				if (tt)
                 {
                     var hangTons = _dACNPMContext.HangTonKhos
                     .Include(x => x.IdhhNavigation)
@@ -355,10 +379,10 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * 1.02))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * 1.03))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * 1.02 * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * 1.03 * y.SlquyDoi))
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
                     || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
                     )
                     .Select(x => new
@@ -403,6 +427,10 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpPost("remove")]
         public async Task<IActionResult> remove(int idHhdvt, int idHh)
         {
+            var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
+            var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
+            ViewBag.Si = Si;
+            ViewBag.Le = Le;
             int _userId = int.Parse(User.Identity.Name);
             var itemDB = await _dACNPMContext.Hhdvts.FindAsync(idHhdvt);
             itemDB.Active = !itemDB.Active;

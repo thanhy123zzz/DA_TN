@@ -5,6 +5,11 @@ namespace DA_CNPM_VatTu.Models.Entities
 {
     public partial class ChiTietPhieuXuat
     {
+        public ChiTietPhieuXuat()
+        {
+            ThongTinBaoHanhs = new HashSet<ThongTinBaoHanh>();
+        }
+
         public int Id { get; set; }
         public int Idpx { get; set; }
         public int Idhh { get; set; }
@@ -24,5 +29,6 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual DonViTinh IddvtNavigation { get; set; } = null!;
         public virtual HangHoa IdhhNavigation { get; set; } = null!;
         public virtual PhieuXuatKho IdpxNavigation { get; set; } = null!;
+        public virtual ICollection<ThongTinBaoHanh> ThongTinBaoHanhs { get; set; }
     }
 }

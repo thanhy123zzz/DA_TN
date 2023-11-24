@@ -1,5 +1,5 @@
 ﻿@model NhanVien
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
                   <h6 class="text-center">Thông tin</h6>
                   <div class="input-style-1">
                     <label for="formFileMultiple" class="form-label">Ảnh nhân viên</label>
@@ -8,36 +8,36 @@
                  </div>
                   <div class="input-style-1">
                     <label for="Ma">Mã NV</label>
-                    <input type="text" asp-for="@Model.MaNv" readonly="@(!(Model.MaNv==null))" id="Ma" placeholder="Mã nhân viên">
+                    <input required class="form-control" type="text" asp-for="@Model.MaNv" readonly="@(!(Model.MaNv==null))" id="Ma" placeholder="Mã nhân viên">
                   </div>
                   <div class="input-style-1">
                     <label for="Ten">Tên nhân viên</label>
-                    <input type="text" asp-for="@Model.TenNv" id="Ten" placeholder="Tên nhân viên">
+                    <input required class="form-control" type="text" asp-for="@Model.TenNv" id="Ten" placeholder="Tên nhân viên">
                   </div>
                   <div class="input-style-1">
                     <label for="DiaChi">Địa chỉ</label>
-                    <input type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
+                    <input class="form-control" type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
                   </div>
                   <div class="input-style-1">
                     <label for="queQuan">Quê quán</label>
-                    <input type="text" asp-for="@Model.QueQuan" id="QueQuan" placeholder="Quê quán">
+                    <input class="form-control" type="text" asp-for="@Model.QueQuan" id="QueQuan" placeholder="Quê quán">
                   </div>
                   <div class="input-style-1">
                     <label for="Sdt">Số điện thoại</label>
-                    <input type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
+                    <input required class="form-control" type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
                   </div>
                   <div class="input-style-1">
                     <label for="Email">Email</label>
-                    <input type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
+                    <input class="form-control" type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
                   </div>
                   <div class="input-style-1">
                     <label for="GhiChu">Căn cước công dân</label>
-                    <input type="text" asp-for="@Model.Cccd" id="Cccd" placeholder="Căn cước công dân">
+                    <input required class="form-control" type="text" asp-for="@Model.Cccd" id="Cccd" placeholder="Căn cước công dân">
                   </div>
                   <div class="select-style-1">
                     <label for="GioiTinh">Giới tính</label>
                     <div class="select-position d-flex justify-content-between">
-                        <select class="light-bg col-lg-9" asp-for="@Model.GioiTinh" id="GioiTinh">
+                        <select class="form-select" class="light-bg col-lg-9" asp-for="@Model.GioiTinh" id="GioiTinh">
                             <option value="true">Nam</option>
                             <option value="false">Nữ</option>
                         </select>
@@ -45,7 +45,7 @@
                   </div>
                   <div class="input-style-1">
                     <label for="NgaySinh">Ngày sinh</label>
-                    <input type="text" value="@(Model.NgaySinh==null?"":Model.NgaySinh.Value.ToString("dd-MM-yyyy"))" id="NgaySinh">
+                    <input class="form-control" type="text" value="@(Model.NgaySinh==null?"":Model.NgaySinh.Value.ToString("dd-MM-yyyy"))" id="NgaySinh">
                   </div>
                   <div class="form-group input-style-1">
                     <label for="Nhh">Nhóm NV</label>
@@ -59,43 +59,36 @@
                   </div>
                   <div class="input-style-1">
                     <label for="TaiKhoan">Tài khoản</label>
-                    <input type="text" asp-for="@Model.IdtkNavigation.TaiKhoan" id="TaiKhoan" placeholder="Tài khoản">
+                    <input class="form-control" type="text" asp-for="@Model.IdtkNavigation.TaiKhoan" id="TaiKhoan" placeholder="Tài khoản">
                   </div>
                   <div class="input-style-1">
                     <label for="MatKhau">Mật khẩu</label>
-                    <input type="text" asp-for="@Model.IdtkNavigation.MatKhau" id="MatKhau" placeholder="Mật khẩu">
+                    <input class="form-control" type="text" asp-for="@Model.IdtkNavigation.MatKhau" id="MatKhau" placeholder="Mật khẩu">
                   </div>
-</div>
+</form>
 <script>
-$('#Nnv').selectize({
-  maxOptions: 10,
-  onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
-    });
-  },
-  valueField: "id",
-  labelField: "tenNnv",
-  searchField: ["tenNnv", "maNnv"],
-  placeholder: '-- Nhóm nhân viên --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/NhanVien/api/nnvs'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/NhanVien/api/nnvs'
+    }).done(function (response) {
+        $('#Nnv').selectize({
+            maxOptions: 10,
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Nhóm nhân viên --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
+    });
 
 $('#NgaySinh').datetimepicker({
                 locale: 'vi',

@@ -67,147 +67,110 @@
                   </div>
 </div>
 <script>
-
-$('#Nhh').selectize({
-  maxOptions: 10,
-  onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
-    });
-  },
-  valueField: "id",
-  labelField: "tenNhh",
-  searchField: ["tenNhh", "maNhh"],
-  placeholder: '-- Nhóm hàng hoá --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/HangHoa/api/nhhs'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/HangHoa/api/nhhs'
+    }).done(function (response) {
+        $('#Nhh').selectize({
+            maxOptions: 50,
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Nhóm hàng hoá --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
-$('#Nsx').selectize({
-    onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
     });
-  },
-  valueField: "id",
-  labelField: "tenNsx",
-  searchField: ["tenNsx", "maNsx"],
-  placeholder: '-- Nước sản xuất --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/HangHoa/api/nsx'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/HangHoa/api/nsx'
+    }).done(function (response) {
+        $('#Nsx').selectize({
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Nước sản xuất --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
-$('#Hsx').selectize({
-    onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
     });
-  },
-  valueField: "id",
-  labelField: "tenHsx",
-  searchField: ["tenHsx", "maHsx"],
-  placeholder: '-- Hãng sản xuất --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/HangHoa/api/hsx'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/HangHoa/api/hsx'
+    }).done(function (response) {
+        $('#Hsx').selectize({
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Hãng sản xuất --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
-$('#Dvtc').selectize({
-  onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
     });
-  },
-  valueField: "id",
-  labelField: "tenDvt",
-  searchField: ["tenDvt", "maDvt"],
-  placeholder: '-- Đơn vị tính chính --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/HangHoa/api/dvts'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/HangHoa/api/dvts'
+    }).done(function (response) {
+        $('#Dvtc').selectize({
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Đơn vị tính chính --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
-
-$('#Bh').selectize({
-  onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
     });
-  },
-  valueField: "id",
-  labelField: "tenBh",
-  searchField: ["tenBh", "maBh"],
-  placeholder: '-- Loại bảo hành --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query,
-          type: 'POST',
-          url: '/DanhMuc/HangHoa/api/bh'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        type: 'POST',
+        url: '/DanhMuc/HangHoa/api/bh'
+    }).done(function (response) {
+        $('#Bh').selectize({
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Loại bảo hành --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
+    });
 </script>

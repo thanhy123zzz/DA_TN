@@ -4,12 +4,14 @@
         if(d==null){
             return "";
         }else{
-            return d.Value.ToString("#,##0.00");
+            return d.Value.ToString("#,##0.##");
         }
     }
     HangHoa hh = ViewBag.Hhdvt;
     List<HangTonKho> htks = ViewBag.giaNhaps;
     var max = htks.Max(x => x.GiaNhap);
+    double Si = ViewBag.Si;
+    double Le = ViewBag.Le;
 }
 <div class="col-lg-8" id="tabHHDVT">
 <div class="card mb-2">
@@ -66,23 +68,23 @@
                               </tr>
                             </thead>
                             <tbody id="tBodyDVT">
-             <tr data-id="@hh.Id" style="background-color:aliceblue; white-space:nowrap;color: @((hh.GiaBanLe <= (max * 1.03)) || (hh.GiaBanSi <= (max * 1.02)) || (hh.GiaBanLe == null && hh.GiaBanSi == null && hh.TiLeLe == null && hh.TiLeSi == null) ? "red" : "");">
+             <tr data-id="@hh.Id" style="background-color:aliceblue; white-space:nowrap;color: @((hh.GiaBanLe <= (max * Le)) || (hh.GiaBanSi <= (max * Si)) || (hh.GiaBanLe == null && hh.GiaBanSi == null && hh.TiLeLe == null && hh.TiLeSi == null) ? "red" : "");">
                 <td>
                         @hh.IddvtchinhNavigation.TenDvt (Chính)
                 </td>
-                <td class="text-center">
+                <td class="text-end">
                     1
                 </td>
-                <td class="text-center">
+                        <td class="text-end">
                         @toDecimal(hh.TiLeLe)
                 </td>
-                <td class="text-center">
+                        <td class="text-end">
                         @toDecimal(hh.TiLeSi)
                 </td>
-                <td class="text-center">
+                        <td class="text-end">
                         @toDecimal(hh.GiaBanLe)
                 </td>
-                <td class="text-center">
+                        <td class="text-end">
                         @toDecimal(hh.GiaBanSi)
                 </td>
                 <td class="last-td-column">
@@ -95,23 +97,23 @@
          </tr>
                 @foreach (Hhdvt hhdvt in ViewBag.Hhdvts)
                 {
-                      <tr data-id="@hhdvt.Id" style="white-space:nowrap;color: @((hhdvt.GiaBanLe <= (max * 1.03 * hhdvt.SlquyDoi)) || (hhdvt.GiaBanSi <= (max * 1.02 * hhdvt.SlquyDoi)) || (hhdvt.GiaBanLe == null && hhdvt.GiaBanSi == null && hhdvt.TiLeLe == null && hhdvt.TiLeSi == null) ? "red" : "");">
+                      <tr data-id="@hhdvt.Id" style="white-space:nowrap;color: @((hhdvt.GiaBanLe <= (max * Le * hhdvt.SlquyDoi)) || (hhdvt.GiaBanSi <= (max * Si * hhdvt.SlquyDoi)) || (hhdvt.GiaBanLe == null && hhdvt.GiaBanSi == null && hhdvt.TiLeLe == null && hhdvt.TiLeSi == null) ? "red" : "");">
                         <td>
                             @hhdvt.IddvtNavigation.TenDvt
                         </td>
-                        <td class="text-center">
+                            <td class="text-end">
                             @hhdvt.SlquyDoi
                         </td>
-                        <td class="text-center">
+                            <td class="text-end">
                             @toDecimal(hhdvt.TiLeLe)
                         </td>
-                        <td class="text-center">
+                            <td class="text-end">
                             @toDecimal(hhdvt.TiLeSi)
                         </td>
-                        <td class="text-center">
+                            <td class="text-end">
                             @toDecimal(hhdvt.GiaBanLe)
                         </td>
-                        <td class="text-center">
+                            <td class="text-end">
                             @toDecimal(hhdvt.GiaBanSi)
                         </td>
                         <td class="last-td-column">
@@ -157,29 +159,29 @@
                                   </h6>
                                 </th><th class="min-width">
                                   <h6 class="text-sm fw-bold">
-                                    Giá nhập
+                                    Giá vốn
                                   </h6>
                                 </th>
                               </tr>
                             </thead>
                             <tbody id="tBodyGia">
-                @foreach (var ht in htks)
+                @foreach (var ht in htks.OrderByDescending(x=>x.NgayNhap))
                 {
                                             <tr style="white-space:nowrap;">
                                                     <td>
                             @ht.IdhhNavigation.IddvtchinhNavigation.TenDvt (Chính)
                                                     </td>
                                                     <td class="text-center">
-                            @ht.NgayNhap.Value.ToString("dd-MM-yyyy")
+                            @ht.NgayNhap?.ToString("dd-MM-yyyy")
                                                     </td>
                                                     <td class="text-center">
-                            @ht.Hsd.Value.ToString("dd-MM-yyyy")
+                            @ht.Hsd?.ToString("dd-MM-yyyy")
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-end">
                             @toDecimal(ht.Slcon)
                                                     </td>
-                                                    <td class="text-center">
-                            @toDecimal(ht.GiaNhap)
+                                                    <td class="text-end">
+                            @toDecimal(ht.GiaNhap * (1 - (ht.Cktm ?? 0)/100) * (1 + (ht.Thue ?? 0)/100))
                                                     </td>
                                             </tr>
                 }

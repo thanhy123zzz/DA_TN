@@ -11,6 +11,7 @@ namespace DA_CNPM_VatTu.Models.Entities
             PhanQuyenNhanViens = new HashSet<PhanQuyenNhanVien>();
             PhieuNhapKhos = new HashSet<PhieuNhapKho>();
             PhieuXuatKhos = new HashSet<PhieuXuatKho>();
+            ThongTinBaoHanhs = new HashSet<ThongTinBaoHanh>();
         }
 
         public int Id { get; set; }
@@ -38,5 +39,6 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual ICollection<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
         public virtual ICollection<PhieuNhapKho> PhieuNhapKhos { get; set; }
         public virtual ICollection<PhieuXuatKho> PhieuXuatKhos { get; set; }
+        public virtual ICollection<ThongTinBaoHanh> ThongTinBaoHanhs { get; set; }
     }
 }

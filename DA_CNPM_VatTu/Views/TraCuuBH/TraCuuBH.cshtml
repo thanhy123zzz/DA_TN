@@ -57,7 +57,9 @@
                                                     <th>ĐVT</th>
                                                     <th>Giá bán</th>
                                                     <th>Kiểu bảo hành</th>
-                                                    <th class="last-th-column">Trạng thái</th>
+                                                    <th >Trạng thái</th>
+                                                    <th >Số lần đã BH</th>
+                                                    <th class="last-th-column">Thao tác</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tBody">
@@ -120,6 +122,30 @@ $(document).ready(function () {
                 },
             });
         });
+    $(document).on('click', '.btn-baoHanh', function(){
+        var value = $(this).val();
+        var tr = $(this).closest('tr');
+            $.ajax({
+                type: "post",
+                url: "/QuanLy/TraCuuBH/baoHanh",
+                data: "id=" + value,
+                success: function (result) {
+                    showToast(result.message, result.statusCode);
+                    if (result.statusCode == 200) {
+                        if(result.tang){
+                            var sE = tr.find('.soLanBaoHanh');
+                            var sl = parseInt(sE.text());
+                            sl++;
+                            sE.text(sl);
+                        }
+                    }
+                },
+                error: function () {
+                    alert("Fail");
+                }
+            });
+
+    });
 });
 
 function loadTableBaoCaoChiTiet(){

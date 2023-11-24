@@ -45,7 +45,9 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual DbSet<PhieuXuatKho> PhieuXuatKhos { get; set; } = null!;
         public virtual DbSet<QuyDinhMa> QuyDinhMas { get; set; } = null!;
         public virtual DbSet<SoThuTu> SoThuTus { get; set; } = null!;
+        public virtual DbSet<ThongTinBaoHanh> ThongTinBaoHanhs { get; set; } = null!;
         public virtual DbSet<ThongTinDoanhNghiep> ThongTinDoanhNghieps { get; set; } = null!;
+        public virtual DbSet<TiLeCanhBao> TiLeCanhBaos { get; set; } = null!;
         public virtual DbSet<TinhGiaXuat> TinhGiaXuats { get; set; } = null!;
         public virtual DbSet<VaiTro> VaiTros { get; set; } = null!;
 
@@ -182,6 +184,8 @@ namespace DA_CNPM_VatTu.Models.Entities
 
                 entity.Property(e => e.Idbh).HasColumnName("IDBH");
 
+                entity.Property(e => e.Iddvtnhap).HasColumnName("IDDVTNhap");
+
                 entity.Property(e => e.Idhh).HasColumnName("IDHH");
 
                 entity.Property(e => e.Idpn).HasColumnName("IDPN");
@@ -199,6 +203,8 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.Property(e => e.Nvtao).HasColumnName("NVTao");
 
                 entity.Property(e => e.Sl).HasColumnName("SL");
+
+                entity.Property(e => e.Slqd).HasColumnName("SLQD");
 
                 entity.Property(e => e.SoLo)
                     .HasMaxLength(50)
@@ -1165,6 +1171,29 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.Property(e => e.Stt).HasColumnName("STT");
             });
 
+            modelBuilder.Entity<ThongTinBaoHanh>(entity =>
+            {
+                entity.ToTable("ThongTinBaoHanh");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Idctpx).HasColumnName("IDCTPX");
+
+                entity.Property(e => e.IdnvbaoHanh).HasColumnName("IDNVBaoHanh");
+
+                entity.Property(e => e.NgayBaoHanh).HasColumnType("date");
+
+                entity.HasOne(d => d.IdctpxNavigation)
+                    .WithMany(p => p.ThongTinBaoHanhs)
+                    .HasForeignKey(d => d.Idctpx)
+                    .HasConstraintName("FK__ThongTinB__IDCTP__55BFB948");
+
+                entity.HasOne(d => d.IdnvbaoHanhNavigation)
+                    .WithMany(p => p.ThongTinBaoHanhs)
+                    .HasForeignKey(d => d.IdnvbaoHanh)
+                    .HasConstraintName("FK__ThongTinB__IDNVB__51EF2864");
+            });
+
             modelBuilder.Entity<ThongTinDoanhNghiep>(entity =>
             {
                 entity.ToTable("ThongTinDoanhNghiep");
@@ -1190,6 +1219,17 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.Property(e => e.SoTk).HasMaxLength(50);
 
                 entity.Property(e => e.TenDoanhNghiep).HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<TiLeCanhBao>(entity =>
+            {
+                entity.ToTable("TiLeCanhBao");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.TenTiLe).HasMaxLength(50);
             });
 
             modelBuilder.Entity<TinhGiaXuat>(entity =>

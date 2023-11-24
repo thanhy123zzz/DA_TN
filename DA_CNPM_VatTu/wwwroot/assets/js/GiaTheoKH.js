@@ -11,7 +11,7 @@ function onloadPage() {
         url: '/QuanLy/NhapKho/api/hhs'
     }).done(function (response) {
         $('#hangHoa').selectize({
-            maxOptions: 30,
+            maxOptions: 50,
             onChange: function (value) {
                 if (value !== "") {
                     $.ajax({

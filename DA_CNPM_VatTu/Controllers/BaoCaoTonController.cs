@@ -23,8 +23,8 @@ namespace DA_CNPM_VatTu.Controllers
     {
         private DACNPMContext _dACNPMContext;
         private ICompositeViewEngine _viewEngine;
-        private readonly ILogger<BaoCaoTonController> _logger;
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly ILogger<BaoCaoTonController> _logger;
         private List<NhanVien> _nvs;
         private readonly IMemoryCache _memoryCache;
         private readonly IConverter _converter;
@@ -35,8 +35,8 @@ namespace DA_CNPM_VatTu.Controllers
             _dACNPMContext = new DACNPMContext();
             _logger = logger;
             _viewEngine = viewEngine;
-            _memoryCache = memoryCache;
             _hostingEnvironment = hostingEnvironment;
+            _memoryCache = memoryCache;
             _converter = converter;
         }
         [HttpGet]

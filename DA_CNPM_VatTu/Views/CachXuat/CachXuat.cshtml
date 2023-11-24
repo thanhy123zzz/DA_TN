@@ -33,6 +33,12 @@
 							</div>
 						}
 					</div>
+					<div class="mb-2">
+						<label for="roles">Tỉ lệ cảnh báo(sỉ)</label>
+						<input class="form-control input-number-float" value="@ViewBag.TiLeCanhBaoSi.TiLe" id="tiLeSi" min="0" max="100" />
+						<label for="roles">Tỉ lệ cảnh báo(lẻ)</label>
+						<input class="form-control input-number-float" value="@ViewBag.TiLeCanhBaoLe.TiLe" id="tiLeLe" min="0" max="100" />
+					</div>
 				</div>
 				<div class="row justify-content-end">
 					<div class="col-lg-2 col-sm-2 text-end">
@@ -43,12 +49,12 @@
 		</div>
 	</div>
 </div>
-<script>
+<script defer>
 	$(document).on('click','#xacNhan',function(){
 		$.ajax({
 		type: "post",
 		url: "/QuyDinh/CachXuat/change",
-		data: "CachXuat="+$('#cachXuat').val() + "&giaXuat=" + $('input[name="giaXuat"]:checked').val(),
+			data: "CachXuat=" + $('#cachXuat').val() + "&giaXuat=" + $('input[name="giaXuat"]:checked').val() + "&Si=" + $('#tiLeSi').inputmask('unmaskedvalue') + "&Le=" + $('#tiLeLe').inputmask('unmaskedvalue'),
 		success: function (result) {
 			 $('#toast').addClass(result.color);
 			 $('#toastContent').text(result.message);
@@ -64,4 +70,7 @@
 		}
 	});
 	});
+	$(document).ready(function () {
+		formatNumberFloatWithElement($('.input-number-float'));
+	})
 </script>

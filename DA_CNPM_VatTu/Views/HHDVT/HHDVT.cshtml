@@ -21,7 +21,7 @@
                                         </h6>
                                     </th>
                                     <th>
-                                        <h6 class="text-sm fw-bold">
+                                        <h6 class="text-sm fw-bold text-start">
                                             Tên HH
                                         </h6>
                                     </th>
@@ -132,7 +132,7 @@
                                   </h6>
                                 </th><th class="min-width">
                                   <h6 class="text-sm fw-bold">
-                                    Giá nhập
+                                    Giá vốn
                                   </h6>
                                 </th>
                               </tr>
@@ -154,5 +154,11 @@
                             
                         </div>
                     </div>
-<script src="/assets/js/HHDVT.js">
+<script>
+    var _qThem = @pqcn.Them.ToString().ToLower();
+    var _qXoa = @pqcn.Xoa.ToString().ToLower();
+    var _qSua = @pqcn.Sua.ToString().ToLower();
+    var _qXuat = @pqcn.Xuat.ToString().ToLower();
+</script>
+<script src="/assets/js/HHDVT.js" asp-append-version="true">
 </script>

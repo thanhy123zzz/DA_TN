@@ -6,6 +6,8 @@
         public int Idpn { get; set; }
         public int Idhh { get; set; }
         public int? Idbh { get; set; }
+        public int? Iddvtnhap { get; set; }
+        public double? Slqd { get; set; }
         public double Sl { get; set; }
         public double DonGia { get; set; }
         public double? Cktm { get; set; }

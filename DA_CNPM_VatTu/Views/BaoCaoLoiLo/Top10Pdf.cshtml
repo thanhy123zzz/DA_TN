@@ -1,0 +1,113 @@
+﻿@{
+    Layout = "/Views/Shared/LayoutPdf.cshtml";
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.##");
+        }
+    }
+}
+<style>
+    th {
+        font-size: 15px;
+    }
+
+    td {
+        font-size: 15px;
+    }
+</style>
+<div class="title card" style="margin-left:0; display:block;">
+    <div style="width:100%">
+        <h1 style="font-size: x-large;font-weight: 700;text-align: center; margin: 0;">
+            THỐNG KÊ 10 NHÓM HÀNG HOÁ BÁN CHẠY NHẤT
+        </h1>
+    </div>
+</div>
+<div class="info card">
+    <div class="row-info text-center">
+        Từ ngày: @ViewBag.TuNgay, Đến ngày: @ViewBag.DenNgay
+    </div>
+</div>
+<div class="table card">
+    <table style="width:100%;">
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>Mã nhóm</th>
+                <th>Tên nhóm</th>
+                <th>Tổng SL đã xuất</th>
+                <th>Tổng giá trị xuất</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int tt = 1;
+            }
+            @foreach (var data in ViewBag.Datas)
+            {
+                <tr>
+                    <td class="text-center">
+                        @tt
+                    </td>
+                    <td class="text-center">
+                        @data.ma
+                    </td>
+                    <td style="max-width: 400px">
+                        @data.ten
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.slXuat)
+                    </td>
+                    <td class="text-end">
+                        @toDecimal(data.giaTriXuat)
+                    </td>
+                </tr>
+                tt++;
+            }
+        </tbody>
+    </table>
+</div>
+<div style="page-break-inside:avoid;">
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+            </div>
+            <div class="w-33 text-center">
+            </div>
+            <div class="w-33 text-center">
+                <em>Ngày ... Tháng ... Năm ...</em>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <div class="flex" style="font-size:16px; font-weight:700">
+            <div class="w-34 text-center">
+                Thủ trưởng đơn vị
+            </div>
+            <div class="w-33 text-center">
+                Kế toán
+            </div>
+            <div class="w-33 text-center">
+                Người lập phiếu
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="flex" style="font-size:12px;">
+            <div class="w-34 text-center">
+                (ký, họ tên, đóng dấu)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+            <div class="w-33 text-center">
+                (ký, họ tên)
+            </div>
+        </div>
+    </div>
+</div>

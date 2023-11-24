@@ -29,13 +29,21 @@
                   <td>@p.IddvtNavigation.TenDvt</td>
                   <td class="text-end">@p.DonGia.Value.ToString("#,##0.00")</td>
                   <td>@(p.IdhhNavigation.IdbaoHanhNavigation == null ? "" : p.IdhhNavigation.IdbaoHanhNavigation.TenBh)</td>
-                  <td class="last-td-column text-center">
+                  <td class="text-center">
                     @if (getTT(p.IdhhNavigation.IdbaoHanhNavigation, p.IdpxNavigation.NgayTao))
                     {
                         <span class="status-btn success-btn">Còn bảo hành</span>
                     }else{
                         <span class="status-btn close-btn">Hết bảo hành</span>
                     }
+                  </td>
+                  <td class="text-end soLanBaoHanh">@p.ThongTinBaoHanhs.Count()</td>
+                  <td class="last-td-column text-center">
+                      <div class="action justify-content-center">
+                                 <button value="@p.Id" class="text-primary btn-baoHanh" title="Thực hiện bảo hành">
+                                    <i class="lni lni-protection"></i>
+                                 </button>
+                      </div>
                   </td>
               </tr>
               i++;

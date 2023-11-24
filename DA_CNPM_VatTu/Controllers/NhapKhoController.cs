@@ -39,8 +39,8 @@ namespace DA_CNPM_VatTu.Controllers
         {
             _dACNPMContext = new DACNPMContext();
             _logger = logger;
-            _viewEngine = viewEngine;
             _memoryCache = memoryCache;
+            _viewEngine = viewEngine;
             _hostingEnvironment = hostingEnvironment;
             _mapper = mapper;
             _converter = converter;
@@ -58,7 +58,9 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpPost("api/hhs")]
         public async Task<IActionResult> searchHH()
         {
-            return Ok(await _dACNPMContext.HangHoas.Select(x => new
+            return Ok(await _dACNPMContext.HangHoas
+                .AsNoTracking()
+                .Select(x => new
             {
                 id = x.Id,
                 ten = x.TenHh.Trim(),
@@ -96,7 +98,7 @@ namespace DA_CNPM_VatTu.Controllers
                 ma = x.MaNcc
             }).ToList());
         }
-        [HttpPost("add-pn")]
+        [HttpPost("update-pn")]
         public async Task<IActionResult> addPN([FromBody] PhieuNhapKhoMap phieuNhapKhoMap)
         {
             PhieuNhapKho phieuNhap = _mapper.Map<PhieuNhapKho>(phieuNhapKhoMap);
@@ -105,49 +107,172 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 int _userId = int.Parse(User.Identity.Name);
                 int idCn = int.Parse(User.FindFirstValue("IdCn"));
-                phieuNhap.SoPn = await getSoPhieu();
-                phieuNhap.Idnv = _userId;
-                phieuNhap.Active = true;
-                phieuNhap.Idcn = idCn;
-
-                await _dACNPMContext.PhieuNhapKhos.AddAsync(phieuNhap);
-                await _dACNPMContext.SaveChangesAsync();
-
-                List<HangTonKho> listHt = new List<HangTonKho>();
-                foreach (var t in phieuNhap.ChiTietPhieuNhaps)
+                if (phieuNhap.Id == 0)
                 {
-                    var hh = await _dACNPMContext.HangHoas.FirstOrDefaultAsync(x => x.Id == t.Idhh);
-                    t.NgayTao = phieuNhap.NgayTao;
-                    t.Nvtao = _userId;
-                    t.Tgbh = hh.IdbaoHanhNavigation == null ? null : hh.IdbaoHanhNavigation.SoNgay;
-                    t.Idbh = hh.IdbaoHanh;
-                    HangTonKho sl = new HangTonKho();
-                    sl.Idctpn = t.Id;
-                    sl.Slcon = Math.Round((double)t.Sl, 2);
-                    sl.Idcn = idCn;
-                    sl.NgayNhap = t.NgayTao;
-                    sl.Thue = t.Thue;
-                    sl.Cktm = t.Cktm;
-                    sl.GiaNhap = t.DonGia;
-                    sl.Hsd = t.Hsd;
-                    sl.Idhh = t.Idhh;
-                    listHt.Add(sl);
+                    phieuNhap.SoPn = await getSoPhieu();
+                    phieuNhap.Idnv = _userId;
+                    phieuNhap.Active = true;
+                    phieuNhap.Idcn = idCn;
+
+                    await _dACNPMContext.PhieuNhapKhos.AddAsync(phieuNhap);
+                    await _dACNPMContext.SaveChangesAsync();
+
+                    List<HangTonKho> listHt = new List<HangTonKho>();
+                    foreach (var t in phieuNhap.ChiTietPhieuNhaps)
+                    {
+                        var hh = await _dACNPMContext.HangHoas.FirstOrDefaultAsync(x => x.Id == t.Idhh);
+                        t.NgayTao = phieuNhap.NgayTao;
+                        t.Nvtao = _userId;
+                        t.Tgbh = hh.IdbaoHanhNavigation == null ? null : hh.IdbaoHanhNavigation.SoNgay;
+                        t.Idbh = hh.IdbaoHanh;
+                        t.Active = true;
+                        HangTonKho sl = new HangTonKho();
+                        sl.Idctpn = t.Id;
+                        sl.Slcon = Math.Round((double)t.Sl, 2);
+                        sl.Idcn = idCn;
+                        sl.NgayNhap = t.NgayTao;
+                        sl.Thue = t.Thue ?? 0;
+                        sl.Cktm = t.Cktm ?? 0;
+                        sl.GiaNhap = t.DonGia;
+                        sl.Hsd = t.Hsd;
+                        sl.Idhh = t.Idhh;
+                        listHt.Add(sl);
+                    }
+                    await _dACNPMContext.HangTonKhos.AddRangeAsync(listHt);
+                    await _dACNPMContext.SaveChangesAsync();
+
+                    var SoTT = await _dACNPMContext.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
+                    SoTT.Stt += 1;
+                    _dACNPMContext.SoThuTus.Update(SoTT);
+                    _dACNPMContext.SaveChanges();
+
+                    await tran.CommitAsync();
+
+                    return Ok(new ResponseModel()
+                    {
+                        statusCode = 200,
+                        message = "Thành công! Phiếu nhập của bạn có số phiếu là: " + phieuNhap.SoPn,
+                    });
                 }
-                await _dACNPMContext.HangTonKhos.AddRangeAsync(listHt);
-                await _dACNPMContext.SaveChangesAsync();
-
-                var SoTT = await _dACNPMContext.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhapKho"));
-                SoTT.Stt += 1;
-                _dACNPMContext.SoThuTus.Update(SoTT);
-                _dACNPMContext.SaveChanges();
-
-                await tran.CommitAsync();
-
-                return Ok(new ResponseModel()
+                else
                 {
-                    statusCode = 200,
-                    message = "Thành công! Phiếu nhập của bạn có số phiếu là: " + phieuNhap.SoPn,
-                });
+                    var hangTonXoa = await _dACNPMContext.HangTonKhos.Where(x=> phieuNhapKhoMap.DaXoas.Any(y=>y == x.Idctpn)).ToListAsync();
+
+                    _dACNPMContext.HangTonKhos.RemoveRange(hangTonXoa);
+                    await _dACNPMContext.SaveChangesAsync();
+                    var listDaXoa = phieuNhapKhoMap.DaXoas.Select(x=> new ChiTietPhieuNhap()
+                    {
+                        Id = x
+                    }).ToList();
+                    _dACNPMContext.ChiTietPhieuNhaps.RemoveRange(listDaXoa);
+                    await _dACNPMContext.SaveChangesAsync();
+
+                    List<ChiTietPhieuNhap> listChiTietphieu = phieuNhap.ChiTietPhieuNhaps.ToList();
+
+                    foreach (var t in listChiTietphieu)
+                    {
+                        if (t.Id == 0)
+                        {
+                            ChiTietPhieuNhap ct = new ChiTietPhieuNhap();
+                            var hh = await _dACNPMContext.HangHoas.FirstOrDefaultAsync(x => x.Id == t.Idhh);
+                            ct.Idpn = phieuNhap.Id;
+                            ct.Idhh = hh.Id;
+                            ct.Tgbh = hh.IdbaoHanhNavigation == null ? null : hh.IdbaoHanhNavigation.SoNgay;
+                            ct.Idbh = hh.IdbaoHanh;
+                            ct.Iddvtnhap = t.Iddvtnhap;
+                            ct.Slqd = t.Slqd;
+                            ct.Sl = t.Sl;
+                            ct.DonGia = t.DonGia;
+                            ct.Cktm = t.Cktm ?? 0;
+                            ct.Thue = t.Thue ?? 0;
+                            ct.SoLo = t.SoLo;
+                            ct.Nsx = t.Nsx;
+                            ct.Hsd = t.Hsd;
+                            ct.GhiChu = t.GhiChu;
+                            ct.Nvtao = _userId;
+                            ct.NgayTao = phieuNhap.NgayTao;
+                            ct.Active = true;
+                            await _dACNPMContext.ChiTietPhieuNhaps.AddAsync(ct);
+                            await _dACNPMContext.SaveChangesAsync();
+
+                            HangTonKho sl = new HangTonKho();
+                            sl.Idctpn = ct.Id;
+                            sl.Slcon = Math.Round((double)t.Sl, 2);
+                            sl.Idcn = idCn;
+                            sl.NgayNhap = ct.NgayTao;
+                            sl.Thue = ct.Thue ?? 0;
+                            sl.Cktm = ct.Cktm ?? 0;
+                            sl.GiaNhap = ct.DonGia;
+                            sl.Hsd = ct.Hsd;
+                            sl.Idhh = ct.Idhh;
+                            await _dACNPMContext.HangTonKhos.AddAsync(sl);
+                            await _dACNPMContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            ChiTietPhieuNhap ct = await _dACNPMContext.ChiTietPhieuNhaps.FindAsync(t.Id);
+                            HangTonKho sl = await _dACNPMContext.HangTonKhos.FirstOrDefaultAsync(x => x.Idctpn == ct.Id);
+                            if (sl.Slcon != ct.Sl)
+                            {
+                                return Ok(new ResponseModel()
+                                {
+                                    statusCode = 500,
+                                    message = "Phiếu đã được xuất kho, không thể sửa!"
+                                });
+                            }
+
+                            var hh = await _dACNPMContext.HangHoas.FirstOrDefaultAsync(x => x.Id == t.Idhh);
+                            ct.Idhh = hh.Id;
+                            ct.Tgbh = hh.IdbaoHanhNavigation == null ? null : hh.IdbaoHanhNavigation.SoNgay;
+                            ct.Idbh = hh.IdbaoHanh;
+                            ct.Iddvtnhap = t.Iddvtnhap;
+                            ct.Slqd = t.Slqd;
+                            ct.Sl = t.Sl;
+                            ct.DonGia = t.DonGia;
+                            ct.Cktm = t.Cktm ?? 0;
+                            ct.Thue = t.Thue ?? 0;
+                            ct.SoLo = t.SoLo;
+                            ct.Nsx = t.Nsx;
+                            ct.Hsd = t.Hsd;
+                            ct.GhiChu = t.GhiChu;
+                            ct.Nvsua = _userId;
+                            ct.NgaySua = phieuNhap.NgayTao;
+                            _dACNPMContext.ChiTietPhieuNhaps.Update(ct);
+                            await _dACNPMContext.SaveChangesAsync();
+
+                            sl.Slcon = Math.Round((double)t.Sl, 2);
+                            sl.Thue = ct.Thue ?? 0;
+                            sl.Cktm = ct.Cktm ?? 0;
+                            sl.GiaNhap = ct.DonGia;
+                            sl.Hsd = ct.Hsd;
+                            sl.Idhh = ct.Idhh;
+                            _dACNPMContext.HangTonKhos.Update(sl);
+                            await _dACNPMContext.SaveChangesAsync();
+                        }
+                    }
+                    var p = await _dACNPMContext.PhieuNhapKhos
+                        .Include(x => x.ChiTietPhieuNhaps)
+                        .ThenInclude(x => x.HangTonKhos)
+                        .Include(x => x.IdnccNavigation)
+                        .Include(x => x.IdnvNavigation)
+                        .FirstOrDefaultAsync(x=>x.Id == phieuNhap.Id);
+                    p.Idncc = phieuNhap.Idncc;
+                    p.NgayTao = phieuNhap.NgayTao;
+                    p.NgayHd = phieuNhap.NgayHd;
+                    p.SoHd = phieuNhap.SoHd;
+                    p.GhiChu = phieuNhap.GhiChu;
+                    p.Nvsua = _userId;
+                    p.NgaySua = DateTime.Now;
+                    await _dACNPMContext.SaveChangesAsync();
+
+                    await tran.CommitAsync();
+                    return Ok(new ResponseModel()
+                    {
+                        statusCode = 200,
+                        message = "Thành công!",
+                        result = p
+                    });
+                }
             }
             catch (Exception e)
             {
@@ -159,6 +284,65 @@ namespace DA_CNPM_VatTu.Controllers
                 });
             }
 
+        }
+        [HttpPost("showEditPhieuNhap")]
+        public async Task<IActionResult> showEditPhieuNhap(int idPN)
+        {
+            var phieu = await _dACNPMContext.PhieuNhapKhos
+                .Include(x => x.ChiTietPhieuNhaps)
+                .ThenInclude(x => x.HangTonKhos)
+                .Include(x => x.IdnccNavigation)
+                .Include(x => x.IdnvNavigation)
+                .FirstOrDefaultAsync(x => x.Id == idPN);
+            return Ok(phieu);
+        }
+        [HttpPost("removePhieuNhap")]
+        public async Task<IActionResult> removePhieuNhap(int idPN)
+        {
+            var tran = _dACNPMContext.Database.BeginTransaction();
+            try
+            {
+                var phieu = await _dACNPMContext.PhieuNhapKhos
+                    .Include(x => x.ChiTietPhieuNhaps)
+                    .ThenInclude(x => x.ChiTietPhieuXuats)
+                    .FirstOrDefaultAsync(x => x.Id == idPN);
+
+                if (phieu.ChiTietPhieuNhaps.Any(x => x.ChiTietPhieuXuats.Count() > 0))
+                {
+                    return Ok(new ResponseModel()
+                    {
+                        statusCode = 500,
+                        message = "Phiếu đã được xuất kho, không thể xoá!"
+                    });
+                }
+                var phieuNhapKhoCts = phieu.ChiTietPhieuNhaps;
+                var tonKhos = _dACNPMContext.HangTonKhos.AsEnumerable().Where(x => phieuNhapKhoCts.Any(y => y.Id == x.Idctpn)).ToList();
+
+                _dACNPMContext.HangTonKhos.RemoveRange(tonKhos);
+                await _dACNPMContext.SaveChangesAsync();
+
+                _dACNPMContext.ChiTietPhieuNhaps.RemoveRange(phieu.ChiTietPhieuNhaps);
+                await _dACNPMContext.SaveChangesAsync();
+
+                _dACNPMContext.PhieuNhapKhos.Remove(phieu);
+                await _dACNPMContext.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return Ok(new ResponseModel()
+                {
+                    statusCode = 200,
+                    message = "Thành công!"
+                });
+            }
+            catch (Exception e)
+            {
+                tran.Rollback();
+                return Ok(new ResponseModel()
+                {
+                    statusCode = 500,
+                    message = "Thất bại!"
+                });
+            }
         }
         [HttpPost("loadTableLichSuNhap")]
         public async Task<IActionResult> loadTableLichSuNhap(string fromDay, string toDay, string soPhieuLS, string soHDLS, int nhaCC, int hhLS)

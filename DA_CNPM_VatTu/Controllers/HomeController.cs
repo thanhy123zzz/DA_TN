@@ -29,64 +29,8 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpGet("/TrangChu")]
         public async Task<IActionResult> Index()
         {
-            string format = "dd-MM-yyyy";
-            int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            List<string> results = new List<string>();
-            List<double> tongGiaNhap = new List<double>();
-            List<double> tongGiaXuat = new List<double>();
-            var nhapKho = await _dACNPMContext.ChiTietPhieuNhaps
-                .Include(x => x.IdpnNavigation)
-                .Where(x => x.IdpnNavigation.Idcn == idCn)
-                .ToListAsync();
-            var xuatKho = await _dACNPMContext.ChiTietPhieuXuats
-                .Include(x => x.IdpxNavigation)
-                .Include(x => x.IdhhNavigation.IdnhhNavigation)
-                .Where(x => x.IdpxNavigation.Idcn == idCn)
-                .ToListAsync();
-            for (int i = 6; i >= 0; i--)
-            {
-                DateTime date = DateTime.Now.AddDays(-i);
-                string result = date.ToString(format);
-                results.Add(result);
-                double sumNhap = nhapKho
-                    .AsParallel()
-                    .Where(x => x.IdpnNavigation.NgayTao.Value.Date == date.Date)
-                    .Sum(x => (x.DonGia * x.Sl));
-                tongGiaNhap.Add(sumNhap);
-
-                double sumXuat = xuatKho
-                    .AsParallel()
-                    .Where(x => x.IdpxNavigation.NgayTao.Value.Date == date.Date)
-                    .Sum(x => (x.DonGia * x.Sl)).Value;
-                tongGiaXuat.Add(sumXuat);
-            }
-            string label = "['" + string.Join("', '", results) + "']";
-            string dataNhap = "[" + string.Join(", ", tongGiaNhap) + "]";
-            string dataXuat = "[" + string.Join(", ", tongGiaXuat) + "]";
-
-            ViewBag.label = label;
-            ViewBag.dataNhap = dataNhap;
-            ViewBag.dataXuat = dataXuat;
-            ViewBag.sumNhap = tongGiaNhap.Sum();
-            ViewBag.sumXuat = tongGiaXuat.Sum();
-
-            var giaTriNhh = xuatKho.AsParallel()
-                                .Where(ctpx => ctpx.Active == true)
-                                .GroupBy(ctpx => ctpx.IdhhNavigation.IdnhhNavigation.TenNhh)
-                                .Select(g => new
-                                {
-                                    TenNhom = g.Key,
-                                    TongGiaTriXuat = g.Sum(ctpx => ctpx.Sl * ctpx.DonGia ?? 0)
-                                })
-                                .OrderByDescending(x => x.TongGiaTriXuat)
-                                .Take(10)
-                                .ToList();
-            ViewBag.giaTriNhh = "['" + string.Join("', '", giaTriNhh
-                .Select(x => (double)x.GetType().GetProperty("TongGiaTriXuat").GetValue(x)).ToList()) + "']";
-            ViewBag.tenNhh = "['" + string.Join("', '", giaTriNhh
-                .Select(x => x.GetType().GetProperty("TenNhom").GetValue(x)).ToList()) + "']";
-
             ViewData["title"] = "Trang chủ";
+            ViewBag.ThongTinDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
             return View();
         }
         [HttpPost("/TrangChu/api/data")]
@@ -240,17 +184,6 @@ namespace DA_CNPM_VatTu.Controllers
                 chucNangs.Add(c.IdchucNangNavigation);
             }
             ViewBag.danhMuc = chucNangs;
-            return View();
-        }
-
-        [HttpGet("/CaiDat")]
-        public IActionResult caiDat()
-        {
-            return View();
-        }
-        [HttpGet("/layout")]
-        public IActionResult layout()
-        {
             return View();
         }
 

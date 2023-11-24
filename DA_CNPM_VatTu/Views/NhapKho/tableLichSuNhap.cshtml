@@ -20,12 +20,18 @@
               <td>@p.GhiChu</td>
               <td class="last-td-column">
                   <div class="action justify-content-center">
-                          <button type="button" value="@p.Id" class="text-primary btn-view-pn">
+                            <a href="/QuanLy/NhapKho/download/phieunhapkho/@p.Id" class="text-success" style="padding: 0px 6px">
+                                <i class="lni lni-printer"></i>
+                            </a>
+                          <button type="button" value="@p.Id" class="text-warning btn-view-pn">
                               <i class="lni lni-eye"></i>
                           </button>
-                          <a href="/QuanLy/NhapKho/download/phieunhapkho/@p.Id" class="text-success">
-                            <i class="lni lni-printer"></i>    
-                      </a>
+                          <button type="button" value="@p.Id" class="text-primary btn-edit-pn">
+                              <i class="lni lni-pencil"></i>
+                          </button>
+                          <button type="button" value="@p.Id" class="text-danger btn-remove-pn">
+                              <i class="lni lni-trash-can"></i>
+                          </button>
                   </div>
               </td>
           </tr>

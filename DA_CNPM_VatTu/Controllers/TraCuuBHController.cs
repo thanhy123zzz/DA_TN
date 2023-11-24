@@ -49,6 +49,7 @@ namespace DA_CNPM_VatTu.Controllers
                 .Include(x => x.IddvtNavigation)
                 .Include(x => x.IdpxNavigation)
                 .Include(x => x.IdpxNavigation.IdkhNavigation)
+                .Include(x => x.ThongTinBaoHanhs)
                 .Where(x => (idKh == 0 ? true : idKh == x.IdpxNavigation.Idkh)
                     && (idHh == 0 ? true : x.Idhh == idHh)
                     && x.IdpxNavigation.NgayTao.Value.Date >= FromDay
@@ -57,6 +58,51 @@ namespace DA_CNPM_VatTu.Controllers
                 ).ToListAsync();
 
             return PartialView("tableTraCuuBH");
+        }
+        [HttpPost("baoHanh")]
+        public async Task<IActionResult> baoHanh(int id)
+        {
+            var tran = _dACNPMContext.Database.BeginTransaction();
+            int _userId = int.Parse(User.Identity.Name);
+            try
+            {
+                bool tang = false;
+                var now = DateTime.Now;
+                var ct = await _dACNPMContext.ThongTinBaoHanhs.FirstOrDefaultAsync(x => x.Idctpx == id && x.NgayBaoHanh.Value.Date == now.Date);
+                if (ct == null)
+                {
+                    ThongTinBaoHanh tt = new ThongTinBaoHanh();
+                    tt.Idctpx = id;
+                    tt.IdnvbaoHanh = _userId;
+                    tt.NgayBaoHanh = now.Date;
+                    await _dACNPMContext.ThongTinBaoHanhs.AddAsync(tt);
+                    tang = true;
+                }
+                else
+                {
+                    ct.NgayBaoHanh = now.Date;
+                }
+                await _dACNPMContext.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return Ok(new
+                {
+                    statusCode = 200,
+                    message = "Thành công!",
+                    color = "bg-success",
+                    tang
+                });
+            }
+            catch (Exception e)
+            {
+                tran.Rollback();
+                return Ok(new
+                {
+                    statusCode = 500,
+                    message = "Thất bại!",
+                    color = "bg-danger"
+                });
+            }
         }
         async Task<PhanQuyenChucNang> GetPhanQuyenTraCuuBH()
         {

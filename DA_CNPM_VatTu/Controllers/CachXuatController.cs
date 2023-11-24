@@ -19,13 +19,18 @@ namespace DA_CNPM_VatTu.Controllers
             ViewBag.PhanQuyenCachXuat = pqcn;
             ViewData["title"] = pqcn.IdchucNangNavigation.TenChucNang;
             ViewBag.TinhGiaXuat = context.TinhGiaXuats.ToList();
+            ViewBag.TiLeCanhBaoSi = context.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si");
+            ViewBag.TiLeCanhBaoLe = context.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le");
             return View(c);
         }
         [HttpPost("change")]
-        public IActionResult updateCachXuat(int CachXuat, int giaXuat)
+        public IActionResult updateCachXuat(int CachXuat, int giaXuat, double Si, double Le)
         {
             var context = new DACNPMContext();
-            CachXuat c = context.CachXuats.Find(1);
+            context.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe = Si;
+            context.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe = Le;
+
+			CachXuat c = context.CachXuats.Find(1);
             if (CachXuat == 1)
             {
                 c.TheoTgnhap = true;

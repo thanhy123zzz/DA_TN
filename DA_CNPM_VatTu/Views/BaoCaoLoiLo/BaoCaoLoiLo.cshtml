@@ -1,0 +1,281 @@
+﻿<style>
+    .avatar{
+        font-size: larger;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: white;
+    }
+
+    .font-weight-medium{
+        color:black;
+        font-weight: 500;
+    }
+    .text-smaller{
+        font-size: smaller;
+    }
+</style>
+@{
+    var now = DateTime.Now;
+    CultureInfo tiengViet = new CultureInfo("vi-VN");
+    string toDecimal(double? d)
+    {
+        if (d == null)
+        {
+            return "";
+        }
+        else
+        {
+            return d.Value.ToString("#,##0.##");
+        }
+    }
+    PhanQuyenChucNang phanQuyenBaoCaoLoiLo = ViewBag.phanQuyenBaoCaoLoiLo;
+}
+<div class="mb-3">
+    <h4>Hôm nay, @tiengViet.DateTimeFormat.GetDayName(now.DayOfWeek).ToLower() ngày @now.Day tháng @now.Month năm @now.Year</h4>
+</div>
+<div class="row mb-3">
+    <div class="col-sm-6 col-lg-3 mb-2">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"></path><path d="M12 3v3m0 12v3"></path></svg>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Xuất kho
+                        </div>
+                        <div class="text-smaller">
+                            @ViewBag.tongPhieuXuat đã xuất kho
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-2">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-success avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-table-import" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 21h-7a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v8" /><path d="M3 10h18" /><path d="M10 3v18" /><path d="M19 22v-6" /><path d="M22 19l-3 -3l-3 3" /></svg>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Nhập kho
+                        </div>
+                        <div class="text-smaller">
+                            @ViewBag.tongPhieuNhap đã nhập kho
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-2">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-warning avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-shield-check" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" /><path d="M15 19l2 2l4 -4" /></svg>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                           Bảo hành
+                        </div>
+                        <div class="text-smaller">
+                            @ViewBag.tongSoLanBaoHanh lượt bảo hành
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3 mb-2">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-info avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-dollar" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h3" /><path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" /><path d="M19 21v1m0 -8v1" /></svg>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">
+                            Khách hàng
+                        </div>
+                        <div class="text-smaller">
+                            +@ViewBag.khachHangMoi khách hàng mới
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-2">
+    <h5>Tổng giá trị nhập xuất kho</h5>
+</div>
+<div class="row mb-3">
+    <div class="col-md-6 mb-2">
+        <div class="card p-2">
+            <canvas id="giaTriNhapXuat"
+                    style="width: 100%; height: 300px"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="row mb-2 justify-content-between">
+            <div class="col-md-auto">
+                @if (phanQuyenBaoCaoLoiLo.TimKiem.Value)
+                {
+                    <select class="form-select form-select-sm" id="ngayGiaTriNhapXuat">
+                        <option value="1" selected>Trong tuần này</option>
+                        <option value="2">Trong tháng này</option>
+                        <option value="3">Trong quý này</option>
+                        <option value="4">Trong năm này</option>
+                    </select>
+                }
+            </div>
+            <div class="col-md-auto">
+                <div class="row">
+                    <div class="col-md-auto col-6">
+                        <button class="btn btn-outline-success btn-sm" title="Xuất" id="btnNhapXuat">Xuất</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive" style="max-height: 277px">
+                <table class="table table-bordered table-striped top-selling-table table-hover display nowrap">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Tổng PN</th>
+                            <th>Tổng GT nhập</th>
+                            <th>Tổng PX</th>
+                            <th>Tổng GT xuất</th>
+                            <th>Tổng lợi nhuận</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-giaTriNhapXuat">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-2">
+    <h5>Top 10 nhóm hàng hoá bán chạy</h5>
+</div>
+<div class="row mb-3">
+    <div class="col-md-4 mb-2">
+        <div class="card p-2">
+            <canvas id="top10NhomHangBanChay"
+                    style="width: 100%; height: 300px"></canvas>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row mb-2 justify-content-between">
+            <div class="col-md-auto">
+                @if (phanQuyenBaoCaoLoiLo.TimKiem.Value)
+                {
+                    <select class="form-select form-select-sm" id="ngayTop10NhomHangBanChay">
+                        <option value="1" selected>Trong ngày hôm nay</option>
+                        <option value="2">Trong tuần này</option>
+                        <option value="3">Trong tháng này</option>
+                        <option value="4">Trong quý này</option>
+                        <option value="5">Trong năm này</option>
+                    </select>
+                }
+            </div>
+            <div class="col-md-auto">
+                <div class="row">
+                    <div class="col-md-auto col-6">
+                        <button class="btn btn-outline-success btn-sm" title="Xuất top 10" id="btnTop10">Xuất</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive" style="max-height: 277px">
+                <table class="table table-bordered table-striped top-selling-table table-hover display">
+                    <thead>
+                        <tr>
+                            <th>TT</th>
+                            <th>Mã nhóm</th>
+                            <th>Tên nhóm</th>
+                            <th>Tổng SL đã xuất</th>
+                            <th>Tổng giá trị xuất</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-top10NhomHangBanChay">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-2">
+    <h5>Top 5 hàng hoá mang lại doanh thu cao</h5>
+</div>
+<div class="row mb-3">
+    <div class="col-md-4 mb-2">
+        <div class="card p-2">
+            <canvas id="top5HangHoaDoanhThu"
+                    style="width: 100%; height: 300px"></canvas>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row mb-2 justify-content-between">
+            <div class="col-md-auto">
+                @if (phanQuyenBaoCaoLoiLo.TimKiem.Value)
+                {
+                    <select class="form-select form-select-sm" id="ngayTop5HangHoaDoanhThu">
+                        <option value="1" selected>Trong ngày hôm nay</option>
+                        <option value="2">Trong tuần này</option>
+                        <option value="3">Trong tháng này</option>
+                        <option value="4">Trong quý này</option>
+                        <option value="5">Trong năm này</option>
+                    </select>
+                }
+            </div>
+            <div class="col-md-auto">
+                <div class="row">
+                    <div class="col-md-auto col-6">
+                        <button class="btn btn-outline-success btn-sm" title="Xuất top 5" id="btnTop5">Xuất</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="table-responsive" style="max-height: 277px">
+                <table class="table table-bordered table-striped top-selling-table table-hover display">
+                    <thead>
+                        <tr>
+                            <th>TT</th>
+                            <th>Mã hàng</th>
+                            <th>Tên hàng</th>
+                            <th>Tổng SL đã xuất</th>
+                            <th>Tổng giá trị nhập</th>
+                            <th>Tổng giá trị xuất</th>
+                            <th>Tổng lợi nhuận</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-top5HangHoaDoanhThu">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/BaoCaoLoiLo.js" defer asp-append-version="true"></script>

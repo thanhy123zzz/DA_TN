@@ -14,14 +14,104 @@ $(document).on('click', '#tBodyHangHoa tr', function () {
         url: "/QuyDinh/HHDVT/load-hhdvt",
         data: "idHh=" + id,
         success: function (result) {
-            $('#tabHHDVT').replaceWith(result);
+            var hh = result.hh;
+            var maxTon = result.maxTon;
+            var le = result.le;
+            var si = result.si;
+            var checkCanhBao = (hh.giaBanLe <= (maxTon * le)) || (hh.giaBanSi <= (maxTon * si)) || (hh.giaBanLe == null && hh.giaBanSi == null && hh.tiLeLe == null && hh.tiLeSi == null);
+            updateTableGiaDVT(result.hhDvts, result.si, result.le, maxTon);
+            $('#tBodyDVT').prepend(`<tr class="${checkCanhBao ? 'text-danger' : ''}" data-id="${hh.id}" style="white-space:nowrap;background-color:aliceblue;">
+                        <td>
+                            ${hh.iddvtchinhNavigation.tenDvt}(Chính)
+                        </td>
+                        <td class="text-end">
+                            1
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(hh.tiLeLe)}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(hh.tiLeSi)}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(hh.giaBanLe)}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(hh.giaBanSi)}
+                        </td>
+                        <td class="last-td-column">
+                             <div class="action justify-content-end">
+                                 <button ${_qSua ? "" : "disabled"} onclick="showModalHHDVTC(${hh.id})" class="text-primary">
+                                       <i class="lni lni-pencil"></i>
+                                 </button>
+                             </div>
+                        </td>
+                 </tr>`);
+            updateTableTonKho(result.hangTonKhos);
         },
         error: function (loi) {
             console.log(loi);
         }
     });
 });
-
+function updateTableGiaDVT(datas, si, le, maxTon) {
+    $('#tBodyDVT').empty();
+    datas.forEach(function (data) {
+        var checkCanhBao = (data.giaBanLe <= (maxTon * le * data.slquyDoi)) || (data.giaBanSi <= (maxTon * si * data.slquyDoi)) || (data.giaBanLe == null && data.giaBanSi == null && data.tiLeLe == null && data.tiLeSi == null);
+        $('#tBodyDVT').append(`<tr class="${checkCanhBao ? 'text-danger' : ''}" data-id="${data.id}" style="white-space:nowrap;">
+                        <td>
+                            ${data.iddvtNavigation.tenDvt}
+                        </td>
+                        <td class="text-end">
+                            ${data.slquyDoi}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(data.tiLeLe) }
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(data.tiLeSi)}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(data.giaBanLe)}
+                        </td>
+                        <td class="text-end">
+                            ${formatOddNumber(data.giaBanSi)}
+                        </td>
+                        <td class="last-td-column">
+                             <div class="action justify-content-end">
+                                 <button ${_qSua ? "" : "disabled"} onclick="showModalHHDVT(${data.id})" class="text-primary">
+                                       <i class="lni lni-pencil"></i>
+                                 </button>
+                                <button onclick="deleteDVTHH(${data.id})" ${_qXoa ? "" : "disabled"} class="text-danger">
+                                    <i class="lni lni-trash-can"></i>
+                                </button>
+                             </div>
+                        </td>
+                 </tr>`);
+    });
+}
+function updateTableTonKho(datas) {
+    $('#tBodyGia').empty();
+    datas.forEach(function (ht) {
+        $('#tBodyGia').append(`<tr style="white-space:nowrap;">
+                                                    <td>
+                            ${ht.idhhNavigation.iddvtchinhNavigation.tenDvt} (Chính)
+                                                    </td>
+                                                    <td class="text-center">
+                            ${formatDay(ht.ngayNhap)}
+                                                    </td>
+                                                    <td class="text-center">
+                            ${formatDay(ht.hsd)}
+                                                    </td>
+                                                    <td class="text-end">
+                            ${formatOddNumber(ht.slcon)}
+                                                    </td>
+                                                    <td class="text-end">
+                            ${formatOddNumber(ht.giaNhap * (1 - ht.cktm/100) * (1 + ht.thue/100))}
+                                                    </td>
+                                            </tr>`);
+    });
+}
 function showHHGiaLo() {
     $.ajax({
         type: "get",
@@ -39,7 +129,7 @@ function showHHGiaLo() {
         }
     });
 }
-
+/*
 $('#search').on('keyup', (e) => {
     var key = e.target.value;
     $('#tBodyDVT').empty();
@@ -56,6 +146,17 @@ $('#search').on('keyup', (e) => {
         error: function (loi) {
             console.log(loi);
         }
+    });
+});*/
+$('#search').on('keyup', function (e) {
+    var key = $(this).val().toLowerCase();
+    $('#tBodyDVT').empty();
+    $('#tBodyGia').empty();
+    var listItem = $('#tBodyHangHoa tr');
+
+    listItem.filter(function () {
+        var have = $(this).text().toLowerCase().indexOf(key) > -1;
+        $(this).toggle(have);
     });
 });
 
@@ -108,8 +209,8 @@ function getValue(str) {
 function checkNumber(str) {
     return /[0-9,.\-$]+/.test(str);
 }
-$('#btnModal').on('click', (e) => {
-    if ($('#form').data('val') === "chinh") {
+$('#btnModal').on('click', function (){
+    /*if ($('#form').data('val') === "chinh") {
         var invalid = false;
         $('.my-selectize').each(function () {
             if (this.selectize) {
@@ -222,6 +323,90 @@ $('#btnModal').on('click', (e) => {
                 }, 5000);
             })
             .catch(error => console.error(error))
+    }*/
+    var form = document.getElementById('formUpdate');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        document.getElementById('DVT').selectize.$control[0].classList.add('is-invalid');
+    } else {
+        form.classList.remove('was-validated');
+        document.getElementById('DVT').selectize.$control[0].classList.remove('is-invalid');
+
+        if ($('#formUpdate').data('val') === "chinh") {
+            fetch("/QuyDinh/HHDVT/update-hhdvtc", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Id: $('.table-active').attr('data-id'),
+                    Iddvtchinh: $('#DVT').val(),
+                    TiLeLe: getValue($('#TLLe').val()),
+                    TiLeSi: getValue($('#TLSi').val()),
+                    GiaBanLe: getValue($('#GBLe').val()),
+                    GiaBanSi: getValue($('#GBSi').val()),
+                    Active: document.getElementById('toggleSwitch1').checked
+                })
+            })
+                .then(Response => Response.json())
+                .then(data => {
+                    $('#staticBackdrop').modal('hide');
+                    if (data.statusCode == 200) {
+                        $('#tabHHDVT').replaceWith(data.viewData);
+                        if (data.data !== undefined) {
+                            $('#tBodyHangHoa').empty();
+                            data.data.map(item => $('#tBodyHangHoa').append(`<tr data-id="${item.id}" class="${(item.id == hh) ? "table-active" : ""}" style="cursor:pointer"><td>${item.maHh}</td><td>${item.tenHh}</td></tr>`));
+                        }
+                    }
+                    $('#toast').addClass(data.color);
+                    $('#toastContent').text(data.message);
+                    $('#toast').show();
+
+                    setTimeout(function () {
+                        $('#toast').hide();
+                        $('#toast').removeClass(data.color);
+                    }, 5000);
+                })
+                .catch(error => console.error(error))
+        } else {
+            fetch("/QuyDinh/HHDVT/update-hhdvt", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Id: idModel,
+                    IdHh: $('.table-active').attr('data-id'),
+                    IdDvt: $('#DVT').val(),
+                    TiLeLe: getValue($('#TLLe').val()),
+                    TiLeSi: getValue($('#TLSi').val()),
+                    GiaBanLe: getValue($('#GBLe').val()),
+                    GiaBanSi: getValue($('#GBSi').val()),
+                    SlquyDoi: getValue($('#Slquydoi').val()),
+                    Active: document.getElementById('toggleSwitch1').checked
+                })
+            })
+                .then(Response => Response.json())
+                .then(data => {
+                    $('#staticBackdrop').modal('hide');
+                    if (data.statusCode == 200) {
+                        $('#tabHHDVT').replaceWith(data.viewData);
+                        if (data.data !== undefined) {
+                            $('#tBodyHangHoa').empty();
+                            data.data.map(item => $('#tBodyHangHoa').append(`<tr data-id="${item.id}" class="${(item.id == hh) ? "table-active" : ""}" style="cursor:pointer"><td>${item.maHh}</td><td>${item.tenHh}</td></tr>`));
+                        }
+                    }
+                    $('#toast').addClass(data.color);
+                    $('#toastContent').text(data.message);
+                    $('#toast').show();
+
+                    setTimeout(function () {
+                        $('#toast').hide();
+                        $('#toast').removeClass(data.color);
+                    }, 5000);
+                })
+                .catch(error => console.error(error))
+        }
     }
 });
 

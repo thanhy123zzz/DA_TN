@@ -56,13 +56,9 @@ namespace DA_CNPM_VatTu.Controllers
                 .Where(x => x.Active == active && (
                 x.MaNv.ToLower().Contains(key.ToLower()) ||
                 x.IdnnvNavigation?.TenNnv.ToLower().Contains(key.ToLower()) == true ||
-                x.IdtkNavigation?.TaiKhoan.ToLower().Contains(key.ToLower()) == true ||
                 x.TenNv.ToLower().Contains(key.ToLower()) ||
-                x.DiaChi.ToLower().Contains(key.ToLower()) ||
                 x.Sdt.ToLower().Contains(key.ToLower()) ||
-                x.Email.ToLower().Contains(key.ToLower()) ||
-                x.Cccd.ToLower().Contains(key.ToLower()) ||
-                x.QueQuan.ToLower().Contains(key.ToLower())))
+                x.Cccd.ToLower().Contains(key.ToLower())))
                 .ToList();
                 var r = await RenderNvs(nvs);
 
@@ -74,14 +70,9 @@ namespace DA_CNPM_VatTu.Controllers
                 .Where(x =>
                 x.MaNv.ToLower().Contains(key.ToLower()) ||
                 x.IdnnvNavigation?.TenNnv.ToLower().Contains(key.ToLower()) == true ||
-                x.IdtkNavigation?.TaiKhoan.ToLower().Contains(key.ToLower()) == true ||
                 x.TenNv.ToLower().Contains(key.ToLower()) ||
-                x.DiaChi.ToLower().Contains(key.ToLower()) ||
                 x.Sdt.ToLower().Contains(key.ToLower()) ||
-                x.Email.ToLower().Contains(key.ToLower()) ||
-                x.Cccd.ToLower().Contains(key.ToLower()) ||
-                x.QueQuan.ToLower().Contains(key.ToLower())
-                )
+                x.Cccd.ToLower().Contains(key.ToLower()))
                 .ToList();
                 var r = await RenderNvs(nvs);
 
@@ -129,17 +120,16 @@ namespace DA_CNPM_VatTu.Controllers
             });
         }
         [HttpPost("api/nnvs")]
-        public async Task<IActionResult> optionNvs(string key)
+        public async Task<IActionResult> optionNvs()
         {
-            var nhhs = getListNhomNV().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaNnv + " " + x.TenNnv).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(nhhs.Select(x => new
+            var nhhs = _dACNPMContext.NhomNhanViens
+                .Where(x => x.Active == true);
+            return Ok(await nhhs.Select(x => new
             {
-                ID = x.Id,
-                MaNnv = x.MaNnv,
-                TenNnv = x.TenNnv,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaNnv,
+                ten = x.TenNnv,
+            }).ToListAsync());
         }
         [HttpPost("update-nv")]
         public async Task<IActionResult> updateNV(MapNhanVien mapNV)

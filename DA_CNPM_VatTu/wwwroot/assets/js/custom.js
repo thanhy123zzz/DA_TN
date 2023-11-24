@@ -208,7 +208,24 @@ function getDateTimeNow() {
     // Chuyển đổi thành định dạng "dd-MM-yyyy HH:mm"
     return ("0" + day).slice(-2) + "-" + ("0" + month).slice(-2) + "-" + year + " " + ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2);
 }
+// 1,000,000
+function formatEvenNumber(number) {
+    if (number == null) return 0;
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
+// 1,000,000.00
+function formatOddNumber(number) {
+    if (number) {
+        if (Number.isInteger(number)) {
+            return number.toLocaleString('en-US');
+        } else {
+            return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+    } else {
+        return "";
+    }
+}
 function getDateNow() {
     // Lấy ngày giờ hiện tại
     var currentDate = new Date();
@@ -273,4 +290,43 @@ function showLoader(table) {
 }
 function hideLoader() {
     $('#loader').remove();
+}
+function formatDay(inputString) {
+    if (inputString) {
+        var inputDate = new Date(inputString);
+        var day = inputDate.getDate();
+        if (day < 10) {
+            day = '0' + day;
+        }
+        var month = inputDate.getMonth() + 1;
+        if (month < 10) {
+            month = '0' + month;
+        }
+        var year = inputDate.getFullYear();
+        return day + '-' + month + '-' + year;
+    } else {
+        return ""
+    }
+}
+function formatDateTime(inputDate) {
+    if (inputDate) {
+        const date = new Date(inputDate);
+
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+    } else {
+        return "";
+    }
+}
+function toEmpty(data) {
+    if (data == null || data == undefined) {
+        return "";
+    } else {
+        return data;
+    }
 }

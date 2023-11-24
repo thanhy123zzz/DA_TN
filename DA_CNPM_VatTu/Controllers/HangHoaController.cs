@@ -36,6 +36,7 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var HangHoas = await getListHH();
             ViewBag.HangHoas = HangHoas.Where(x => x.Active == true)
+                .OrderBy(x=>x.TenHh.Trim())
             .Take(10)
             .ToList();
 
@@ -48,10 +49,6 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpGet("show-modal/{id}")]
         public async Task<IActionResult> showEdit(int id)
         {
-            var a = await getListNuocSX();
-            var b = await getListNhomHH();
-            var c = await getListDVT();
-            var d = await getListHangSX();
             var Hh = getListHH().Result.FirstOrDefault(x => x.Id == id);
 
             PartialViewResult partialViewResult = PartialView("FormHH", Hh == null ? new HangHoa() : Hh);
@@ -68,7 +65,7 @@ namespace DA_CNPM_VatTu.Controllers
             List<HangHoa> hhs;
             if (active)
             {
-                hhs = getListHH().Result.AsParallel()
+                hhs = getListHH().Result
                 .Where(x => x.Active == active && (
                 x.MaHh.ToLower().Contains(key.ToLower()) ||
                 x.TenHh?.ToLower().Contains(key.ToLower()) == true ||
@@ -76,6 +73,7 @@ namespace DA_CNPM_VatTu.Controllers
                 x.IdnhhNavigation?.TenNhh.ToLower().Contains(key.ToLower()) == true ||
                 x.IdnsxNavigation?.TenNsx.ToLower().Contains(key.ToLower()) == true ||
                 x.IdhsxNavigation?.TenHsx?.ToLower().Contains(key.ToLower()) == true))
+                .OrderBy(x => x.TenHh.Trim())
                 .ToList();
                 var r = await RenderHhs(hhs);
 
@@ -83,13 +81,14 @@ namespace DA_CNPM_VatTu.Controllers
             }
             else
             {
-                hhs = getListHH().Result.AsParallel()
+                hhs = getListHH().Result
                 .Where(x => x.MaHh.ToLower().Contains(key.ToLower()) ||
                 x.TenHh?.ToLower().Contains(key.ToLower()) == true ||
                 x.IddvtchinhNavigation?.TenDvt.ToLower().Contains(key.ToLower()) == true ||
                 x.IdnhhNavigation?.TenNhh.ToLower().Contains(key.ToLower()) == true ||
                 x.IdnsxNavigation?.TenNsx.ToLower().Contains(key.ToLower()) == true ||
                 x.IdhsxNavigation?.TenHsx?.ToLower().Contains(key.ToLower()) == true)
+                .OrderBy(x => x.TenHh.Trim())
                 .ToList();
                 var r = await RenderHhs(hhs);
 
@@ -103,8 +102,9 @@ namespace DA_CNPM_VatTu.Controllers
             List<HangHoa> hhs;
             if (active)
             {
-                hhs = getListHH().Result.AsParallel()
+                hhs = getListHH().Result
                 .Where(x => x.Active == active)
+                .OrderBy(x => x.TenHh.Trim())
                 .Skip(page * 10)
                 .Take(10)
                 .ToList();
@@ -113,7 +113,8 @@ namespace DA_CNPM_VatTu.Controllers
             }
             else
             {
-                hhs = getListHH().Result.AsParallel()
+                hhs = getListHH().Result
+                    .OrderBy(x => x.TenHh.Trim())
                 .Skip(page * 10)
                 .Take(10)
                 .ToList();
@@ -122,24 +123,25 @@ namespace DA_CNPM_VatTu.Controllers
             }
         }
         [HttpPost("api/dvts")]
-        public async Task<IActionResult> optionDVTS(string key)
+        public async Task<IActionResult> optionDVTS()
         {
-            var dvts = getListDVT().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaDvt + " " + x.TenDvt).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(dvts.Select(x => new
+            return Ok(await _dACNPMContext.DonViTinhs
+                .AsNoTracking()
+                .Where(x => x.Active == true)
+                .Select(x => new
             {
-                ID = x.Id,
-                MaDvt = x.MaDvt,
-                TenDvt = x.TenDvt,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaDvt,
+                ten = x.TenDvt,
+            }).ToListAsync());
         }
         [HttpPost("api/nhhs")]
         public async Task<IActionResult> optionNhh()
         {
-            var nhhs = _dACNPMContext.NhomHangHoas
-                .Where(x => x.Active == true);
-            return Ok(await nhhs.Select(x => new
+            return Ok(await _dACNPMContext.NhomHangHoas
+            .AsNoTracking()
+                .Where(x => x.Active == true)
+            .Select(x => new
             {
                 id = x.Id,
                 ma = x.MaNhh,
@@ -147,44 +149,41 @@ namespace DA_CNPM_VatTu.Controllers
             }).ToListAsync());
         }
         [HttpPost("api/nsx")]
-        public async Task<IActionResult> optionNsx(string key)
+        public async Task<IActionResult> optionNsx()
         {
-            var nhhs = getListNuocSX().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaNsx + " " + x.TenNsx).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(nhhs.Select(x => new
+            return Ok(await _dACNPMContext.NuocSanXuats.AsNoTracking()
+                .Where(x => x.Active == true).Select(x => new
             {
-                ID = x.Id,
-                MaNsx = x.MaNsx,
-                TenNsx = x.TenNsx,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaNsx,
+                ten = x.TenNsx,
+            }).ToListAsync());
         }
         [HttpPost("api/hsx")]
-        public async Task<IActionResult> optionHangSx(string key)
+        public async Task<IActionResult> optionHangSx()
         {
-            var nhhs = getListHangSX().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaHsx + " " + x.TenHsx).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(nhhs.Select(x => new
+            return Ok(await _dACNPMContext.HangSanXuats
+                .AsNoTracking()
+                .Where(x => x.Active == true).Select(x => new
             {
-                ID = x.Id,
-                MaHsx = x.MaHsx,
-                TenHsx = x.TenHsx,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaHsx,
+                ten = x.TenHsx,
+            }).ToListAsync());
         }
 
         [HttpPost("api/bh")]
-        public async Task<IActionResult> optionBH(string key)
+        public async Task<IActionResult> optionBH()
         {
-            var nhhs = getListBaoHanh().Result.AsParallel()
-                .Where(x => x.Active == true && (x.MaBh + " " + x.TenBh).ToLower().Contains(key.ToLower()))
-                .ToList();
-            return Ok(nhhs.Select(x => new
+            return Ok(await _dACNPMContext.BaoHanhs
+                .AsNoTracking()
+                .Where(x => x.Active == true)
+                .Select(x => new
             {
-                ID = x.Id,
-                MaBh = x.MaBh,
-                TenBh = x.TenBh,
-            }).ToList());
+                id = x.Id,
+                ma = x.MaBh,
+                ten = x.TenBh,
+            }).ToListAsync());
         }
 
 
@@ -283,8 +282,9 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 if (active)
                 {
-                    hhs = getListHH().Result.AsParallel()
+                    hhs = getListHH().Result
                     .Where(x => x.Active == active)
+                    .OrderBy(x => x.TenHh.Trim())
                     .Skip(page * 10)
                     .Take(10)
                     .ToList();
@@ -299,7 +299,8 @@ namespace DA_CNPM_VatTu.Controllers
                 }
                 else
                 {
-                    hhs = getListHH().Result.AsParallel()
+                    hhs = getListHH().Result
+                        .OrderBy(x => x.TenHh.Trim())
                     .Skip(page * 10)
                     .Take(10)
                     .ToList();
@@ -317,7 +318,7 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 if (active)
                 {
-                    hhs = getListHH().Result.AsParallel()
+                    hhs = getListHH().Result
                     .Where(x => x.Active == active && (
                     x.MaHh.ToLower().Contains(key.ToLower()) ||
                     x.TenHh.ToLower().Contains(key.ToLower()) ||
@@ -325,6 +326,7 @@ namespace DA_CNPM_VatTu.Controllers
                     x.IdnhhNavigation.TenNhh.ToLower().Contains(key.ToLower()) ||
                     x.IdnsxNavigation.TenNsx.ToLower().Contains(key.ToLower()) ||
                     x.IdhsxNavigation.TenHsx.ToLower().Contains(key.ToLower())))
+                    .OrderBy(x => x.TenHh.Trim())
                     .ToList();
                     r = await RenderHhs(hhs);
                     return Ok(new
@@ -337,7 +339,7 @@ namespace DA_CNPM_VatTu.Controllers
                 }
                 else
                 {
-                    hhs = getListHH().Result.AsParallel()
+                    hhs = getListHH().Result
                     .Where(x =>
                     x.MaHh.ToLower().Contains(key.ToLower()) ||
                     x.TenHh.ToLower().Contains(key.ToLower()) ||
@@ -345,6 +347,7 @@ namespace DA_CNPM_VatTu.Controllers
                     x.IdnhhNavigation.TenNhh.ToLower().Contains(key.ToLower()) ||
                     x.IdnsxNavigation.TenNsx.ToLower().Contains(key.ToLower()) ||
                     x.IdhsxNavigation.TenHsx.ToLower().Contains(key.ToLower()))
+                    .OrderBy(x => x.TenHh.Trim())
                     .ToList();
                     r = await RenderHhs(hhs);
                     return Ok(new
@@ -357,7 +360,7 @@ namespace DA_CNPM_VatTu.Controllers
                 }
             }
         }
-        async Task<string> RenderHhs(List<HangHoa> nhomHhs)
+        async Task<string> RenderHhs(List<HangHoa> Hhs)
         {
             ConcurrentBag<string> str = new ConcurrentBag<string>();
             _nvs = await getListNhanVien();
@@ -365,39 +368,36 @@ namespace DA_CNPM_VatTu.Controllers
 
             string can = "lni lni-trash-can";
             string re = "lni lni-spinner-arrow";
-
-            await Task.Run(() =>
-                Parallel.ForEach(nhomHhs, hh =>
-                {
-                    string t = hh.Active.Value ? can : re;
-                    string btnSua = phanQuyenNhomHH.Sua.Value
-                                    ? $"<button onclick='showModalEdit({hh.Id})' class='text-primary'  data-bs-toggle='modal' data-bs-target='#staticBackdrop'><i class='lni lni-pencil'></i></button>"
-                                    : "";
-                    string btnXoa = phanQuyenNhomHH.Xoa.Value
-                                    ? $"<button onclick='deleteHH({hh.Id})' class='text-danger'><i class='{t}'></i></button>"
-                                    : "";
-                    str.Add($"<tr>" +
-                                    $"<td><div class='product'><div class='image'><img class='image-modal' src='{hh.Avatar}' alt='{hh.TenHh}'></div></div></td>" +
-                                    $"<td>{hh.MaHh}</td>" +
-                                    $"<td>{hh.TenHh}</td>" +
-                                    $"<td>{(hh.IdnhhNavigation == null ? "" : hh.IdnhhNavigation.TenNhh)}</td>" +
-                                    $"<td>{(hh.IdnsxNavigation == null ? "" : hh.IdnsxNavigation.TenNsx)}</td>" +
-                                    $"<td>{(hh.IdhsxNavigation == null ? "" : hh.IdhsxNavigation.TenHsx)}</td>" +
-                                    $"<td>{(hh.IddvtchinhNavigation == null ? "" : hh.IddvtchinhNavigation.TenDvt)}</td>" +
-                                    $"<td>{(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)}</td>" +
-                                    $"<td>{getNhanVien(hh.Nvtao).TenNv}</td>" +
-                                    $"<td>{formatDay(hh.NgayTao)}</td>" +
-                                    $"<td>{getNhanVien(hh.Nvsua).TenNv}</td>" +
-                                    $"<td>{formatDay(hh.NgaySua)}</td>" +
-                                    $"<td class='last-td-column'>" +
-                                        $"<div class='action justify-content-end'>" +
-                                            $"{btnSua}" +
-                                            $"{btnXoa}" +
-                                        $"</div>" +
-                                    $"</td>" +
-                              $"</tr>");
-                }
-            ));
+            Hhs.ForEach(hh =>
+            {
+                string t = hh.Active.Value ? can : re;
+                string btnSua = phanQuyenNhomHH.Sua.Value
+                                ? $"<button onclick='showModalEdit({hh.Id})' class='text-primary'  data-bs-toggle='modal' data-bs-target='#staticBackdrop'><i class='lni lni-pencil'></i></button>"
+                                : "";
+                string btnXoa = phanQuyenNhomHH.Xoa.Value
+                                ? $"<button onclick='deleteHH({hh.Id})' class='text-danger'><i class='{t}'></i></button>"
+                                : "";
+                str.Add($"<tr>" +
+                                $"<td><div class='product'><div class='image'><img class='image-modal' src='{hh.Avatar}' alt='{hh.TenHh}'></div></div></td>" +
+                                $"<td>{hh.MaHh}</td>" +
+                                $"<td>{hh.TenHh}</td>" +
+                                $"<td>{(hh.IdnhhNavigation == null ? "" : hh.IdnhhNavigation.TenNhh)}</td>" +
+                                $"<td>{(hh.IdnsxNavigation == null ? "" : hh.IdnsxNavigation.TenNsx)}</td>" +
+                                $"<td>{(hh.IdhsxNavigation == null ? "" : hh.IdhsxNavigation.TenHsx)}</td>" +
+                                $"<td>{(hh.IddvtchinhNavigation == null ? "" : hh.IddvtchinhNavigation.TenDvt)}</td>" +
+                                $"<td>{(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)}</td>" +
+                                $"<td>{getNhanVien(hh.Nvtao).TenNv}</td>" +
+                                $"<td>{formatDay(hh.NgayTao)}</td>" +
+                                $"<td>{getNhanVien(hh.Nvsua).TenNv}</td>" +
+                                $"<td>{formatDay(hh.NgaySua)}</td>" +
+                                $"<td class='last-td-column'>" +
+                                    $"<div class='action justify-content-end'>" +
+                                        $"{btnSua}" +
+                                        $"{btnXoa}" +
+                                    $"</div>" +
+                                $"</td>" +
+                          $"</tr>");
+            });
             string result = string.Join("", str);
             return result;
         }

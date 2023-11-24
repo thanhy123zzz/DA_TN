@@ -8,75 +8,66 @@
         }
         else
         {
-            return d.Value.ToString("#,##0.00");
+            return d.Value.ToString("#,##0.##");
         }
     }
 }
-<div class="card-style m-30" style="border: none;">
-	<h6 class="text-center">Thông tin</h6>
-	<div class="form-group input-style-1">
+<form class="card-style m-30" style="border: none;" id="formUpdate">
+	<h6 class="text-center mb-3">Thông tin</h6>
+    <div class="col-12" style="margin-bottom: 15px">
         <label for="DVT">Đơn vị tính</label>
-             <div class="select-position d-flex justify-content-center">
-                <select tabindex="1" id="DVT" class="form-select w-100 my-selectize" required>
-                    @if(Model.IddvtNavigation != null){
-                        <option value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
-                     }
-                </select>
-            </div>
+        <select tabindex="1" id="DVT" class="form-select w-100 my-selectize" required>
+            @if (Model.IddvtNavigation != null)
+            {
+                <option value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
+            }
+        </select>
     </div>
     <div class="input-style-1">
-        <label for="Slquydoi">SL quy đổi</label>
-        <input tabindex="2" type="text" value="@toDecimal(Model.SlquyDoi)" id="Slquydoi" placeholder="Số lượng quy đổi" class="text-decimal">
+        <label for="Slquydoi required">SL quy đổi</label>
+        <input autocomplete="off" required tabindex="2" type="text" value="@toDecimal(Model.SlquyDoi)" id="Slquydoi" placeholder="Số lượng quy đổi" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
-        <label for="TLLe">Tỉ lệ lẻ</label>
-        <input tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ"  class="text-decimal">
+        <label for="TLLe required">Tỉ lệ lẻ</label>
+        <input autocomplete="off" required tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
-        <label for="TLSi">Tỉ lệ sỉ</label>
-        <input tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
+        <label for="TLSi required">Tỉ lệ sỉ</label>
+        <input autocomplete="off" required tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
-        <label for="GBLe">Giá bán lẻ</label>
-        <input tabindex="5" type="text" value="@toDecimal(Model.GiaBanLe)" id="GBLe" placeholder="Giá bán lẻ" class="text-decimal">
+        <label for="GBLe required">Giá bán lẻ</label>
+        <input autocomplete="off" required tabindex="5" type="text" value="@toDecimal(Model.GiaBanLe)" id="GBLe" placeholder="Giá bán lẻ" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
-        <label for="GBSi">Giá bán sỉ</label>
-        <input tabindex="6" type="text" value="@toDecimal(Model.GiaBanSi)" id="GBSi" placeholder="Giá bán sỉ" class="text-decimal">
+        <label for="GBSi required">Giá bán sỉ</label>
+        <input autocomplete="off" required tabindex="6" type="text" value="@toDecimal(Model.GiaBanSi)" id="GBSi" placeholder="Giá bán sỉ" class="text-decimal form-control">
     </div>
-</div>
+</form>
 <script>
-
-$('#DVT').selectize({
-  maxOptions: 10,
-  onFocus: function($dropdown) {
-      $('.my-selectize').not(this.$input).each(function() {
-      if (this.selectize) {
-        this.selectize.close();
-        this.selectize.blur();
-      }
-    });
-  },
-  valueField: "id",
-  labelField: "tenDvt",
-  searchField: ["tenDvt", "maDvt"],
-  placeholder: '-- Đơn vị tính --',
-  allowEmptyOption: false,
-  preload: true,
-  load: function(query, callback) {
-      if(query!==""){
-        $.ajax({
-          data: "key="+query + "&idHh="+@Html.Raw(ViewBag.IdHH),
-          type: 'POST',
-          url: '/QuyDinh/HHDVT/api/dvts'
-        }).done(function(response) {
-          callback(response);
+    $.ajax({
+        data: "idHh=" + @Html.Raw(ViewBag.IdHH) + "&idDvt=" + @Html.Raw(Model.Iddvt),
+        type: 'POST',
+        url: '/QuyDinh/HHDVT/api/dvts'
+    }).done(function (response) {
+        $('#DVT').selectize({
+            maxOptions: 50,
+            onFocus: function ($dropdown) {
+                $('.my-selectize').not(this.$input).each(function () {
+                    if (this.selectize) {
+                        this.selectize.close();
+                        this.selectize.blur();
+                    }
+                });
+            },
+            valueField: "id",
+            labelField: "ten",
+            searchField: ["ten", "ma"],
+            placeholder: '-- Đơn vị tính --',
+            loadThrottle: 400,
+            options: response
         });
-      }
-  },
-  loadThrottle: 400,
-});
-
+    });
     formatNumberFloatWithElement($('.text-decimal'));
 
 $('.text-decimal').focus(function(){

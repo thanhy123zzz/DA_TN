@@ -16,6 +16,7 @@ namespace DA_CNPM_VatTu.Models.MapData
         public bool? Active { get; set; }
         public int Idcn { get; set; }
         public int Idncc { get; set; }
+        public List<int>? DaXoas { get; set; }
         public virtual List<ChiTietPhieuNhapMap> ChiTietPhieuNhaps { get; set; }
     }
 }

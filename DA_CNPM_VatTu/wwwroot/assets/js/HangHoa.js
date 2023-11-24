@@ -261,7 +261,7 @@ function deleteHH(id) {
                 $("#loader").hide();
                 setTimeout(function () {
                     $('#toast').hide();
-                    $('#toast').removeClass(data.color);
+                    $('#toast').removeClass(result.color);
                 }, 5000);
 
             },
@@ -284,6 +284,9 @@ function changeActive() {
             $("#loader").hide();
             $('#tBody').append(result);
             contentTable = $('#tBody').children();
+            $("#content").append(pages);
+            $('#search').val('');
+            $("#btnBack").replaceWith('<button title=Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light m-2"><i class="lni lni-keyword-research d-flex"></i></button>');
         },
         error: function (loi) {
             console.log(loi);

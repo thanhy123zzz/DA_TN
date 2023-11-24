@@ -1,4 +1,6 @@
-﻿$(document).ready(function () {
+﻿var _idPn = 0;
+var _daXoa = [];
+$(document).ready(function () {
     var datas = [
         {
             el: $('.cbNhaCC'),
@@ -15,8 +17,11 @@
 
     $(document).on('click', '.btn-remove-ct', function () {
         var tr = $(this).closest('tr');
-
-        if (!(tr.is(":last-child") && tr.is(":first-child"))) {
+        var id = tr.find('input[name="Id"]').val();
+        if (id) {
+            _daXoa.push(parseInt(id));
+        }
+        if (!tr.is(":last-child")) {
             tr.find('select').each(function () {
                 if (this.selectize) {
                     this.selectize.destroy();
@@ -102,14 +107,14 @@
             // Lắng nghe sự kiện click trên nút có class "action-button"
             var phieuNhapCts = [];
             var check = true;
-            $("#tBodyCtpn tr").each(function () {
+            $("#tBodyCtpn tr[data-daxuat='false']").each(function () {
                 var tr = $(this);
                 var idHh = tr.find('select[name="Idhh"]').val();
                 if (idHh) {
                     tr.removeClass('bg-danger');
                     var slNhap = tr.find('input[name="Sl"]').inputmask('unmaskedvalue');
-                    var chiecKhau = tr.find('input[name="Cktm"]').inputmask('unmaskedvalue');
-                    var thueVat = tr.find('input[name="Thue"]').inputmask('unmaskedvalue');
+                    /*var chiecKhau = tr.find('input[name="Cktm"]').inputmask('unmaskedvalue');
+                    var thueVat = tr.find('input[name="Thue"]').inputmask('unmaskedvalue');*/
                     if (slNhap) {
                         tr.find('input[name="Sl"]').closest('td').removeClass('bg-danger');
 
@@ -120,7 +125,7 @@
                             tr.find('input[name="Sl"]').closest('td').addClass('bg-danger');
                         }
                         check = false;
-                        showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
+                        showBtn($('#btnTaoPhieu'), 'Lưu');
                     }
                 } else {
                     if (!tr.is(":last-child")) {
@@ -128,35 +133,44 @@
                     }
                 }
             });
-            if (phieuNhapCts.length == 0) {
+            if (phieuNhapCts.length == 0 && _idPn == 0) {
                 check = false;
             }
             if (check) {
                 var phieuNhap = {
+                    Id: _idPn,
                     Idncc: $('#nhaCC').val(),
                     SoHd: $('#soHD').val(),
                     NgayTao: $('#NgayNhap').val(),
                     NgayHd: $('#ngayHD').val(),
                     GhiChu: $('#ghiChu').val(),
                     ChiTietPhieuNhaps: phieuNhapCts,
+                    DaXoas: _daXoa
                 }
+                console.log(phieuNhap);
                 $.ajax({
                     type: "post",
-                    url: "/QuanLy/NhapKho/add-pn",
+                    url: "/QuanLy/NhapKho/update-pn",
                     data: JSON.stringify(phieuNhap),
                     contentType: "application/json",
                     success: function (response) {
                         showToast(response.message, response.statusCode);
-                        showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
-                        xoaTrangPhieuXuatKho()
+                        showBtn($('#btnTaoPhieu'), 'Lưu');
+                        if (response.statusCode == 200) {
+                            if (!_idPn) {
+                                xoaTrangPhieuXuatKho();
+                            } else {
+                                showEditPhieuNhap(response.result);
+                            }
+                        }
                     },
                     error: function (error) {
                         console.log(error);
-                        showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
+                        showBtn($('#btnTaoPhieu'), 'Lưu');
                     }
                 });
             } else {
-                showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
+                showBtn($('#btnTaoPhieu'), 'Lưu');
             }
         }
     });
@@ -206,13 +220,52 @@
         });
     });
     $(document).on('change', 'select.dvt', function () {
-        
+
         var tr = $(this).closest('tr');
         var slqd = $(this).find('option:selected').data('slqd');
-        
+
         tr.find('input.slqd').val(slqd);
         tr.find('input.SlDvt').keyup();
-    })
+    });
+
+    $(document).on('click', '.btn-remove-pn', function () {
+        if (confirm("Bạn có muốn thực hiện thao tác này?")) {
+            var id = $(this).val();
+            var tr = $(this).closest('tr');
+            if (id) {
+                $.ajax({
+                    type: "post",
+                    url: "/QuanLy/NhapKho/removePhieuNhap",
+                    data: "idPN=" + id,
+                    success: function (result) {
+                        showToast(result.message, result.statusCode);
+                        if (result.statusCode == 200) {
+                            tr.remove();
+                        }
+                    },
+                    error: function () {
+                        alert("Fail");
+                    }
+                });
+            }
+        }
+    });
+    $(document).on('click', '.btn-edit-pn', function () {
+        var id = $(this).val();
+        if (id) {
+            $.ajax({
+                type: "post",
+                url: "/QuanLy/NhapKho/showEditPhieuNhap",
+                data: "idPN=" + id,
+                success: function (result) {
+                    showEditPhieuNhap(result);
+                },
+                error: function () {
+                    alert("Fail");
+                }
+            });
+        }
+    });
 });
 function loadTable() {
     $.ajax({
@@ -242,11 +295,17 @@ function loadTable() {
     });
 }
 function xoaTrangPhieuXuatKho() {
+    _idPn = 0;
+    _daXoa = [];
+    $('#TienHang').val(0);
+    $('#TienCK').val(0);
+    $('#TienThue').val(0);
+    $('#TienThanhToan').val(0);
     $.ajax({
         type: "post",
         url: "/QuanLy/NhapKho/api/getSoPhieuNhap",
         success: function (result) {
-            $('#inputText').val(result);
+            $('#maPhieu').val(result);
         },
         error: function () {
             alert("Fail");
@@ -271,14 +330,16 @@ function xoaTrangPhieuXuatKho() {
     loadTable();
 }
 function getRowPhieuNhapCt() {
-    return `<tr>
-        <td><select class="form-select form-table" name="Idhh" style="width: 300px;"></select></td>
+    return `<tr data-daxuat="false">
+        <td><select class="form-select form-table" name="Idhh" style="width: 300px;"></select>
+        <input type="hidden" value="0" name="Id"/>
+        </td>
         <td>
-            <select class="select-control form-table dvt" style="width: 80px; height: 30px">
+            <select class="select-control form-table dvt" style="width: 80px; height: 30px" name="Iddvtnhap">
                 
             </select>
         </td>
-        <td><input autocomplete="off" class="form-control form-table input-number-float slqd" style="min-width: 60px;" readonly/></td>
+        <td><input autocomplete="off" class="form-control form-table input-number-float slqd" name="Slqd" style="min-width: 60px;" readonly/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float SlDvt" style="min-width: 80px;"/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float DonGiaDvt" style="min-width: 120px;"/></td>
         <td><input autocomplete="off" class="form-control form-table ThanhTien input-number-float" style="min-width: 140px;"/></td>
@@ -298,7 +359,6 @@ function getRowPhieuNhapCt() {
             </div>
         </td>
     </tr>`;
-    
 }
 function configRowPhieuNhapCt(tr, hhs) {
     var cbHangHoa = tr.find('select[name="Idhh"]');
@@ -435,4 +495,136 @@ function cancelXemPhieu() {
     $('#tabXemPhieu').addClass('d-lg-none');
     $('#bordered-justified-profile').addClass('active');
     $('#bordered-justified-profile').addClass('show');
+}
+
+function showEditPhieuNhap(result) {
+    console.log(result)
+    _idPn = result.id;
+    _daXoa = [];
+    $('#maPhieu').val(result.soPn);
+    $('#nhaCC')[0].selectize.setValue(result.idncc);
+    $('#NgayNhap').val(formatDateTime(result.ngayTao));
+    $('#soHD').val(toEmpty(result.soHd));
+    $('#ngayHD').val(formatDay(result.ngayHd));
+    $('#ghiChu').val(toEmpty(result.ghiChu));
+
+    $('#tBodyCtpn tr').each(function () {
+        var tr = $(this);
+
+        tr.find('select').each(function () {
+            if (this.selectize) {
+                this.selectize.destroy();
+            }
+        });
+    });
+    $('#tBodyCtpn').empty();
+
+    $.ajax({
+        type: 'POST',
+        url: '/QuanLy/NhapKho/api/hhs'
+    }).done(function (response) {
+        result.chiTietPhieuNhaps.forEach(function (item, index) {
+            var daXuat = item.hangTonKhos[0].slcon != item.sl;
+            var hh = response.find(function (data) {
+                return data.id == item.idhh;
+            });
+            var dvts = ``;
+            hh.dvts.unshift(hh.dvtChinh);
+            hh.dvts.forEach(function (data) {
+                dvts += `<option ${(data.id == item.iddvtnhap ? "selected" : "")} value="${data.id}" data-slqd="${data.slqd}">${data.ten}</option>`
+            });
+            var soLos = [];
+            hh.soLos.forEach(function (item) {
+                soLos.push({
+                    soLo: item
+                });
+            });
+
+            $('#tBodyCtpn').append(getRowPhieuNhapCtCoDuLieu(item, dvts, daXuat));
+            var tr = $('#tBodyCtpn tr:last');
+            var cbSoLo = tr.find('select[name="SoLo"]');
+            cbSoLo.selectize({
+                placeholder: "-- Số lô --",
+                options: soLos,
+                valueField: "soLo",
+                labelField: "soLo",
+                searchField: ["soLo"],
+                create: true,
+                dropdownParent: '#dropdow-show',
+                closeAfterSelect: 0,
+                items: [item.soLo],
+                onDropdownOpen: function ($dropdown) {
+                    showDropdownMenu(cbSoLo, $dropdown);
+                },
+                onFocus: function ($dropdown) {
+                    $('.my-selectize-2').not(this.$input).each(function () {
+                        if (this.selectize) {
+                            this.selectize.close();
+                            this.selectize.blur();
+                        }
+                    });
+                },
+            });
+            configRowPhieuNhapCt(tr, response);
+            if (index == result.chiTietPhieuNhaps.length - 1) {
+                tr.find('.SlDvt').keyup();
+            }
+            if (daXuat) {
+                tr.find('select').each(function () {
+                    if (this.selectize) {
+                        this.selectize.disable();
+                    } else {
+                        this.disabled = true;
+                    }
+                });
+                tr.find('input').prop('readonly', true);
+                tr.find('textarea').prop('readonly', true);
+                tr.find('button').prop('disabled', true);
+            }
+        })
+        loadTable();
+    });
+
+    var tabLapPhieu = document.getElementById('home-tab');
+    var tab = new bootstrap.Tab(tabLapPhieu);
+    tab.show();
+}
+function getRowPhieuNhapCtCoDuLieu(data, dvts, daXuat) {
+    return `<tr data-daxuat="${daXuat}">
+        <td>
+        <select class="form-select form-table" name="Idhh" style="width: 300px;">
+            <option value="${data.idhh}"></option>
+        </select>
+        <input type="hidden" value="${data.id}" name="Id"/>
+        </td>
+        <td>
+            <select class="select-control form-table dvt" name="Iddvtnhap" style="width: 80px; height: 30px">
+                ${dvts}
+            </select>
+        </td>
+        <td><input value="${data.slqd}" autocomplete="off" class="form-control form-table input-number-float slqd" name="Slqd" style="min-width: 60px;" readonly/></td>
+        <td><input value="${data.sl / data.slqd}" autocomplete="off" class="form-control form-table input-number-float SlDvt" style="min-width: 80px;"/></td>
+        <td><input value="${data.donGia * data.slqd}" autocomplete="off" class="form-control form-table input-number-float DonGiaDvt" style="min-width: 120px;"/></td>
+        <td><input value="${data.sl * data.donGia}" autocomplete="off" class="form-control form-table ThanhTien input-number-float" style="min-width: 140px;"/></td>
+        <td>
+        <select class="form-select form-table" name="SoLo" style="width: 120px;">
+        </select></td>
+        <td><input value="${data.cktm}" autocomplete="off" class="form-control form-table input-number-float" name="Cktm" max="100" style="min-width: 60px;"/></td>
+        <td><input value="${data.thue}" autocomplete="off" class="form-control form-table input-number-float" name="Thue" max="100" style="min-width: 60px;"/></td>
+        <td><input value="${formatDay(data.nsx)}" autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
+        <td><input value="${formatDay(data.hsd)}" autocomplete="off" class="form-control form-table date-sort-mask" name="Hsd" style="min-width: 110px;"/></td>
+        <td><textarea autocomplete="off" class="form-control form-table" name="GhiChu" style="min-width: 220px;" rows="1">${data.ghiChu}</textarea></td>
+        <td><input value="${data.sl}" autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;" readonly/></td>
+        <td><input value="${data.donGia}" autocomplete="off" class="form-control form-table input-number-float" name="DonGia" style="min-width: 120px;" readonly/></td>
+        <td class='last-td-column'>
+            <div class="action justify-content-center">
+                <button class="text-danger btn-remove-ct">
+                    <i class="lni lni-trash-can"></i>
+                </button>
+            </div>
+        </td>
+    </tr>`;
+}
+function offTabNhap() {
+    $('#tabXemPhieu').addClass('d-none');
 }

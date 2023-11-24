@@ -153,92 +153,86 @@ $(document).on('focus', '.my-selectize, .input-style-1 input[type="text"]', func
 });
 
 $('#btnModal').on('click', function (e) {
-    var invalid = false;
-    $('.my-selectize').each(function () {
-        if (this.selectize) {
-            if ($(this).val() === "") {
-                $(this).nextAll().addClass("is-invalid");
-                invalid = true;
+    var form = document.getElementById('formUpdate');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        document.getElementById('Nnv').selectize.$control[0].classList.add('is-invalid');
+    } else {
+        form.classList.remove('was-validated');
+        document.getElementById('Nnv').selectize.$control[0].classList.remove('is-invalid');
+        var image = $('#Avatar').get(0).files[0];
+        var formData = new FormData();
+        formData.append('FormFile', image);
+
+        formData.append('NhanVien.Id', idModel);
+        formData.append('NhanVien.MaNv', $('#Ma').val());
+        formData.append('NhanVien.TenNv', $('#Ten').val());
+        formData.append('NhanVien.DiaChi', $('#DiaChi').val());
+        formData.append('NhanVien.Email', $('#Email').val());
+        formData.append('NhanVien.Sdt', $('#Sdt').val());
+        formData.append('NhanVien.QueQuan', $('#QueQuan').val());
+        formData.append('NhanVien.Cccd', $('#Cccd').val());
+        formData.append('NhanVien.GioiTinh', $('#GioiTinh').val());
+        formData.append('NgaySinh', $('#NgaySinh').val());
+        formData.append('NhanVien.Idnnv', $('#Nnv').val());
+        formData.append('Account.TaiKhoan', $('#TaiKhoan').val());
+        formData.append('Account.MatKhau', $('#MatKhau').val());
+
+        $.ajax({
+            url: "/DanhMuc/NhanVien/update-nv",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (result) {
+                $("#loader").show();
+                $('#tBody').empty();
+                $('#staticBackdrop').modal('hide');
+
+                $('#toast').addClass(result.color);
+                $('#toastContent').text(result.message);
+                $('#toast').show();
+
+                if ($('#search').val() === "") {
+                    $.ajax({
+                        type: "post",
+                        url: "/DanhMuc/NhanVien/change-page",
+                        data: "active=" + active + "&page=" + page,
+                        success: function (result) {
+
+                            $('#tBody').append(result);
+                            $("#loader").hide();
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
+                else {
+                    $.ajax({
+                        type: "post",
+                        url: "/DanhMuc/NhanVien/searchTableNV",
+                        data: "active=" + active + "&key=" + $('#search').val(),
+                        success: function (result) {
+                            $("#loader").hide();
+                            $('#tBody').append(result);
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
+
+                setTimeout(function () {
+                    $('#toast').hide();
+                    $('#toast').removeClass(result.color);
+                }, 5000);
+            },
+            error: function (loi) {
+                console.log(loi)
             }
-        }
-    });
-    if (invalid) {
-        return;
+        });
     }
-
-    var image = $('#Avatar').get(0).files[0];
-    var formData = new FormData();
-    formData.append('FormFile', image);
-
-    formData.append('NhanVien.Id', idModel);
-    formData.append('NhanVien.MaNv', $('#Ma').val());
-    formData.append('NhanVien.TenNv', $('#Ten').val());
-    formData.append('NhanVien.DiaChi', $('#DiaChi').val());
-    formData.append('NhanVien.Email', $('#Email').val());
-    formData.append('NhanVien.Sdt', $('#Sdt').val());
-    formData.append('NhanVien.QueQuan', $('#QueQuan').val());
-    formData.append('NhanVien.Cccd', $('#Cccd').val());
-    formData.append('NhanVien.GioiTinh', $('#GioiTinh').val());
-    formData.append('NgaySinh', $('#NgaySinh').val());
-    formData.append('NhanVien.Idnnv', $('#Nnv').val());
-    formData.append('Account.TaiKhoan', $('#TaiKhoan').val());
-    formData.append('Account.MatKhau', $('#MatKhau').val());
-
-    $.ajax({
-        url: "/DanhMuc/NhanVien/update-nv",
-        type: "POST",
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function (result) {
-            $("#loader").show();
-            $('#tBody').empty();
-            $('#staticBackdrop').modal('hide');
-
-            $('#toast').addClass(result.color);
-            $('#toastContent').text(result.message);
-            $('#toast').show();
-
-            if ($('#search').val() === "") {
-                $.ajax({
-                    type: "post",
-                    url: "/DanhMuc/NhanVien/change-page",
-                    data: "active=" + active + "&page=" + page,
-                    success: function (result) {
-
-                        $('#tBody').append(result);
-                        $("#loader").hide();
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
-            else {
-                $.ajax({
-                    type: "post",
-                    url: "/DanhMuc/NhanVien/searchTableNV",
-                    data: "active=" + active + "&key=" + $('#search').val(),
-                    success: function (result) {
-                        $("#loader").hide();
-                        $('#tBody').append(result);
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
-
-            setTimeout(function () {
-                $('#toast').hide();
-                $('#toast').removeClass(result.color);
-            }, 5000);
-        },
-        error: function (loi) {
-            console.log(loi)
-        }
-    });
-
 });
 
 function deleteNV(id) {
