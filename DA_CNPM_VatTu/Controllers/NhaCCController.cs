@@ -30,9 +30,10 @@ namespace DA_CNPM_VatTu.Controllers
         [HttpGet]
         public async Task<IActionResult> NhaCC()
         {
-            ViewBag.NhaCCs = getListNhaCC().Result.Where(x => x.Active == true)
-            .Take(10)
-            .ToList();
+            ViewBag.NhaCCs = await _dACNPMContext.NhaCungCaps.Where(x => x.Active == true)
+                .OrderBy(x=>x.TenNcc)
+            .Take(15)
+            .ToListAsync();
 
             var pqcn = await GetPhanQuyenNhaCC();
             ViewBag.phanQuyenNhaCC = pqcn;
@@ -46,21 +47,23 @@ namespace DA_CNPM_VatTu.Controllers
             List<NhaCungCap> nccs;
             if (active)
             {
-                nccs = getListNhaCC().Result.AsParallel()
+                nccs = await _dACNPMContext.NhaCungCaps
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
-                .ToList();
-                var r = await RenderDvts(nccs);
+                .OrderBy(x => x.TenNcc)
+                .Skip(page * 15)
+                .Take(15)
+                .ToListAsync();
+                var r = await RenderNccs(nccs);
                 return r;
             }
             else
             {
-                nccs = getListNhaCC().Result.AsParallel()
-                .Skip(page * 10)
-                .Take(10)
-                .ToList();
-                var r = await RenderDvts(nccs);
+                nccs = await _dACNPMContext.NhaCungCaps
+                    .OrderBy(x => x.TenNcc)
+                .Skip(page * 15)
+                .Take(15)
+                .ToListAsync();
+                var r = await RenderNccs(nccs);
                 return r;
             }
         }
@@ -68,43 +71,45 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<string> searchNhaCC(string key, bool active)
         {
             List<NhaCungCap> nsxs;
+            key = key;
             if (active)
             {
-                nsxs = getListNhaCC().Result.AsParallel()
-                .Where(x => x.Active == active && (
-                x.MaNcc.ToLower().Contains(key.ToLower()) ||
-                x.TenNcc?.ToLower().Contains(key.ToLower()) == true ||
-                x.DiaChi?.ToLower().Contains(key.ToLower()) == true ||
-                x.Sdt?.ToLower().Contains(key.ToLower()) == true ||
-                x.Email?.ToLower().Contains(key.ToLower()) == true ||
-                x.GhiChu?.ToLower().Contains(key.ToLower()) == true))
-                .ToList();
-                var r = await RenderDvts(nsxs);
+                nsxs = await _dACNPMContext.NhaCungCaps
+                .Where(x => ((x.MaNcc != null && x.MaNcc.ToLower().Contains(key)) ||
+                                               (x.DiaChi != null && x.DiaChi.ToLower().Contains(key)) ||
+                                               (x.Sdt != null && x.Sdt.ToLower().Contains(key)) ||
+                                               (x.Email != null && x.Email.ToLower().Contains(key)) ||
+                                               (x.GhiChu != null && x.GhiChu.ToLower().Contains(key)) ||
+                                               (x.TenNcc != null && x.TenNcc.ToLower().Contains(key))) &&
+                                                x.Active == true)
+                .OrderBy(x => x.TenNcc)
+                .ToListAsync();
+                var r = await RenderNccs(nsxs);
 
                 return r;
             }
             else
             {
-                nsxs = getListNhaCC().Result.AsParallel()
-                .Where(x =>
-                x.MaNcc.ToLower().Contains(key.ToLower()) ||
-                x.TenNcc?.ToLower().Contains(key.ToLower()) == true ||
-                x.DiaChi?.ToLower().Contains(key.ToLower()) == true ||
-                x.Sdt?.ToLower().Contains(key.ToLower()) == true ||
-                x.Email?.ToLower().Contains(key.ToLower()) == true ||
-                x.GhiChu?.ToLower().Contains(key.ToLower()) == true
-                )
-                .ToList();
-                var r = await RenderDvts(nsxs);
+                nsxs = await _dACNPMContext.NhaCungCaps
+                .Where(x => ((x.MaNcc != null && x.MaNcc.ToLower().Contains(key)) ||
+                                               (x.DiaChi != null && x.DiaChi.ToLower().Contains(key)) ||
+                                               (x.Sdt != null && x.Sdt.ToLower().Contains(key)) ||
+                                               (x.Email != null && x.Email.ToLower().Contains(key)) ||
+                                               (x.GhiChu != null && x.GhiChu.ToLower().Contains(key)) ||
+                                               (x.TenNcc != null && x.TenNcc.ToLower().Contains(key))) &&
+                                                x.Active == true)
+                .OrderBy(x => x.TenNcc)
+                .ToListAsync();
+                var r = await RenderNccs(nsxs);
 
                 return r;
             }
 
         }
         [HttpGet("show-modal/{id}")]
-        public IActionResult showEdit(int id)
+        public async Task<IActionResult> showEdit(int id)
         {
-            var nhaCC = getListNhaCC().Result.Find(x => x.Id == id);
+            var nhaCC = await _dACNPMContext.NhaCungCaps.FindAsync(id);
 
             PartialViewResult partialViewResult = PartialView("FormNhaCC", nhaCC == null ? new NhaCungCap() : nhaCC);
             string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
@@ -131,7 +136,7 @@ namespace DA_CNPM_VatTu.Controllers
                 }
                 else
                 {
-                    var nhacc = getListNhaCC().Result.Find(x => x.Id == ncc.Id);
+                    var nhacc = await _dACNPMContext.NhaCungCaps.FindAsync(ncc.Id);
 
                     nhacc.MaNcc = ncc.MaNcc;
                     nhacc.TenNcc = ncc.TenNcc;
@@ -170,7 +175,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> remove(int Id, bool active, int page, string key)
         {
             int _userId = int.Parse(User.Identity.Name);
-            var itemDB = getListNhaCC().Result.Find(x => x.Id == Id);
+            var itemDB = await _dACNPMContext.NhaCungCaps.FindAsync(Id);
             itemDB.Active = !itemDB.Active;
             itemDB.Nvsua = int.Parse(User.Identity.Name);
             itemDB.NgaySua = DateTime.Now;
@@ -184,14 +189,16 @@ namespace DA_CNPM_VatTu.Controllers
             string r;
             if (key == null)
             {
+                key = key.ToLower();
                 if (active)
                 {
-                    nsxs = getListNhaCC().Result
+                    nsxs = await _dACNPMContext.NhaCungCaps
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
-                    .ToList();
-                    r = await RenderDvts(nsxs);
+                    .OrderBy(x => x.TenNcc)
+                    .Skip(page * 15)
+                    .Take(15)
+                    .ToListAsync();
+                    r = await RenderNccs(nsxs);
                     return Ok(new
                     {
                         statusCode = 200,
@@ -202,11 +209,12 @@ namespace DA_CNPM_VatTu.Controllers
                 }
                 else
                 {
-                    nsxs = getListNhaCC().Result
-                    .Skip(page * 10)
-                    .Take(10)
-                    .ToList();
-                    r = await RenderDvts(nsxs);
+                    nsxs = await _dACNPMContext.NhaCungCaps
+                        .OrderBy(x => x.TenNcc)
+                    .Skip(page * 15)
+                    .Take(15)
+                    .ToListAsync();
+                    r = await RenderNccs(nsxs);
                     return Ok(new
                     {
                         statusCode = 200,
@@ -220,16 +228,17 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 if (active)
                 {
-                    nsxs = getListNhaCC().Result
-                    .Where(x => x.Active == active && (
-                x.MaNcc.ToLower().Contains(key.ToLower()) ||
-                x.TenNcc?.ToLower().Contains(key.ToLower()) == true ||
-                x.DiaChi?.ToLower().Contains(key.ToLower()) == true ||
-                x.Sdt?.ToLower().Contains(key.ToLower()) == true ||
-                x.Email?.ToLower().Contains(key.ToLower()) == true ||
-                x.GhiChu?.ToLower().Contains(key.ToLower()) == true))
-                    .ToList();
-                    r = await RenderDvts(nsxs);
+                    nsxs = await _dACNPMContext.NhaCungCaps
+                    .Where(x => ((x.MaNcc != null && x.MaNcc.ToLower().Contains(key)) ||
+                                               (x.DiaChi != null && x.DiaChi.ToLower().Contains(key)) ||
+                                               (x.Sdt != null && x.Sdt.ToLower().Contains(key)) ||
+                                               (x.Email != null && x.Email.ToLower().Contains(key)) ||
+                                               (x.GhiChu != null && x.GhiChu.ToLower().Contains(key)) ||
+                                               (x.TenNcc != null && x.TenNcc.ToLower().Contains(key))) &&
+                                                x.Active == true)
+                    .OrderBy(x => x.TenNcc)
+                    .ToListAsync();
+                    r = await RenderNccs(nsxs);
                     return Ok(new
                     {
                         statusCode = 200,
@@ -240,17 +249,17 @@ namespace DA_CNPM_VatTu.Controllers
                 }
                 else
                 {
-                    nsxs = getListNhaCC().Result
-                    .Where(x =>
-                x.MaNcc.ToLower().Contains(key.ToLower()) ||
-                x.TenNcc?.ToLower().Contains(key.ToLower()) == true ||
-                x.DiaChi?.ToLower().Contains(key.ToLower()) == true ||
-                x.Sdt?.ToLower().Contains(key.ToLower()) == true ||
-                x.Email?.ToLower().Contains(key.ToLower()) == true ||
-                x.GhiChu?.ToLower().Contains(key.ToLower()) == true
-                    )
-                    .ToList();
-                    r = await RenderDvts(nsxs);
+                    nsxs = await _dACNPMContext.NhaCungCaps
+                    .Where(x => ((x.MaNcc != null && x.MaNcc.ToLower().Contains(key)) ||
+                                               (x.DiaChi != null && x.DiaChi.ToLower().Contains(key)) ||
+                                               (x.Sdt != null && x.Sdt.ToLower().Contains(key)) ||
+                                               (x.Email != null && x.Email.ToLower().Contains(key)) ||
+                                               (x.GhiChu != null && x.GhiChu.ToLower().Contains(key)) ||
+                                               (x.TenNcc != null && x.TenNcc.ToLower().Contains(key))) &&
+                                                x.Active == true)
+                    .OrderBy(x => x.TenNcc)
+                    .ToListAsync();
+                    r = await RenderNccs(nsxs);
                     return Ok(new
                     {
                         statusCode = 200,
@@ -261,7 +270,7 @@ namespace DA_CNPM_VatTu.Controllers
                 }
             }
         }
-        async Task<string> RenderDvts(List<NhaCungCap> nhaCCs)
+        async Task<string> RenderNccs(List<NhaCungCap> nhaCCs)
         {
             ConcurrentBag<string> str = new ConcurrentBag<string>();
             _nvs = await getListNhanVien();
@@ -270,32 +279,30 @@ namespace DA_CNPM_VatTu.Controllers
             string can = "lni lni-trash-can";
             string re = "lni lni-spinner-arrow";
 
-            await Task.Run(() =>
-                Parallel.ForEach(nhaCCs, ncc =>
-                {
-                    string t = ncc.Active.Value ? can : re;
-                    string btnSua = phanQuyenNhaCC.Sua.Value
-                                    ? $"<button onclick='showModalEdit({ncc.Id})' class='text-primary'  data-bs-toggle='modal' data-bs-target='#staticBackdrop'><i class='lni lni-pencil'></i></button>"
-                                    : "";
-                    string btnXoa = phanQuyenNhaCC.Xoa.Value
-                                    ? $"<button onclick='deleteNhaCC({ncc.Id})' class='text-danger'><i class='{t}'></i></button>"
-                                    : "";
-                    str.Add($"<tr>" +
-                                    $"<td class ='text-center'>{ncc.MaNcc}</td>" +
-                                    $"<td>{ncc.TenNcc}</td>" +
-                                    $"<td>{ncc.DiaChi}</td>" +
-                                    $"<td>{ncc.Sdt}</td>" +
-                                    $"<td>{ncc.Email}</td>" +
-                                    $"<td>{ncc.GhiChu}</td>" +
-                                    $"<td>" +
-                                        $"<div class='action justify-content-end'>" +
-                                            $"{btnSua}" +
-                                            $"{btnXoa}" +
-                                        $"</div>" +
-                                    $"</td>" +
-                              $"</tr>");
-                }
-            ));
+            nhaCCs.ForEach(ncc =>
+            {
+                string t = ncc.Active.Value ? can : re;
+                string btnSua = phanQuyenNhaCC.Sua.Value
+                                ? $"<button onclick='showModalEdit({ncc.Id})' class='text-primary'  data-bs-toggle='modal' data-bs-target='#staticBackdrop'><i class='lni lni-pencil'></i></button>"
+                                : "";
+                string btnXoa = phanQuyenNhaCC.Xoa.Value
+                                ? $"<button onclick='deleteNhaCC({ncc.Id})' class='text-danger'><i class='{t}'></i></button>"
+                                : "";
+                str.Add($"<tr>" +
+                                $"<td class ='text-center'>{ncc.MaNcc}</td>" +
+                                $"<td>{ncc.TenNcc}</td>" +
+                                $"<td>{ncc.DiaChi}</td>" +
+                                $"<td>{ncc.Sdt}</td>" +
+                                $"<td>{ncc.Email}</td>" +
+                                $"<td>{ncc.GhiChu}</td>" +
+                                $"<td>" +
+                                    $"<div class='action justify-content-end'>" +
+                                        $"{btnSua}" +
+                                        $"{btnXoa}" +
+                                    $"</div>" +
+                                $"</td>" +
+                          $"</tr>");
+            });
             string result = string.Join("", str);
             return result;
         }
@@ -307,15 +314,6 @@ namespace DA_CNPM_VatTu.Controllers
                 .Include(x => x.IdchucNangNavigation)
                 .FirstOrDefaultAsync(x => x.Idpq == idPq
                 && x.IdchucNangNavigation.MaChucNang.Equals("DM_NhaCC"));
-        }
-        async Task<List<NhaCungCap>> getListNhaCC()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("NhaCC_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return await _dACNPMContext.NhaCungCaps.ToListAsync();
-            });
         }
         async Task<List<NhanVien>> getListNhanVien()
         {

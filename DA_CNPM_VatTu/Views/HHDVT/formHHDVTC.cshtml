@@ -28,11 +28,11 @@
     </div>
     <div class="input-style-1">
         <label for="TLLe">Tỉ lệ lẻ</label>
-        <input required tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal">
+        <input min="0" max="100" required tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal">
     </div>
     <div class="input-style-1">
         <label for="TLSi">Tỉ lệ sỉ</label>
-        <input required tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
+        <input min="0" max="100" required tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
     </div>
     <div class="input-style-1">
         <label for="GBLe">Giá bán lẻ</label>

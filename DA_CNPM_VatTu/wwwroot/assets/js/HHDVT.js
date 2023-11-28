@@ -18,7 +18,7 @@ $(document).on('click', '#tBodyHangHoa tr', function () {
             var maxTon = result.maxTon;
             var le = result.le;
             var si = result.si;
-            var checkCanhBao = (hh.giaBanLe <= (maxTon * le)) || (hh.giaBanSi <= (maxTon * si)) || (hh.giaBanLe == null && hh.giaBanSi == null && hh.tiLeLe == null && hh.tiLeSi == null);
+            var checkCanhBao = (hh.giaBanLe != null && hh.giaBanLe <= (maxTon * le)) || (hh.giaBanSi != null && hh.giaBanSi <= (maxTon * si)) || (hh.giaBanLe == null && hh.giaBanSi == null && hh.tiLeLe == null && hh.tiLeSi == null);
             updateTableGiaDVT(result.hhDvts, result.si, result.le, maxTon);
             $('#tBodyDVT').prepend(`<tr class="${checkCanhBao ? 'text-danger' : ''}" data-id="${hh.id}" style="white-space:nowrap;background-color:aliceblue;">
                         <td>
@@ -57,7 +57,7 @@ $(document).on('click', '#tBodyHangHoa tr', function () {
 function updateTableGiaDVT(datas, si, le, maxTon) {
     $('#tBodyDVT').empty();
     datas.forEach(function (data) {
-        var checkCanhBao = (data.giaBanLe <= (maxTon * le * data.slquyDoi)) || (data.giaBanSi <= (maxTon * si * data.slquyDoi)) || (data.giaBanLe == null && data.giaBanSi == null && data.tiLeLe == null && data.tiLeSi == null);
+        var checkCanhBao = (data.giaBanLe && data.giaBanLe <= (maxTon * le * data.slquyDoi)) || (data.giaBanSi && data.giaBanSi <= (maxTon * si * data.slquyDoi)) || (data.giaBanLe == null && data.giaBanSi == null && data.tiLeLe == null && data.tiLeSi == null);
         $('#tBodyDVT').append(`<tr class="${checkCanhBao ? 'text-danger' : ''}" data-id="${data.id}" style="white-space:nowrap;">
                         <td>
                             ${data.iddvtNavigation.tenDvt}

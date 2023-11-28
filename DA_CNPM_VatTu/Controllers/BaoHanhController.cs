@@ -35,7 +35,7 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var Bhs = await getListBaoHanh();
             ViewBag.Bhs = Bhs.Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenBaoHanh();
@@ -52,8 +52,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 BaoHanhs = getListBaoHanh().Result.AsParallel()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderBhs(BaoHanhs);
                 return r;
@@ -61,8 +61,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 BaoHanhs = getListBaoHanh().Result.AsParallel()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderBhs(BaoHanhs);
                 return r;
@@ -184,8 +184,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     bhs = getListBaoHanh().Result
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderBhs(bhs);
                     return Ok(new
@@ -199,8 +199,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     bhs = getListBaoHanh().Result
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderBhs(bhs);
                     return Ok(new

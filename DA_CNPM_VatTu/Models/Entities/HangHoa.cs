@@ -31,11 +31,11 @@ namespace DA_CNPM_VatTu.Models.Entities
         public DateTime? NgaySua { get; set; }
         public bool? Active { get; set; }
         public int? Idcn { get; set; }
-        public int Iddvtchinh { get; set; }
+        public int? Iddvtchinh { get; set; }
         public int? IdbaoHanh { get; set; }
 
         public virtual BaoHanh? IdbaoHanhNavigation { get; set; }
-        public virtual DonViTinh IddvtchinhNavigation { get; set; } = null!;
+        public virtual DonViTinh? IddvtchinhNavigation { get; set; }
         public virtual HangSanXuat? IdhsxNavigation { get; set; }
         public virtual NhomHangHoa? IdnhhNavigation { get; set; }
         public virtual NuocSanXuat? IdnsxNavigation { get; set; }

@@ -1,16 +1,16 @@
 ﻿@model BaoHanh 
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
                   <h6 class="text-center">Thông tin</h6>
                   <div class="input-style-1">
                     <label for="MaBh">Mã bảo hành</label>
-                    <input type="text" value="@Model.MaBh" id="MaBh" placeholder="Mã bảo hành">
+                    <input class="form-control" required type="text" value="@Model.MaBh" id="MaBh" placeholder="Mã bảo hành">
                   </div>
                   <div class="input-style-1">
                     <label for="TenBh">Tên bảo hành</label>
-                    <input type="text" value="@Model.TenBh" id="TenBh" placeholder="Tên bảo hành">
+                    <input class="form-control" required type="text" value="@Model.TenBh" id="TenBh" placeholder="Tên bảo hành">
                   </div>
                   <div class="input-style-1">
                     <label for="SoNgay">Số ngày bảo hành</label>
-                    <input type="text" value="@Model.SoNgay" id="SoNgay" placeholder="Số ngày bảo hành">
+                    <input class="form-control" required type="number" min="0" value="@Model.SoNgay" id="SoNgay" placeholder="Số ngày bảo hành">
                   </div>
-</div>
+</form>

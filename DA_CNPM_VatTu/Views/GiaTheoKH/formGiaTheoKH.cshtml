@@ -14,7 +14,7 @@
     bool loaiKh = ViewBag.LoaiKh;
     List<DonViTinh> dvts = ViewBag.Dvts;
 }
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
     <input type="hidden" value="@(loaiKh ? 1 : 0)" id="LoaiKh"/>
 	<h6 class="text-center">Thông tin</h6>
 	<div class="form-group select-style-1">
@@ -47,7 +47,7 @@
         <label for="GBSi">Giá bán sỉ</label>
         <input tabindex="6" type="text" value="@toDecimal(Model.GiaBanSi)" id="GBSi" placeholder="Giá bán sỉ" class="text-decimal">
     </div>
-</div>
+</form>
 <script>
 
 formatNumberFloatWithElement($('.text-decimal'));

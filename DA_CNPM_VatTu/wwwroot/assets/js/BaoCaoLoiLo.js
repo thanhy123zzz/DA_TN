@@ -96,7 +96,16 @@ $(document).ready(function () {
                             {
                                 ticks: {
                                     callback: function (value, index, values) {
-                                        return value / 1000000 + " triệu VNĐ";
+                                        if (value > 1000000000) {
+                                            return value / 1000000000 + " tỉ VNĐ";
+                                        }
+                                        if (value > 1000000) {
+                                            return value / 1000000 + " triệu VNĐ";
+                                        }
+                                        if (value > 1000) {
+                                            return value / 1000 + " ngàn VNĐ";
+                                        }
+                                        return value;
                                     }
                                 },
                                 gridLines: {

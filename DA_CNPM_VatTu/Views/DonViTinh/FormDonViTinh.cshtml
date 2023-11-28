@@ -1,12 +1,12 @@
 ﻿@model DonViTinh 
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
                   <h6 class="text-center">Thông tin</h6>
                   <div class="input-style-1">
                     <label for="MaDVT">Mã đơn vị tính</label>
-                    <input type="text" value="@Model.MaDvt" id="MaDVT" placeholder="Mã đơn vị tính">
+                    <input class="form-control" required type="text" value="@Model.MaDvt" id="MaDVT" placeholder="Mã đơn vị tính">
                   </div>
                   <div class="input-style-1">
                     <label for="TenDVT">Tên đơn vị tính</label>
-                    <input type="text" value="@Model.TenDvt" id="TenDVT" placeholder="Tên đơn vị tính">
+                    <input class="form-control" required type="text" value="@Model.TenDvt" id="TenDVT" placeholder="Tên đơn vị tính">
                   </div>
-</div>
+</form>

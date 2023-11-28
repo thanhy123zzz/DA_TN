@@ -34,6 +34,14 @@
                     }
                 });
             },
+            render: {
+                item: function (item, escape) {
+                    return '<div>' + escape(item.ten + ' (' + item.loai + ')') + '</div>';
+                },
+                option: function (item, escape) {
+                    return `<div class="px-2 py-1"><b>${item.ten}</b> - [${item.loai}]</div>`;
+                }
+            },
         });
     });
     
@@ -248,6 +256,7 @@ function getRowPhieuXuatCt() {
         <td class="text-center"><img class='image-modal object-fit-cover' style="max-height: 32px;max-width: 42px;border-radius:0;" src="" alt=''></td>
         <td><select class="form-select form-table" name="Iddvt" style="width: 140px;"></select></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;"/></td>
+        <td><input class="form-control form-table slqd input-number-float" readonly style="min-width: 42px;"/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="DonGia" readonly style="min-width: 120px;"/></td>
         <td><input autocomplete="off" class="form-control form-table ThanhTien input-number-float" readonly style="min-width: 140px;"/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Cktm" max="100" style="min-width: 60px;"/></td>
@@ -328,9 +337,8 @@ function dropDownHhChange(cbHangHoa, value) {
         if (option.slTon == 0) {
             showToast("Đã hết hàng trong kho!", 500);
         }
+        tr.find('.slqd').val(1);
         formatNumberFloatWithElement(tr.find('.input-number-float'));
-        configDateLongMask(tr.find('.date-sort-mask'));
-
         option.dvts.unshift(option.dvtChinh);
         var cbDvt = tr.find('select[name="Iddvt"]');
 
@@ -355,7 +363,15 @@ function dropDownHhChange(cbHangHoa, value) {
                     showDropdownMenu(cbDvt, $dropdown);
                 },
                 onChange: function (value) {
-                    var idHh = tr.find('select[name="Idhh"]').val();
+                    var cbHh = tr.find('select[name="Idhh"]');
+                    var idHh = cbHh.val();
+                    var slqd = cbDvt[0].selectize.options[value].slqd;
+                    tr.find('input.slqd').val(slqd);
+                    var sl = tr.find('input[name="Sl"]');
+                    var slTon = cbHh[0].selectize.options[idHh].slTon;
+                    sl.val(0);
+                    sl.prop('max', slTon / slqd);
+                    formatNumberFloatWithElement(sl);
                     loadDonGia(idHh, value, $('#KhachHang').val(), tr.find('input[name="DonGia"]'));
                 },
                 onFocus: function ($dropdown) {
@@ -375,11 +391,6 @@ function dropDownHhChange(cbHangHoa, value) {
     }
 }
 function loadDonGia(idHh, idDvt, idKh, input) {
-    console.log({
-        idKh: idKh,
-        idHh: idHh,
-        idDvt: idDvt
-    })
     if (idKh) {
         if (idHh && idDvt) {
             $.ajax({

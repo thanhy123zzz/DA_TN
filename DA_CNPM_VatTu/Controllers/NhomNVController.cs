@@ -31,7 +31,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> NhomNhanVien()
         {
             ViewBag.NhomNVs = getListNhomNV().Result.AsParallel().Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenNhomNV();
@@ -48,8 +48,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 nnvs = getListNhomNV().Result.AsParallel()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(nnvs);
                 return r;
@@ -57,8 +57,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 nnvs = getListNhomNV().Result.AsParallel()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(nnvs);
                 return r;
@@ -171,8 +171,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     nnvs = getListNhomNV().Result.AsParallel()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nnvs);
                     return Ok(new
@@ -186,8 +186,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     nnvs = getListNhomNV().Result.AsParallel()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nnvs);
                     return Ok(new

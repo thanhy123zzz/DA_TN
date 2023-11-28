@@ -1,28 +1,28 @@
 ﻿@model NhaCungCap 
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
                   <h6 class="text-center">Thông tin</h6>
                   <div class="input-style-1">
-                    <label for="Ma">Mã nhà cung cấp</label>
-                    <input type="text" asp-for="@Model.MaNcc" readonly="@(!(Model.MaNcc==null))" id="Ma" placeholder="Mã nhà cung cấp">
+                    <label for="Ma form-label">Mã nhà cung cấp</label>
+                    <input class="form-control" required type="text" asp-for="@Model.MaNcc" readonly="@(!(Model.MaNcc==null))" id="Ma" placeholder="Mã nhà cung cấp">
                   </div>
                   <div class="input-style-1">
                     <label for="Ten">Tên nhà cung cấp</label>
-                    <input type="text" asp-for="@Model.TenNcc" id="Ten" placeholder="Tên nhà cung cấp">
+                    <input class="form-control" required type="text" asp-for="@Model.TenNcc" id="Ten" placeholder="Tên nhà cung cấp">
                   </div>
                   <div class="input-style-1">
                     <label for="DiaChi">Địa chỉ</label>
-                    <input type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
+                    <input class="form-control" type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
                   </div>
                   <div class="input-style-1">
                     <label for="Sdt">Số điện thoại</label>
-                    <input type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
+                    <input class="form-control" type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
                   </div>
                   <div class="input-style-1">
                     <label for="Email">Email</label>
-                    <input type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
+                    <input class="form-control" type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
                   </div>
                   <div class="input-style-1">
                     <label for="GhiChu">Ghi chú</label>
-                    <input type="email" asp-for="@Model.GhiChu" id="GhiChu" placeholder="Ghi chú">
+                    <input class="form-control" type="email" asp-for="@Model.GhiChu" id="GhiChu" placeholder="Ghi chú">
                   </div>
-</div>
+</form>

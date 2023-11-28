@@ -31,7 +31,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> KhachHangAsync()
         {
             ViewBag.KHs = getListKH().Result.Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenKH();
@@ -48,8 +48,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 KHs = getListKH().Result.AsParallel()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(KHs);
                 return r;
@@ -57,8 +57,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 KHs = getListKH().Result.AsParallel()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(KHs);
                 return r;
@@ -189,8 +189,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     khs = getListKH().Result.AsParallel()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(khs);
                     return Ok(new
@@ -204,8 +204,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     khs = getListKH().Result.AsParallel()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(khs);
                     return Ok(new

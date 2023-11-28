@@ -6,7 +6,7 @@
             <div class="card-style mb-30 p-3">
                 <input placeholder="Tìm kiếm" id="search" type="text" class="form-control mb-2" disabled="@(!pqcn.TimKiem.Value)">
                 <div class="card">
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 60vh">
                     <table class="table table-bordered top-selling-table table-hover display nowrap">
                         <thead>
                             <tr>
@@ -16,7 +16,7 @@
                                     </h6>
                                 </th>
                                 <th class="min-width">
-                                    <h6 class="text-sm fw-bold">
+                                    <h6 class="text-sm fw-bold text-start">
                                         Tên NHH
                                     </h6>
                                 </th>
@@ -92,6 +92,6 @@
             </div>
         </div>
     </div>
-<script src="/assets/js/GiaTheoNHH.js">
+<script src="/assets/js/GiaTheoNHH.js" defer asp-append-version="true">
 
 </script>

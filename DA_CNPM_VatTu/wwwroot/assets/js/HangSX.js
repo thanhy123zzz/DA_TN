@@ -134,68 +134,74 @@ function showModalEdit(id) {
     });
 }
 
-$('#btnModal').on('click', (e) => {
-    fetch("/DanhMuc/HangSX/update-hangsx", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            Id: idModel,
-            MaHsx: $('#MaHSX').val(),
-            TenHsx: $('#TenHSX').val()
+$('#btnModal').on('click', function (e){
+    var form = document.getElementById('formUpdate');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+    } else {
+        form.classList.remove('was-validated');
+        fetch("/DanhMuc/HangSX/update-hangsx", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                Id: idModel,
+                MaHsx: $('#MaHSX').val(),
+                TenHsx: $('#TenHSX').val()
+            })
         })
-    })
-        .then(Response => Response.json())
-        .then(data => {
-            $("#loader").show();
-            $('#tBody').empty();
-            $('#staticBackdrop').modal('hide');
+            .then(Response => Response.json())
+            .then(data => {
+                $("#loader").show();
+                $('#tBody').empty();
+                $('#staticBackdrop').modal('hide');
 
-            if ($('#search').val() === "") {
-                $.ajax({
-                    type: "post",
-                    url: "/DanhMuc/HangSX/change-page",
-                    data: "active=" + active + "&page=" + page,
-                    success: function (result) {
-                        $('#toast').addClass(data.color);
-                        $('#toastContent').text(data.message);
-                        $('#toast').show();
+                if ($('#search').val() === "") {
+                    $.ajax({
+                        type: "post",
+                        url: "/DanhMuc/HangSX/change-page",
+                        data: "active=" + active + "&page=" + page,
+                        success: function (result) {
+                            $('#toast').addClass(data.color);
+                            $('#toastContent').text(data.message);
+                            $('#toast').show();
 
-                        $('#tBody').append(result);
-                        $("#loader").hide();
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
-            else {
+                            $('#tBody').append(result);
+                            $("#loader").hide();
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
+                else {
 
-                $.ajax({
-                    type: "post",
-                    url: "/DanhMuc/HangSX/searchTableHangSX",
-                    data: "active=" + active + "&key=" + $('#search').val(),
-                    success: function (result) {
-                        $('#toast').addClass(data.color);
-                        $('#toastContent').text(data.message);
-                        $('#toast').show();
+                    $.ajax({
+                        type: "post",
+                        url: "/DanhMuc/HangSX/searchTableHangSX",
+                        data: "active=" + active + "&key=" + $('#search').val(),
+                        success: function (result) {
+                            $('#toast').addClass(data.color);
+                            $('#toastContent').text(data.message);
+                            $('#toast').show();
 
-                        $("#loader").hide();
-                        $('#tBody').append(result);
-                    },
-                    error: function (loi) {
-                        console.log(loi);
-                    }
-                });
-            }
+                            $("#loader").hide();
+                            $('#tBody').append(result);
+                        },
+                        error: function (loi) {
+                            console.log(loi);
+                        }
+                    });
+                }
 
-            setTimeout(function () {
-                $('#toast').hide();
-                $('#toast').removeClass(data.color);
-            }, 5000);
-        })
-        .catch(error => console.error(error))
+                setTimeout(function () {
+                    $('#toast').hide();
+                    $('#toast').removeClass(data.color);
+                }, 5000);
+            })
+            .catch(error => console.error(error))
+    }
 });
 
 function deleteNSX(id) {

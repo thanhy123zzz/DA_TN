@@ -12,25 +12,25 @@
         }
     }
 }
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
 	<h6 class="mb-25 text-center">Thông tin</h6>
     <div class="input-style-1">
         <label for="GBLe">Giá trị min</label>
-        <input tabindex="5" type="text" value="@toDecimal(Model.Min)" id="min" placeholder="Giá trị min" class="text-decimal">
+        <input min="0" tabindex="5" type="text" value="@toDecimal(Model.Min)" id="min" placeholder="Giá trị min" class="text-decimal form-control" required>
     </div>
     <div class="input-style-1">
         <label for="GBSi">Giá trị max</label>
-        <input tabindex="6" type="text" value="@toDecimal(Model.Max)" id="max" placeholder="Giá trị max" class="text-decimal">
+        <input min="0" tabindex="6" type="text" value="@toDecimal(Model.Max)" id="max" placeholder="Giá trị max" class="text-decimal form-control" required>
     </div>
     <div class="input-style-1">
         <label for="TLLe">Tỉ lệ lẻ</label>
-        <input tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal">
+        <input min="0" max="100" tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal form-control" required>
     </div>
     <div class="input-style-1">
         <label for="TLSi">Tỉ lệ sỉ</label>
-        <input tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal">
+        <input min="0" max="100" tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal form-control" required>
     </div>
-</div>
+</form>
 <script>
 formatNumberFloatWithElement($('.text-decimal'));
 $('.text-decimal').focus(function(){

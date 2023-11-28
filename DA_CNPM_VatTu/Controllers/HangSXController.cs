@@ -31,7 +31,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> HangSX()
         {
             ViewBag.HangSXs = getListHangSX().Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenHangSX();
@@ -49,8 +49,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 hangSXs = getListHangSX()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(hangSXs);
                 return r;
@@ -58,8 +58,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 hangSXs = getListHangSX()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(hangSXs);
                 return r;
@@ -173,8 +173,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     hsxs = getListHangSX()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(hsxs);
                     return Ok(new
@@ -188,8 +188,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     hsxs = getListHangSX()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(hsxs);
                     return Ok(new

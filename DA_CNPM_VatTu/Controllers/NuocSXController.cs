@@ -32,7 +32,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> NuocSX()
         {
             ViewBag.NuocSXs = getListNuocSX().Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenNuocSX();
@@ -49,8 +49,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 donViTinhs = getListNuocSX()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -58,8 +58,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 donViTinhs = getListNuocSX()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -175,8 +175,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     nsxs = getListNuocSX()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nsxs);
                     return Ok(new
@@ -190,8 +190,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     nsxs = getListNuocSX()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nsxs);
                     return Ok(new

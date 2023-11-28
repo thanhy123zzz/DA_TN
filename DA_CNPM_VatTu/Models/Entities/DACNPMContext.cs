@@ -21,9 +21,7 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual DbSet<CachXuat> CachXuats { get; set; } = null!;
         public virtual DbSet<ChiNhanh> ChiNhanhs { get; set; } = null!;
         public virtual DbSet<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; } = null!;
-        public virtual DbSet<ChiTietPhieuNhapTam> ChiTietPhieuNhapTams { get; set; } = null!;
         public virtual DbSet<ChiTietPhieuXuat> ChiTietPhieuXuats { get; set; } = null!;
-        public virtual DbSet<ChiTietPhieuXuatTam> ChiTietPhieuXuatTams { get; set; } = null!;
         public virtual DbSet<ChucNang> ChucNangs { get; set; } = null!;
         public virtual DbSet<DonViTinh> DonViTinhs { get; set; } = null!;
         public virtual DbSet<GiaTheoKhachHang> GiaTheoKhachHangs { get; set; } = null!;
@@ -230,53 +228,6 @@ namespace DA_CNPM_VatTu.Models.Entities
                     .HasConstraintName("FK__ChiTietPhi__IDPN__41EDCAC5");
             });
 
-            modelBuilder.Entity<ChiTietPhieuNhapTam>(entity =>
-            {
-                entity.ToTable("ChiTietPhieuNhapTam");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Cktm).HasColumnName("CKTM");
-
-                entity.Property(e => e.Dvt)
-                    .HasMaxLength(50)
-                    .HasColumnName("DVT");
-
-                entity.Property(e => e.GhiChu)
-                    .HasMaxLength(2000)
-                    .UseCollation("Vietnamese_CI_AS");
-
-                entity.Property(e => e.Host)
-                    .HasMaxLength(50)
-                    .UseCollation("Vietnamese_CI_AS");
-
-                entity.Property(e => e.Hsd)
-                    .HasColumnType("datetime")
-                    .HasColumnName("HSD");
-
-                entity.Property(e => e.Idbh).HasColumnName("IDBH");
-
-                entity.Property(e => e.Idhh).HasColumnName("IDHH");
-
-                entity.Property(e => e.Idpn).HasColumnName("IDPN");
-
-                entity.Property(e => e.Nsx)
-                    .HasColumnType("datetime")
-                    .HasColumnName("NSX");
-
-                entity.Property(e => e.Sl).HasColumnName("SL");
-
-                entity.Property(e => e.SoLo)
-                    .HasMaxLength(50)
-                    .UseCollation("Vietnamese_CI_AS");
-
-                entity.Property(e => e.TenHh)
-                    .HasMaxLength(250)
-                    .HasColumnName("tenHH");
-
-                entity.Property(e => e.Tgbh).HasColumnName("TGBH");
-            });
-
             modelBuilder.Entity<ChiTietPhieuXuat>(entity =>
             {
                 entity.ToTable("ChiTietPhieuXuat");
@@ -328,39 +279,6 @@ namespace DA_CNPM_VatTu.Models.Entities
                     .HasForeignKey(d => d.Idpx)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ChiTietPhi__IDPX__6AEFE058");
-            });
-
-            modelBuilder.Entity<ChiTietPhieuXuatTam>(entity =>
-            {
-                entity.ToTable("ChiTietPhieuXuatTam");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Cktm).HasColumnName("CKTM");
-
-                entity.Property(e => e.Host).HasMaxLength(50);
-
-                entity.Property(e => e.Idctpn).HasColumnName("IDCTPN");
-
-                entity.Property(e => e.Iddvt).HasColumnName("IDDVT");
-
-                entity.Property(e => e.Idhh).HasColumnName("IDHH");
-
-                entity.Property(e => e.NgaySua).HasColumnType("datetime");
-
-                entity.Property(e => e.NgayTao).HasColumnType("datetime");
-
-                entity.Property(e => e.Nvsua).HasColumnName("NVSua");
-
-                entity.Property(e => e.Sl).HasColumnName("SL");
-
-                entity.Property(e => e.TenDvt)
-                    .HasMaxLength(500)
-                    .HasColumnName("TenDVT");
-
-                entity.Property(e => e.TenHh)
-                    .HasMaxLength(500)
-                    .HasColumnName("TenHH");
             });
 
             modelBuilder.Entity<ChucNang>(entity =>
@@ -534,7 +452,6 @@ namespace DA_CNPM_VatTu.Models.Entities
                 entity.HasOne(d => d.IddvtchinhNavigation)
                     .WithMany(p => p.HangHoas)
                     .HasForeignKey(d => d.Iddvtchinh)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__HangHoa__IDDVTCh__74AE54BC");
 
                 entity.HasOne(d => d.IdhsxNavigation)

@@ -32,7 +32,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> VaiTro()
         {
             ViewBag.VaiTros = getListVaiTro().Result.AsParallel().Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenNuocSX();
@@ -50,8 +50,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 vts = getListVaiTro().Result.AsParallel()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(vts);
                 return r;
@@ -59,8 +59,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 vts = getListVaiTro().Result.AsParallel()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(vts);
                 return r;
@@ -174,8 +174,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     vts = getListVaiTro().Result.AsParallel()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(vts);
                     return Ok(new
@@ -189,8 +189,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     vts = getListVaiTro().Result.AsParallel()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(vts);
                     return Ok(new

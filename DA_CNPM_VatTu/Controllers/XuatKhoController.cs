@@ -51,14 +51,12 @@ namespace DA_CNPM_VatTu.Controllers
             var ncc = getListKH();
             var hh = getListHH();
             var ctpn = getListCTPX();
-            var ctpnt = GetListCTPXT();
             var p = GetPhanQuyenXuatKho();
-            await Task.WhenAll(ncc, hh, ctpn, p, ctpnt);
+            await Task.WhenAll(ncc, hh, ctpn, p);
 
             var dvt = await getListDVT();
             ViewBag.Dvts = dvt;
             ViewBag.SoPhieuXuat = getSoPhieu().Result;
-            ViewBag.CTPXTs = ctpnt.Result;
             ViewBag.HHs = getListHH().Result;
             ViewBag.phanQuyenXuatKho = p.Result;
             ViewData["title"] = p.Result.IdchucNangNavigation.TenChucNang;
@@ -80,10 +78,13 @@ namespace DA_CNPM_VatTu.Controllers
             return Ok(khs);
         }
         [HttpPost("api/hhs")]
-        public async Task<IActionResult> searchHH()
+        public async Task<IActionResult> searchHH(bool active)
         {
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            return Ok(await _dACNPMContext.HangHoas.Select(x => new
+            return Ok(await _dACNPMContext.HangHoas
+                .AsNoTracking()
+                .Where(x=>x.Active == true)
+                .Select(x => new
             {
                 id = x.Id,
                 ten = x.TenHh.Trim(),
@@ -94,12 +95,14 @@ namespace DA_CNPM_VatTu.Controllers
                     id = y.IddvtNavigation.Id,
                     ten = y.IddvtNavigation.TenDvt,
                     ma = y.IddvtNavigation.MaDvt,
+                    slqd = y.SlquyDoi,
                 }).ToList(),
                 dvtChinh = new
                 {
                     id = x.Iddvtchinh,
                     ten = x.IddvtchinhNavigation.TenDvt,
-                    ma = x.IddvtchinhNavigation.MaDvt
+                    ma = x.IddvtchinhNavigation.MaDvt,
+                    slqd = 1
                 },
                 slTon = x.HangTonKhos.Where(y => y.Idcn == idCn).Sum(y => y.Slcon)
             }).OrderBy(x => x.ten).ToListAsync());
@@ -329,174 +332,6 @@ namespace DA_CNPM_VatTu.Controllers
                     }
                 }
             }
-        }
-        
-        [HttpPost("add-ctpxt")]
-        public async Task<IActionResult> addCTPXT(int idHH, float ThueXuat, float SL, float DonGia,
-        float ChietKhau, int idDvt)
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            string host = GetLocalIPAddress();
-            ChiTietPhieuXuatTam ct = new ChiTietPhieuXuatTam();
-            ct.Idhh = idHH;
-            ct.Thue = Math.Round(ThueXuat, 2);
-            ct.Sl = Math.Round(SL, 2);
-            ct.DonGia = Math.Round(DonGia, 2);
-            ct.Cktm = Math.Round(ChietKhau, 2);
-            ct.Host = host;
-            ct.Iddvt = idDvt;
-            _dACNPMContext.ChiTietPhieuXuatTams.Add(ct);
-            _dACNPMContext.SaveChanges();
-
-            _memoryCache.Remove("CTPXTs_" + _userId);
-
-            var ListCTPXT = GetListCTPXT();
-            var lhh = getListHH();
-            var p = GetPhanQuyenXuatKho();
-            var ldvt = await getListDVT();
-            Task.WaitAll(ListCTPXT, lhh, p);
-
-            ViewBag.CTPXTs = ListCTPXT.Result;
-            ViewBag.Dvts = ldvt;
-            ViewBag.HHs = lhh.Result;
-            ViewBag.phanQuyenXuatKho = p.Result;
-            PartialViewResult partialViewResult = PartialView("tableChiTietPhieuXuat");
-
-            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-
-            var TienHang = ListCTPXT.Result.Sum(x => x.Sl * x.DonGia);
-            var TienCK = ListCTPXT.Result.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
-            var TienThue = ListCTPXT.Result.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
-            var TienThanhToan = TienHang - TienCK + TienThue;
-            return Ok(new
-            {
-                table = viewContent,
-                tienHang = TienHang,
-                tienCK = TienCK,
-                tienThue = TienThue,
-                tienThanhToan = TienThanhToan,
-                statusCode = 200,
-                message = "Thành công!",
-                color = "bg-success"
-            });
-        }
-        [HttpPost("showEditCTPXT")]
-        public async Task<IActionResult> editChitietPhieuXuatTam(int id)
-        {
-            int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            var ctpxt = GetListCTPXT().Result.FirstOrDefault(x => x.Id == id);
-            ctpxt.TenHh = getListHH().Result.FirstOrDefault(x => x.Id == ctpxt.Idhh).TenHh;
-
-            // các loại đơn vị tính của hàng hoá
-            var hhdvts = await _dACNPMContext
-                .Hhdvts.Include(x => x.IddvtNavigation)
-                .Where(x => x.Idhh == ctpxt.Idhh && x.Active == true)
-                .ToListAsync();
-            // đơn vị tính chính của hàng hoá
-            var hh = getListHH().Result
-                .FirstOrDefault(x => x.Id == ctpxt.Idhh && x.Active == true);
-            hhdvts.Insert(0, new Hhdvt() { IddvtNavigation = hh.IddvtchinhNavigation, SlquyDoi = 1 });
-            // lấy hàng tồn
-            var hangTons = await _dACNPMContext.HangTonKhos
-                .Include(x => x.IdctpnNavigation)
-                .Where(x => x.Idhh == ctpxt.Idhh && x.Idcn == idCn).ToListAsync();
-            // nếu không còn hàng tồn trong kho
-            var slCon = hangTons
-            .AsParallel().Sum(x => x.Slcon);
-
-            ViewBag.SlCon = slCon / (hhdvts.FirstOrDefault(x => x.IddvtNavigation.Id == ctpxt.Iddvt).SlquyDoi);
-            ViewBag.HhDvts = hhdvts;
-
-            return PartialView("GroupChitietPhieuXuat", ctpxt);
-        }
-        [HttpPost("edit-ctpxt")]
-        public async Task<IActionResult> editCTPXT(int idHH, float ThueXuat, float SL, float DonGia,
-        float ChietKhau, int idDvt, int id)
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            string host = GetLocalIPAddress();
-            ChiTietPhieuXuatTam ct = GetListCTPXT().Result.FirstOrDefault(x => x.Id == id);
-            ct.Idhh = idHH;
-            ct.Thue = Math.Round(ThueXuat, 2);
-            ct.Sl = Math.Round(SL, 2);
-            ct.DonGia = Math.Round(DonGia, 2);
-            ct.Cktm = Math.Round(ChietKhau, 2);
-            ct.Host = host;
-            ct.Iddvt = idDvt;
-            _dACNPMContext.ChiTietPhieuXuatTams.Update(ct);
-            _dACNPMContext.SaveChanges();
-
-            _memoryCache.Remove("CTPXTs_" + _userId);
-
-            var ListCTPXT = GetListCTPXT();
-            var lhh = getListHH();
-            var p = GetPhanQuyenXuatKho();
-            var ldvt = await getListDVT();
-            Task.WaitAll(ListCTPXT, lhh, p);
-
-            ViewBag.CTPXTs = ListCTPXT.Result;
-            ViewBag.Dvts = ldvt;
-            ViewBag.HHs = lhh.Result;
-            ViewBag.phanQuyenXuatKho = p.Result;
-            PartialViewResult partialViewResult = PartialView("tableChiTietPhieuXuat");
-
-            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-
-            var TienHang = ListCTPXT.Result.Sum(x => x.Sl * x.DonGia);
-            var TienCK = ListCTPXT.Result.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
-            var TienThue = ListCTPXT.Result.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
-            var TienThanhToan = TienHang - TienCK + TienThue;
-            return Ok(new
-            {
-                table = viewContent,
-                tienHang = TienHang,
-                tienCK = TienCK,
-                tienThue = TienThue,
-                tienThanhToan = TienThanhToan,
-                statusCode = 200,
-                message = "Thành công!",
-                color = "bg-success"
-            });
-        }
-        [HttpPost("delete-ctpxt")]
-        public async Task<IActionResult> deletePhieuXuatTam(int id)
-        {
-            ChiTietPhieuXuatTam ch = _dACNPMContext.ChiTietPhieuXuatTams.Find(id);
-            int _userId = int.Parse(User.Identity.Name);
-            _dACNPMContext.ChiTietPhieuXuatTams.Remove(ch);
-            _dACNPMContext.SaveChanges();
-
-            _memoryCache.Remove("CTPXTs_" + _userId);
-
-            var ListCTPXT = GetListCTPXT();
-            var lhh = getListHH();
-            var p = GetPhanQuyenXuatKho();
-            var ldvt = await getListDVT();
-            Task.WaitAll(ListCTPXT, lhh, p);
-
-            ViewBag.CTPXTs = await ListCTPXT;
-            ViewBag.Dvts = ldvt;
-            ViewBag.HHs = await lhh;
-            ViewBag.phanQuyenXuatKho = await p;
-            PartialViewResult partialViewResult = PartialView("tableChiTietPhieuXuat");
-
-            string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
-
-            var TienHang = ListCTPXT.Result.Sum(x => x.Sl * x.DonGia);
-            var TienCK = ListCTPXT.Result.Sum(x => (x.Sl * x.DonGia * x.Cktm) / 100);
-            var TienThue = ListCTPXT.Result.Sum(x => (((x.Sl * x.DonGia) - ((x.Sl * x.DonGia * x.Cktm) / 100)) * x.Thue) / 100);
-            var TienThanhToan = TienHang - TienCK + TienThue;
-            return Ok(new
-            {
-                table = viewContent,
-                tienHang = TienHang,
-                tienCK = TienCK,
-                tienThue = TienThue,
-                tienThanhToan = TienThanhToan,
-                statusCode = 200,
-                message = "Thành công!",
-                color = "bg-success"
-            });
         }
         [HttpPost("add-px")]
         public async Task<IActionResult> addPN([FromBody] PhieuXuatKhoMap phieuXuatKhoMap)
@@ -842,16 +677,6 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(5);
                 return _dACNPMContext.ChiTietPhieuXuats
-                                .ToList();
-            });
-        }
-        async Task<List<ChiTietPhieuXuatTam>> GetListCTPXT()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("CTPXTs_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.ChiTietPhieuXuatTams.Where(x => x.Host == GetLocalIPAddress())
                                 .ToList();
             });
         }

@@ -29,11 +29,11 @@
     </div>
     <div class="input-style-1">
         <label for="TLLe required">Tỉ lệ lẻ</label>
-        <input autocomplete="off" required tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal form-control">
+        <input min="0" max="100" autocomplete="off" required tabindex="3" type="text" value="@toDecimal(Model.TiLeLe)" id="TLLe" placeholder="Tỉ lệ lẻ" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
         <label for="TLSi required">Tỉ lệ sỉ</label>
-        <input autocomplete="off" required tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal form-control">
+        <input min="0" max="100" autocomplete="off" required tabindex="4" type="text" value="@toDecimal(Model.TiLeSi)" id="TLSi" placeholder="Tỉ lệ sỉ" class="text-decimal form-control">
     </div>
     <div class="input-style-1">
         <label for="GBLe required">Giá bán lẻ</label>

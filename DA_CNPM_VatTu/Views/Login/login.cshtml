@@ -107,11 +107,9 @@
                         <div class="input-style-1">
                           <div class="select-style-1">
                           <label for="roles">Chi nhánh</label>
-                          <div class="select-position d-flex justify-content-between">
-                            <select id="chiNhanh" class="light-bg col-lg-9" onchange="changeChinhNhanh()">
+                          <select id="chiNhanh" class="form-select" onchange="changeChinhNhanh()">
                                 <option value="0" selected>-- Chọn chi nhánh --</option>
                             </select>
-                          </div>
                         </div>
                         </div>
                       </div>
@@ -119,23 +117,34 @@
                       <div class="col-12">
                         <div class="select-style-1">
                           <label for="roles">Vai trò</label>
-                          <div class="select-position d-flex justify-content-center">
-                            <select id="roles" class="light-bg col-lg-9">
+                          <select id="roles" class="form-select">
                                 
                             </select>
-                          </div>
                         </div>
                       </div>
                       <div class="col-12">
                         <div
                           class="
                             button-group
-                            d-flex
-                            justify-content-around
-                            flex-wrap
+                            row
                           ">
-                          <button
-                            class="
+                          
+                          <div class="col-6">
+                                                <button class="
+                              main-btn
+                              lignt-btn
+                              btn-hover
+                              w-100
+                              text-center
+                            "
+                                                        style="padding: 7px 15px;height: auto;"
+                                                        type="button"
+                                                        id="btnHuy">
+                                                    Quay lại
+                                                </button>
+                          </div>
+                          <div class="col-6">
+                                                <button class="
                               main-btn
                               primary-btn
                               btn-hover
@@ -143,26 +152,11 @@
                               text-center
                               mb-2
                             "
-                            style="padding: 10px 15px;height: auto;"
-                            type="submit"
-                          >
-                            Xác nhận
-                          </button>
-                          <button
-                            class="
-                              main-btn
-                              lignt-btn
-                              btn-hover
-                              w-100
-                              text-center
-                            "
-                            style="padding: 10px 15px;height: auto;"
-                            type="button"
-                            id="btnHuy"
-                          >
-                            Huỷ
-                          </button>
-                          
+                                                        style="padding: 7px 15px;height: auto;"
+                                                        type="submit">
+                                                    Xác nhận
+                                                </button>
+                          </div>
                         </div>
                       </div>
                       <!-- end col -->

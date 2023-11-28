@@ -56,31 +56,62 @@ namespace DA_CNPM_VatTu.Controllers
             return View();
         }
         [HttpPost("api/hhs")]
-        public async Task<IActionResult> searchHH()
+        public async Task<IActionResult> searchHH(bool active = true)
         {
-            return Ok(await _dACNPMContext.HangHoas
+            if (active)
+            {
+                return Ok(await _dACNPMContext.HangHoas
+                .AsNoTracking()
+                .Where(x => x.Active == true)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    ten = x.TenHh.Trim(),
+                    ma = x.MaHh,
+                    soLos = x.ChiTietPhieuNhaps.Select(x => x.SoLo).Distinct().ToList(),
+                    dvts = x.Hhdvts.Where(y => y.Active == true).Select(y => new
+                    {
+                        id = y.IddvtNavigation.Id,
+                        ten = y.IddvtNavigation.TenDvt,
+                        ma = y.IddvtNavigation.MaDvt,
+                        slqd = y.SlquyDoi
+                    }).ToList(),
+                    dvtChinh = new
+                    {
+                        id = x.Iddvtchinh,
+                        ten = x.IddvtchinhNavigation.TenDvt,
+                        ma = x.IddvtchinhNavigation.MaDvt,
+                        slqd = 1
+                    },
+                }).OrderBy(x => x.ten).ToListAsync());
+            }
+            else
+            {
+                return Ok(await _dACNPMContext.HangHoas
                 .AsNoTracking()
                 .Select(x => new
-            {
-                id = x.Id,
-                ten = x.TenHh.Trim(),
-                ma = x.MaHh,
-                soLos = x.ChiTietPhieuNhaps.Select(x=>x.SoLo).Distinct().ToList(),
-                dvts = x.Hhdvts.Where(y => y.Active == true).Select(y => new
                 {
-                    id = y.IddvtNavigation.Id,
-                    ten = y.IddvtNavigation.TenDvt,
-                    ma = y.IddvtNavigation.MaDvt,
-                    slqd = y.SlquyDoi
-                }).ToList(),
-                dvtChinh = new
-                {
-                    id = x.Iddvtchinh,
-                    ten = x.IddvtchinhNavigation.TenDvt,
-                    ma = x.IddvtchinhNavigation.MaDvt,
-                    slqd = 1
-                },
-            }).OrderBy(x => x.ten).ToListAsync());
+                    id = x.Id,
+                    ten = x.TenHh.Trim(),
+                    ma = x.MaHh,
+                    soLos = x.ChiTietPhieuNhaps.Select(x => x.SoLo).Distinct().ToList(),
+                    dvts = x.Hhdvts.Where(y => y.Active == true).Select(y => new
+                    {
+                        id = y.IddvtNavigation.Id,
+                        ten = y.IddvtNavigation.TenDvt,
+                        ma = y.IddvtNavigation.MaDvt,
+                        slqd = y.SlquyDoi
+                    }).ToList(),
+                    dvtChinh = new
+                    {
+                        id = x.Iddvtchinh,
+                        ten = x.IddvtchinhNavigation.TenDvt,
+                        ma = x.IddvtchinhNavigation.MaDvt,
+                        slqd = 1
+                    },
+                }).OrderBy(x => x.ten).ToListAsync());
+            }
+            
         }
         [HttpPost("api/getSoPhieuNhap")]
         public async Task<IActionResult> getSoPhieuNhap()
@@ -576,16 +607,6 @@ namespace DA_CNPM_VatTu.Controllers
                 .Include(x => x.IdchucNangNavigation)
                 .FirstOrDefaultAsync(x => x.Idpq == idPq
                 && x.IdchucNangNavigation.MaChucNang.Equals("QL_NhapKho"));
-        }
-        async Task<List<ChiTietPhieuNhapTam>> GetListCTPNT()
-        {
-            int _userId = int.Parse(User.Identity.Name);
-            return await _memoryCache.GetOrCreateAsync("CTPNTs_" + _userId, async entry =>
-            {
-                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return _dACNPMContext.ChiTietPhieuNhapTams.Where(x => x.Host == GetLocalIPAddress())
-                                .ToList();
-            });
         }
         string GetLocalIPAddress()
         {

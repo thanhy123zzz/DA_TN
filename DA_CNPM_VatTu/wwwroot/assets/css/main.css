@@ -11,6 +11,15 @@ button, input, optgroup, select, textarea {
 .nowrap {
     white-space: nowrap;
 }
+.text-logo {
+    font-weight: 800;
+    font-family: sans-serif;
+    font-size: x-large;
+    transition: transform .2s;
+}
+.text-logo:hover{
+    transform: scale(1.1);
+}
 .text-logo:before,
 .text-logo:after {
     content: '[';
@@ -28,11 +37,11 @@ button, input, optgroup, select, textarea {
 }
 
 .text-logo:hover:before {
-    transform: translateX(-5px);
+    transform: translateX(-8px);
 }
 
 .text-logo:hover:after {
-    transform: translateX(5px);
+    transform: translateX(8px);
 }
 
 .text-decimal{

@@ -116,7 +116,7 @@ namespace DA_CNPM_VatTu.Controllers
             var ht =  _dACNPMContext.HangTonKhos
                 .Include(x=>x.IdhhNavigation.IddvtchinhNavigation)
                 .Where(x => x.Idhh == idHh).OrderByDescending(x => x.NgayNhap);
-            var maxTon = ht.Max(x => x.GiaNhap * (1 - x.Cktm / 100) * (1 + x.Thue / 100));
+            var maxTon = ht.Max(x => x.GiaNhap * (1 - x.Cktm / 100) * (1 + x.Thue / 100)) ?? 0;
             return Ok(new
             {
                 hh = await _dACNPMContext.HangHoas.Include(x=>x.IddvtchinhNavigation).FirstOrDefaultAsync(x=>x.Id == idHh),
@@ -125,8 +125,8 @@ namespace DA_CNPM_VatTu.Controllers
                 .Where(x => x.Idhh == idHh && x.Active == true).ToListAsync(),
                 hangTonKhos = await ht.ToListAsync(),
                 maxTon,
-                si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe,
-                le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe,
+                si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe ?? 0,
+                le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe ?? 0,
             });
         }
         [HttpGet("change-tt")]
@@ -207,7 +207,7 @@ namespace DA_CNPM_VatTu.Controllers
             var listDvt = getListHHdvt().Result
                 .Where(x => x.Idhh == idHh && x.Active == true)
                 .Select(x => x.Iddvt).ToList();
-            listDvt.Add(dvtChinh);
+            listDvt.Add(dvtChinh.Value);
             if (idDvt != null)
             {
                 listDvt.Remove(idDvt);

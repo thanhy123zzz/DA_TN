@@ -28,7 +28,7 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var pqcn = await GetPhanQuyenGiaTheoNHH();
             ViewBag.PhanQuyenPQ = pqcn;
-            ViewBag.NHHs = getListNhomHH().Result.AsParallel().Take(10).ToList();
+            ViewBag.NHHs = getListNhomHH().Result.OrderBy(x=>x.TenNhh).ToList();
             ViewData["title"] = pqcn.IdchucNangNavigation.TenChucNang;
             return View();
         }
@@ -48,7 +48,6 @@ namespace DA_CNPM_VatTu.Controllers
                         TenNhh = x.TenNhh,
                         MaNhh = x.MaNhh
                     })
-                    .Take(10)
                     .ToList(),
                 });
             }

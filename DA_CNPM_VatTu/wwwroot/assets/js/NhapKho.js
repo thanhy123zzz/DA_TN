@@ -1,5 +1,6 @@
 ﻿var _idPn = 0;
 var _daXoa = [];
+var _active = true;
 $(document).ready(function () {
     var datas = [
         {
@@ -253,6 +254,7 @@ $(document).ready(function () {
     $(document).on('click', '.btn-edit-pn', function () {
         var id = $(this).val();
         if (id) {
+            _active = false;
             $.ajax({
                 type: "post",
                 url: "/QuanLy/NhapKho/showEditPhieuNhap",
@@ -270,7 +272,8 @@ $(document).ready(function () {
 function loadTable() {
     $.ajax({
         type: 'POST',
-        url: '/QuanLy/NhapKho/api/hhs'
+        url: '/QuanLy/NhapKho/api/hhs',
+        data: "active=" + _active
     }).done(function (response) {
         $('#tBodyCtpn').append(getRowPhieuNhapCt());
         configRowPhieuNhapCt($('#tBodyCtpn tr:last'), response);
@@ -297,6 +300,7 @@ function loadTable() {
 function xoaTrangPhieuXuatKho() {
     _idPn = 0;
     _daXoa = [];
+    _active = true;
     $('#TienHang').val(0);
     $('#TienCK').val(0);
     $('#TienThue').val(0);
@@ -521,7 +525,8 @@ function showEditPhieuNhap(result) {
 
     $.ajax({
         type: 'POST',
-        url: '/QuanLy/NhapKho/api/hhs'
+        url: '/QuanLy/NhapKho/api/hhs',
+        data: "active=" + _active
     }).done(function (response) {
         result.chiTietPhieuNhaps.forEach(function (item, index) {
             var daXuat = item.hangTonKhos[0].slcon != item.sl;

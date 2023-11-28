@@ -31,7 +31,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.Dvts = getListDVT().Result.Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
             var pqcn = await GetPhanQuyenDVT();
             ViewBag.phanQuyenDVT = pqcn;
@@ -71,8 +71,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 donViTinhs = getListDVT().Result
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -80,8 +80,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 donViTinhs = getListDVT().Result
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -172,8 +172,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     donViTinhs = getListDVT().Result
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(donViTinhs);
                     return Ok(new
@@ -187,8 +187,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     donViTinhs = getListDVT().Result
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(donViTinhs);
                     return Ok(new
@@ -295,7 +295,7 @@ namespace DA_CNPM_VatTu.Controllers
             return await _memoryCache.GetOrCreateAsync("Dvts_" + idcn, async entry =>
             {
                 entry.SlidingExpiration = TimeSpan.FromMinutes(5);
-                return await _dACNPMContext.DonViTinhs.ToListAsync();
+                return await _dACNPMContext.DonViTinhs.Where(x=>x.Active == true).ToListAsync();
             });
         }
 

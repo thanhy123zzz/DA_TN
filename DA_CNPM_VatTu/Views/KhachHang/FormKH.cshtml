@@ -1,41 +1,39 @@
 ﻿@model KhachHang 
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
                   <h6 class="text-center">Thông tin</h6>
                   <div class="input-style-1">
                     <label for="Ma">Mã khách hàng</label>
-                    <input type="text" asp-for="@Model.MaKh" id="Ma" readonly="@(!(Model.MaKh==null))" placeholder="Mã khách hàng">
+                    <input required class="form-control" type="text" asp-for="@Model.MaKh" id="Ma" readonly="@(!(Model.MaKh==null))" placeholder="Mã khách hàng">
                   </div>
                   <div class="input-style-1">
                     <label for="Ten">Tên khách hàng</label>
-                    <input type="text" asp-for="@Model.TenKh" id="Ten" placeholder="Tên khách hàng">
+                    <input required class="form-control" type="text" asp-for="@Model.TenKh" id="Ten" placeholder="Tên khách hàng">
                   </div>
                   <div class="input-style-1">
                     <label for="DiaChi">Địa chỉ</label>
-                    <input type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
+                    <input class="form-control" type="text" asp-for="@Model.DiaChi" id="DiaChi" placeholder="Địa chỉ">
                   </div>
                   <div class="input-style-1">
                     <label for="Sdt">Số điện thoại</label>
-                    <input type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
+                    <input class="form-control" type="text" asp-for="@Model.Sdt" id="Sdt" placeholder="Số điện thoại">
                   </div>
                   <div class="input-style-1">
                     <label for="Email">Email</label>
-                    <input type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
+                    <input class="form-control" type="email" asp-for="@Model.Email" id="Email" placeholder="Email">
                   </div>
                   <div class="input-style-1">
                     <label for="MST">Mã số thuế</label>
-                    <input type="text" asp-for="@Model.MaSoThue" id="MST" placeholder="Mã số thuế">
+                    <input class="form-control" type="text" asp-for="@Model.MaSoThue" id="MST" placeholder="Mã số thuế">
                   </div>
                   <div class="select-style-1">
                     <label for="LoaiKH">Loại KH</label>
-                    <div class="select-position d-flex justify-content-between">
-                        <select class="light-bg col-lg-9" asp-for="@Model.LoaiKh" id="LoaiKH">
-                            <option value="true">Xỉ</option>
+                    <select required class="light-bg col-lg-9 form-select" asp-for="@Model.LoaiKh" id="LoaiKH">
+                            <option value="true">Sỉ</option>
                             <option value="false">Lẻ</option>
                         </select>
-                    </div>
                   </div>
                   <div class="input-style-1">
                     <label for="GhiChu">Ghi chú</label>
-                    <input type="email" asp-for="@Model.GhiChu" id="GhiChu" placeholder="Ghi chú">
+                    <input class="form-control" type="email" asp-for="@Model.GhiChu" id="GhiChu" placeholder="Ghi chú">
                   </div>
-</div>
+</form>

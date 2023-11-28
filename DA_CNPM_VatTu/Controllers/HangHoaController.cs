@@ -37,7 +37,7 @@ namespace DA_CNPM_VatTu.Controllers
             var HangHoas = await getListHH();
             ViewBag.HangHoas = HangHoas.Where(x => x.Active == true)
                 .OrderBy(x=>x.TenHh.Trim())
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenHH();
@@ -105,8 +105,8 @@ namespace DA_CNPM_VatTu.Controllers
                 hhs = getListHH().Result
                 .Where(x => x.Active == active)
                 .OrderBy(x => x.TenHh.Trim())
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderHhs(hhs);
                 return r;
@@ -115,8 +115,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 hhs = getListHH().Result
                     .OrderBy(x => x.TenHh.Trim())
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderHhs(hhs);
                 return r;
@@ -285,8 +285,8 @@ namespace DA_CNPM_VatTu.Controllers
                     hhs = getListHH().Result
                     .Where(x => x.Active == active)
                     .OrderBy(x => x.TenHh.Trim())
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderHhs(hhs);
                     return Ok(new
@@ -301,8 +301,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     hhs = getListHH().Result
                         .OrderBy(x => x.TenHh.Trim())
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderHhs(hhs);
                     return Ok(new

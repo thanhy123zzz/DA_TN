@@ -31,7 +31,7 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> NhomHangHoa()
         {
             ViewBag.NhomHHs = getListNhomHH().Where(x => x.Active == true)
-            .Take(10)
+            .Take(15)
             .ToList();
 
             var pqcn = await GetPhanQuyenNhomHH();
@@ -48,8 +48,8 @@ namespace DA_CNPM_VatTu.Controllers
             {
                 donViTinhs = getListNhomHH()
                 .Where(x => x.Active == active)
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -57,8 +57,8 @@ namespace DA_CNPM_VatTu.Controllers
             else
             {
                 donViTinhs = getListNhomHH()
-                .Skip(page * 10)
-                .Take(10)
+                .Skip(page * 15)
+                .Take(15)
                 .ToList();
                 var r = await RenderDvts(donViTinhs);
                 return r;
@@ -171,8 +171,8 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     nsxs = getListNhomHH()
                     .Where(x => x.Active == active)
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nsxs);
                     return Ok(new
@@ -186,8 +186,8 @@ namespace DA_CNPM_VatTu.Controllers
                 else
                 {
                     nsxs = getListNhomHH()
-                    .Skip(page * 10)
-                    .Take(10)
+                    .Skip(page * 15)
+                    .Take(15)
                     .ToList();
                     r = await RenderDvts(nsxs);
                     return Ok(new

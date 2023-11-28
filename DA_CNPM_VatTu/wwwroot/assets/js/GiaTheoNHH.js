@@ -19,22 +19,14 @@ $(document).on('click', '#tBodyNHH tr', function () {
         }
     });
 });
-$('#search').on('keyup', (e) => {
-    var key = e.target.value;
+$('#search').on('keyup', function (e){
+    var key = $(this).val();
     $('#tBodyGTNHH').empty();
-    $.ajax({
-        type: "post",
-        url: "/QuyDinh/GiaTheoNHH/search-nhh",
-        data: "key=" + key,
-        success: function (result) {
-            $('#tBodyNHH').empty();
+    var listItem = $('#tBodyNHH tr');
 
-            result.data.map(item => $('#tBodyNHH').append(`<tr data-id="${item.id}" style="cursor:pointer"><td class="first-td-column">${item.maNhh}</td><td>${item.tenNhh}</td></tr>`));
-
-        },
-        error: function (loi) {
-            console.log(loi);
-        }
+    listItem.filter(function () {
+        var have = $(this).text().toLowerCase().indexOf(key) > -1;
+        $(this).toggle(have);
     });
 });
 function getValue(str) {
@@ -63,42 +55,43 @@ function showModalGTNHH(idGtnhh) {
         });
     }
 }
-$('#btnModal').on('click', (e) => {
-    if ($('#TLLe').val() === "" && $('#TLSi').val() === "") {
-        $('.text-decimal').addClass("is-invalid");
-        return false;
+$('#btnModal').on('click', function (e) {
+    var form = document.getElementById('formUpdate');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+    } else {
+        form.classList.remove('was-validated');
+        fetch("/QuyDinh/GiaTheoNHH/update-gtnhh", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                Id: idModel,
+                IdNhh: $('.table-active').attr('data-id'),
+                TiLeLe: getValue($('#TLLe').val()),
+                TiLeSi: getValue($('#TLSi').val()),
+                Min: getValue($('#min').val()),
+                Max: getValue($('#max').val())
+            })
+        })
+            .then(Response => Response.json())
+            .then(data => {
+                if (data.statusCode == 200) {
+                    $('#tBodyGTNHH').replaceWith(data.viewData);
+                    $('#staticBackdrop').modal('hide');
+                }
+                $('#toast').addClass(data.color);
+                $('#toastContent').text(data.message);
+                $('#toast').show();
+
+                setTimeout(function () {
+                    $('#toast').hide();
+                    $('#toast').removeClass(data.color);
+                }, 5000);
+            })
+            .catch(error => console.error(error))
     }
-
-    fetch("/QuyDinh/GiaTheoNHH/update-gtnhh", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            Id: idModel,
-            IdNhh: $('.table-active').attr('data-id'),
-            TiLeLe: getValue($('#TLLe').val()),
-            TiLeSi: getValue($('#TLSi').val()),
-            Min: getValue($('#min').val()),
-            Max: getValue($('#max').val())
-        })
-    })
-        .then(Response => Response.json())
-        .then(data => {
-            if (data.statusCode == 200) {
-                $('#tBodyGTNHH').replaceWith(data.viewData);
-                $('#staticBackdrop').modal('hide');
-            }
-            $('#toast').addClass(data.color);
-            $('#toastContent').text(data.message);
-            $('#toast').show();
-
-            setTimeout(function () {
-                $('#toast').hide();
-                $('#toast').removeClass(data.color);
-            }, 5000);
-        })
-        .catch(error => console.error(error))
 });
 function deleteGTNHH(id) {
     if (confirm("Bạn có muốn thực hiện thao tác này?")) {

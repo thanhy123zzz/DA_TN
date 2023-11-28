@@ -1,12 +1,12 @@
 ﻿@model HangSanXuat
-<div class="card-style m-30" style="border: none;">
+<form id="formUpdate" class="card-style m-30" style="border: none;">
     <h6 class="text-center">Thông tin</h6>
     <div class="input-style-1">
         <label for="MaDVT">Mã hãng sản xuất</label>
-        <input type="text" value="@Model.MaHsx" id="MaHSX" placeholder="Mã hãng sản xuất">
+        <input class="form-control" required type="text" value="@Model.MaHsx" id="MaHSX" placeholder="Mã hãng sản xuất">
     </div>
     <div class="input-style-1">
         <label for="TenDVT">Tên hãng sản xuất</label>
-        <input type="text" value="@Model.TenHsx" id="TenHSX" placeholder="Tên hãng sản xuất">
+        <input class="form-control" required type="text" value="@Model.TenHsx" id="TenHSX" placeholder="Tên hãng sản xuất">
     </div>
-</div>
+</form>
