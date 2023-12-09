@@ -118,7 +118,15 @@ namespace DA_CNPM_VatTu.Controllers
             var kh = getListKH().Result.FirstOrDefault(x => x.Id == idKh);
             var loaiKh = kh.LoaiKh.Value;
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
-            
+            double? tiLeMacDinh;
+            if (loaiKh == true)
+            {
+                tiLeMacDinh = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe * 100 - 100;
+            }
+            else
+            {
+                tiLeMacDinh = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe * 100 - 100;
+            }
             // các loại đơn vị tính của hàng hoá
             var hhdvts = await _dACNPMContext
                 .Hhdvts.Include(x => x.IddvtNavigation)
@@ -167,13 +175,13 @@ namespace DA_CNPM_VatTu.Controllers
                     // sỉ
                     if (loaiKh)
                     {
-                        return Ok(giaTheoKH.GiaBanSi == null ? getDonGia(giaTheoKH.TiLeSi, giaNhap, thue) : giaTheoKH.GiaBanSi);
+                        return Ok(giaTheoKH.GiaBanSi == null ? getDonGia(giaTheoKH.TiLeSi, giaNhap, thue, tiLeMacDinh) : giaTheoKH.GiaBanSi);
                     }
                     // lẻ
                     else
                     {
                         return Ok(giaTheoKH.GiaBanLe == null
-                            ? getDonGia(giaTheoKH.TiLeLe, giaNhap, thue)
+                            ? getDonGia(giaTheoKH.TiLeLe, giaNhap, thue, tiLeMacDinh)
                             : giaTheoKH.GiaBanLe);
                     }
                 }
@@ -194,12 +202,12 @@ namespace DA_CNPM_VatTu.Controllers
                                 // sỉ
                                 if (loaiKh)
                                 {
-                                    return Ok(getDonGia(h.TiLeSi, giaNhap, thue));
+                                    return Ok(getDonGia(h.TiLeSi, giaNhap, thue, tiLeMacDinh));
                                 }
                                 // lẻ
                                 else
                                 {
-                                    return Ok(getDonGia(h.TiLeLe, giaNhap, thue));
+                                    return Ok(getDonGia(h.TiLeLe, giaNhap, thue, tiLeMacDinh));
                                 }
                             }
                         }
@@ -208,14 +216,14 @@ namespace DA_CNPM_VatTu.Controllers
                         if (loaiKh)
                         {
                             return Ok(hh.GiaBanSi == null
-                                ? getDonGia(hh.TiLeSi, giaNhap, thue)
+                                ? getDonGia(hh.TiLeSi, giaNhap, thue, tiLeMacDinh)
                                 : hh.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
                             return Ok(hh.GiaBanLe == null
-                                ? getDonGia(hh.TiLeLe, giaNhap, thue)
+                                ? getDonGia(hh.TiLeLe, giaNhap, thue, tiLeMacDinh)
                                 : hh.GiaBanLe);
                         }
                     }
@@ -226,14 +234,14 @@ namespace DA_CNPM_VatTu.Controllers
                         if (loaiKh)
                         {
                             return Ok(hh.GiaBanSi == null
-                                ? getDonGia(hh.TiLeSi, giaNhap, thue)
+                                ? getDonGia(hh.TiLeSi, giaNhap, thue, tiLeMacDinh)
                                 : hh.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
                             return Ok(hh.GiaBanLe == null
-                                ? getDonGia(hh.TiLeLe, giaNhap, thue)
+                                ? getDonGia(hh.TiLeLe, giaNhap, thue, tiLeMacDinh)
                                 : hh.GiaBanLe);
                         }
                     }
@@ -257,14 +265,14 @@ namespace DA_CNPM_VatTu.Controllers
                     if (loaiKh)
                     {
                         return Ok(giaTheoKH.GiaBanSi == null
-                            ? getDonGia(giaTheoKH.TiLeSi, giaNhap * slQuyDoi, thue)
+                            ? getDonGia(giaTheoKH.TiLeSi, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                             : giaTheoKH.GiaBanSi);
                     }
                     // lẻ
                     else
                     {
                         return Ok(giaTheoKH.GiaBanLe == null
-                            ? getDonGia(giaTheoKH.TiLeLe, giaNhap * slQuyDoi, thue)
+                            ? getDonGia(giaTheoKH.TiLeLe, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                             : giaTheoKH.GiaBanLe);
                     }
                 }
@@ -284,12 +292,12 @@ namespace DA_CNPM_VatTu.Controllers
                                 // sỉ
                                 if (loaiKh)
                                 {
-                                    return Ok(getDonGia(h.TiLeSi, giaNhap * slQuyDoi, thue));
+                                    return Ok(getDonGia(h.TiLeSi, giaNhap * slQuyDoi, thue, tiLeMacDinh));
                                 }
                                 // lẻ
                                 else
                                 {
-                                    return Ok(getDonGia(h.TiLeLe, giaNhap * slQuyDoi, thue));
+                                    return Ok(getDonGia(h.TiLeLe, giaNhap * slQuyDoi, thue, tiLeMacDinh));
                                 }
                             }
                         }
@@ -299,14 +307,14 @@ namespace DA_CNPM_VatTu.Controllers
                         if (loaiKh)
                         {
                             return Ok(hhdvt.GiaBanSi == null
-                                ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue)
+                                ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                                 : hhdvt.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
                             return Ok(hhdvt.GiaBanLe == null
-                                ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue)
+                                ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                                 : hhdvt.GiaBanLe);
                         }
                     }
@@ -318,14 +326,14 @@ namespace DA_CNPM_VatTu.Controllers
                         if (loaiKh)
                         {
                             return Ok(hhdvt.GiaBanSi == null
-                                ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue)
+                                ? getDonGia(hhdvt.TiLeSi, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                                 : hhdvt.GiaBanSi);
                         }
                         // lẻ
                         else
                         {
                             var r = hhdvt.GiaBanLe == null
-                                ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue)
+                                ? getDonGia(hhdvt.TiLeLe, giaNhap * slQuyDoi, thue, tiLeMacDinh)
                                 : hhdvt.GiaBanLe;
                             return Ok(r);
                         }
@@ -607,9 +615,9 @@ namespace DA_CNPM_VatTu.Controllers
 
             return File(pdfBytes, "application/pdf", "BaoCaoXuatKho.pdf");
         }
-        double? getDonGia(double? tiLe, double? GiaNhap, double? Vat)
+        double? getDonGia(double? tiLe, double? GiaNhap, double? Vat, double? tiLeMacDinh)
         {
-            tiLe ??= 0;
+            tiLe ??= tiLeMacDinh;
             double tl = Math.Round((tiLe.Value / 100) + 1, 2);
             double thue = Math.Round(Vat.Value / 100, 2);
             return Math.Round(tl * (GiaNhap.Value + (GiaNhap.Value * thue)), 2);

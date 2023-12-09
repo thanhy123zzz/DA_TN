@@ -2,6 +2,47 @@
 var _chartTop10NhomHangBanChay = null;
 var _chartTop5HangHoaLoiNhuan = null;
 $(document).ready(function () {
+    configDate();
+    $('#btnTimBaoCaoLoiLo').on('click', function () {
+        $.ajax({
+            type: "post",
+            url: "/QuanLy/BaoCaoLoiLo/timBaoCaoLoiLo",
+            data: "tuNgay=" + $('#TuNgay').val() + "&denNgay=" + $('#DenNgay').val(),
+            success: function (result) {
+                console.log(result);
+                updateTableBaoCaoLoiLo(result);
+            },
+            error: function (loi) {
+                console.log(loi);
+            }
+        });
+    });
+    $('#btnXuatBaoCaoLoiLo').on('click', function () {
+        $.ajax({
+            type: "post",
+            url: "/QuanLy/BaoCaoLoiLo/download/baoCaoLoiLo",
+            data: "tuNgay=" + $('#TuNgay').val() + "&denNgay=" + $('#DenNgay').val(),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (result) {
+                var a = document.createElement('a');
+                var url = window.URL.createObjectURL(result);
+                a.href = url;
+                a.download = "file.pdf";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            },
+            error: function (loi) {
+                console.log(loi);
+            }
+        });
+    });
+    $('#btnTimBaoCaoLoiLo').click();
     // Biêu đồ giá trị nhập xuất
     $('#ngayGiaTriNhapXuat').on('change', function () {
         $.ajax({
@@ -359,6 +400,45 @@ $(document).ready(function () {
         });
     });
 });
+function updateTableBaoCaoLoiLo(datas) {
+    $('#table-baoCaoLoiLo').empty();
+    $('#tfoot-baoCaoLoiLo').empty();
+    var tong = 0;
+    datas.forEach(function (data, tt) {
+        $('#table-baoCaoLoiLo').append(`<tr>
+                                <td class="text-center">
+                                    ${tt + 1}
+                                </td>
+                                <td class="text-center">
+                                    ${data.ma}
+                                </td>
+                                <td style="max-width: 400px">
+                                    ${data.ten}
+                                </td>
+                                <td class="text-end">
+                                    ${formatOddNumber(data.slXuat)}
+                                </td>
+                                <td class="text-end">
+                                    ${formatOddNumber(data.giaTriNhap)}
+                                </td>
+                                <td class="text-end">
+                                    ${formatOddNumber(data.giaTriXuat)}
+                                </td>
+                                <td class="text-end">
+                                    ${formatOddNumber(data.loiNhuan)}
+                                </td>
+                            </tr>`);
+        tong += data.loiNhuan;
+    })
+    $('#tfoot-baoCaoLoiLo').append(`<tr style="position: sticky;bottom: 0;background-color: lightgrey;">
+                                <td colspan="6">
+                                    <b>Tổng lợi nhuận</b>
+                                </td>
+                                <td class="text-end">
+                                    <b>${formatOddNumber(tong)}</b>
+                                </td>
+                            </tr>`);
+}
 function getRandomColor() { //generates random colours and puts them in string
     var colors = [];
     for (var i = 0; i < 3; i++) {

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace DA_CNPM_VatTu.Controllers
@@ -50,8 +51,50 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> showEdit(int id)
         {
             var Hh = getListHH().Result.FirstOrDefault(x => x.Id == id);
+            if (Hh == null)
+            {
+                Hh = new HangHoa();
+                Hh.MaHh = await getSoPhieu();
+            }
+            async Task<string> getSoPhieu()
+            {
+                var context = new DACNPMContext();
+                //ID chi nhánh
+                int cn = int.Parse(User.FindFirstValue("IdCn"));
 
-            PartialViewResult partialViewResult = PartialView("FormHH", Hh == null ? new HangHoa() : Hh);
+                DateTime d = DateTime.Now;
+                string ngayThangNam = d.ToString("yyMMdd");
+
+                QuyDinhMa qd = await context.QuyDinhMas.FirstOrDefaultAsync(x => x.TiepDauNgu == "H");
+                string SoPhieu = cn + "_" + qd.TiepDauNgu + ngayThangNam;
+                var list = await context.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("HangHoa"));
+                int stt;
+                if (list == null)
+                {
+                    SoThuTu sttt = new SoThuTu();
+                    sttt.Ngay = DateTime.ParseExact(DateTime.Now.ToString("dd-MM-yyyy"), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    sttt.Stt = 1;
+                    sttt.Loai = "HangHoa";
+                    await context.SoThuTus.AddAsync(sttt);
+                    context.SaveChanges();
+                    stt = 1;
+                }
+                else
+                {
+                    stt = list.Stt + 1;
+                    list.Stt++;
+                    context.SaveChanges();
+                }
+                SoPhieu += stt;
+                while (true)
+                {
+                    if (qd.DoDai == SoPhieu.Length) break;
+                    SoPhieu = SoPhieu.Insert(SoPhieu.Length - stt.ToString().Length, "0");
+                }
+
+                return SoPhieu;
+            }
+            PartialViewResult partialViewResult = PartialView("FormHH", Hh);
             string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
             return Ok(new
             {

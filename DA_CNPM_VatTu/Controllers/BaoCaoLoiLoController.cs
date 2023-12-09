@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -50,6 +51,28 @@ namespace DA_CNPM_VatTu.Controllers
                 .Where(x => x.NgayTao.Value.Date == now.Date).ToListAsync();*/
             return View();
         }
+        [HttpPost("timBaoCaoLoiLo")]
+        public async Task<IActionResult> timBaoCaoLoiLo(string tuNgay, string denNgay)
+        {
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            DateTime TuNgay = DateTime.ParseExact(tuNgay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime DenNgay = DateTime.ParseExact(denNgay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var ctPhieuXuats = _dACNPMContext.ChiTietPhieuXuats
+                        .Include(x => x.IdhhNavigation)
+                        .Include(x => x.IdpxNavigation)
+                        .Include(x => x.IdctpnNavigation).Where(x => x.IdpxNavigation.Idcn == idCn);
+            var cts = await ctPhieuXuats.Where(x => x.NgayTao.Value.Date <= DenNgay.Date && x.NgayTao.Value.Date >= TuNgay.Date).ToListAsync();
+            var gr = cts.GroupBy(x => x.IdhhNavigation).ToList();
+            return Ok(gr.Select(x => new
+            {
+                ma = x.Key.MaHh,
+                ten = x.Key.TenHh,
+                slXuat = x.Sum(y => y.Sl),
+                giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+            }).OrderByDescending(x => x.loiNhuan).ToList());
+        }
         [HttpPost("getTop10NhomHangBanChay")]
         public async Task<IActionResult> getTop10NhomHangBanChay(int tg)
         {
@@ -69,7 +92,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList());
             }
             // tuần
@@ -88,7 +111,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList());
             }
             // tháng
@@ -107,7 +130,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList());
             }
             // quý
@@ -129,7 +152,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList());
             }
             // năm
@@ -148,7 +171,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList());
             }
             return Ok();
@@ -382,9 +405,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x=>x.loiNhuan).Take(5).ToList());
             }
             // tuần
@@ -403,9 +426,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList());
             }
             // tháng
@@ -424,9 +447,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList());
             }
             // quý
@@ -448,9 +471,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList());
             }
             // năm
@@ -469,12 +492,69 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList());
             }
             return Ok();
+        }
+        [HttpPost("download/baoCaoLoiLo")]
+        public async Task<IActionResult> baoCaoLoiLo(string tuNgay, string denNgay)
+        {
+            int idCn = int.Parse(User.FindFirstValue("IdCn"));
+            DateTime TuNgay = DateTime.ParseExact(tuNgay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime DenNgay = DateTime.ParseExact(denNgay, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            var ctPhieuXuats = _dACNPMContext.ChiTietPhieuXuats
+                        .Include(x => x.IdhhNavigation)
+                        .Include(x => x.IdpxNavigation)
+                        .Include(x => x.IdctpnNavigation).Where(x => x.IdpxNavigation.Idcn == idCn);
+            var cts = await ctPhieuXuats.Where(x => x.NgayTao.Value.Date <= DenNgay.Date && x.NgayTao.Value.Date >= TuNgay.Date).ToListAsync();
+            var gr = cts.GroupBy(x => x.IdhhNavigation).ToList();
+            ViewBag.Datas = gr.Select(x => new
+            {
+                ma = x.Key.MaHh,
+                ten = x.Key.TenHh,
+                slXuat = x.Sum(y => y.Sl),
+                giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+            }).OrderByDescending(x => x.loiNhuan).ToList();
+            ViewBag.TuNgay = tuNgay;
+            ViewBag.DenNgay = denNgay;
+            ViewBag.ttDoanhNghiep = await _dACNPMContext.ThongTinDoanhNghieps.FirstOrDefaultAsync();
+            ViewBag.logo = CommonServices.ConvertImageToBase64(_hostingEnvironment, "/assets/images/logo2.png");
+            PartialViewResult partialViewResult = PartialView("baoCaoLoiLoPdf");
+            string viewContent = CommonServices.ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
+
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Margins = new MarginSettings()
+                        {
+                            Left = 0.5,
+                            Right = 0.5,
+                            Unit = Unit.Centimeters
+                        },
+                    },
+                Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = viewContent,
+                            WebSettings = {
+                                DefaultEncoding = "utf-8",
+                            },
+                            UseLocalLinks = true,
+                            FooterSettings = { FontSize = 9, Right = "Trang [page]", Line = true, Spacing = 2.812 }
+                        }
+                    }
+            };
+            var pdfBytes = _converter.Convert(doc);
+
+            return File(pdfBytes, "application/pdf", "file.pdf");
         }
         [HttpPost("download/nhapXuat")]
         public async Task<IActionResult> downLoadNhapXuat(int tg)
@@ -749,7 +829,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList();
             }
             // tuần
@@ -769,7 +849,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList();
             }
             // tháng
@@ -789,7 +869,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList();
             }
             // quý
@@ -812,7 +892,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList();
             }
             // năm
@@ -832,7 +912,7 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaNhh,
                     ten = x.Key.TenNhh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.slXuat).Take(10).ToList();
             }
             ViewBag.Datas = datas;
@@ -892,9 +972,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100) * y.Sl),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList();
             }
             // tuần
@@ -914,9 +994,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList();
             }
             // tháng
@@ -936,9 +1016,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList();
 
             }
@@ -962,9 +1042,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList();
             }
             // năm
@@ -984,9 +1064,9 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.Key.MaHh,
                     ten = x.Key.TenHh,
                     slXuat = x.Sum(y => y.Sl),
-                    giaTriXuat = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
-                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
-                    loiNhuan = x.Sum(y => y.DonGia * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
+                    giaTriXuat = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)),
+                    giaTriNhap = x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100)),
+                    loiNhuan = x.Sum(y => y.DonGia * y.Sl * (1 - (y.Cktm ?? 0) / 100) * (1 + (y.Thue ?? 0) / 100)) - x.Sum(y => y.IdctpnNavigation.DonGia * y.Sl * (1 - (y.IdctpnNavigation.Cktm ?? 0) / 100) * (1 + (y.IdctpnNavigation.Thue ?? 0) / 100))
                 }).OrderByDescending(x => x.loiNhuan).Take(5).ToList();
             }
             ViewBag.Datas = datas;
