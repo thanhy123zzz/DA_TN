@@ -12,7 +12,22 @@
     formatNumberFloatWithElement($('.input-number-float'));
 
     loadTable();
-
+    $(document).on('click', '.btn-remove-ct', function () {
+        var tr = $(this).closest('tr');
+        var id = tr.find('input[name="Id"]').val();
+        if (id) {
+            _daXoa.push(parseInt(id));
+        }
+        if (!tr.is(":last-child")) {
+            tr.find('select').each(function () {
+                if (this.selectize) {
+                    this.selectize.destroy();
+                }
+            });
+            tr.remove();
+            updateGiaTongTien();
+        }
+    });
     $.ajax({
         url: '/QuanLy/XuatKho/api/khs',
         method: 'POST',
@@ -329,14 +344,18 @@ function dropDownHhChange(cbHangHoa, value) {
         var option = options.find(function (item) {
             return item.id == value;
         });
+        if (option.slTon == 0) {
+            showToast("Đã hết hàng trong kho!", 500);
+            cbHangHoa[0].selectize.clear();
+            return;
+        }
+
         tr.find('img.image-modal').prop('alt', option.ten);
         if (option.hinh) {
             tr.find('img.image-modal').prop('src', option.hinh);
         }
         tr.find('input[name="Sl"]').prop('max', option.slTon);
-        if (option.slTon == 0) {
-            showToast("Đã hết hàng trong kho!", 500);
-        }
+        
         tr.find('.slqd').val(1);
         formatNumberFloatWithElement(tr.find('.input-number-float'));
         option.dvts.unshift(option.dvtChinh);
@@ -450,4 +469,7 @@ function cancelXemPhieu() {
     $('#tabXemPhieu').addClass('d-lg-none');
     $('#bordered-justified-profile').addClass('active');
     $('#bordered-justified-profile').addClass('show');
+}
+function offTabNhap() {
+    $('#tabXemPhieu').addClass('d-none');
 }

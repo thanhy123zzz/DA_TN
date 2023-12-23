@@ -31,6 +31,7 @@ namespace DA_CNPM_VatTu.Models.Entities
         public virtual DbSet<HangTonKho> HangTonKhos { get; set; } = null!;
         public virtual DbSet<Hhdvt> Hhdvts { get; set; } = null!;
         public virtual DbSet<KhachHang> KhachHangs { get; set; } = null!;
+        public virtual DbSet<NganKe> NganKes { get; set; } = null!;
         public virtual DbSet<NhaCungCap> NhaCungCaps { get; set; } = null!;
         public virtual DbSet<NhanVien> NhanViens { get; set; } = null!;
         public virtual DbSet<NhomHangHoa> NhomHangHoas { get; set; } = null!;
@@ -422,6 +423,8 @@ namespace DA_CNPM_VatTu.Models.Entities
 
                 entity.Property(e => e.Idhsx).HasColumnName("IDHSX");
 
+                entity.Property(e => e.IdnganKe).HasColumnName("IDNganKe");
+
                 entity.Property(e => e.Idnhh).HasColumnName("IDNHH");
 
                 entity.Property(e => e.Idnsx).HasColumnName("IDNSX");
@@ -458,6 +461,11 @@ namespace DA_CNPM_VatTu.Models.Entities
                     .WithMany(p => p.HangHoas)
                     .HasForeignKey(d => d.Idhsx)
                     .HasConstraintName("FK__HangHoa__IDHSX__73BA3083");
+
+                entity.HasOne(d => d.IdnganKeNavigation)
+                    .WithMany(p => p.HangHoas)
+                    .HasForeignKey(d => d.IdnganKe)
+                    .HasConstraintName("FK__HangHoa__IDNganK__7CD98669");
 
                 entity.HasOne(d => d.IdnhhNavigation)
                     .WithMany(p => p.HangHoas)
@@ -633,6 +641,25 @@ namespace DA_CNPM_VatTu.Models.Entities
                     .WithMany(p => p.KhachHangs)
                     .HasForeignKey(d => d.Idnvsale)
                     .HasConstraintName("FK__KhachHang__IDNVS__797309D9");
+            });
+
+            modelBuilder.Entity<NganKe>(entity =>
+            {
+                entity.ToTable("NganKe");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Idcn).HasColumnName("IDCN");
+
+                entity.Property(e => e.NgaySua).HasColumnType("datetime");
+
+                entity.Property(e => e.NgayTao).HasColumnType("datetime");
+
+                entity.Property(e => e.Nvsua).HasColumnName("NVSua");
+
+                entity.Property(e => e.Nvtao).HasColumnName("NVTao");
+
+                entity.Property(e => e.TenNganKe).HasMaxLength(100);
             });
 
             modelBuilder.Entity<NhaCungCap>(entity =>

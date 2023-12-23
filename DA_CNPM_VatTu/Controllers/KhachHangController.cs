@@ -66,7 +66,7 @@ namespace DA_CNPM_VatTu.Controllers
             }
         }
         [HttpPost("searchTableKH")]
-        public async Task<string> searchNhaCC(string key, bool active)
+        public async Task<string> searchTableKH(string key, bool active)
         {
             List<KhachHang> khs;
             if (active)

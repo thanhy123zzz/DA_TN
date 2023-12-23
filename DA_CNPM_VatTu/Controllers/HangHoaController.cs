@@ -228,6 +228,19 @@ namespace DA_CNPM_VatTu.Controllers
                 ten = x.TenBh,
             }).ToListAsync());
         }
+        [HttpPost("api/nganKe")]
+        public async Task<IActionResult> optionNganKe()
+        {
+            int cn = int.Parse(User.FindFirstValue("IdCn"));
+            return Ok(await _dACNPMContext.NganKes
+                .AsNoTracking()
+                .Where(x => x.Active == true && x.Idcn == cn)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    ten = x.TenNganKe,
+                }).ToListAsync());
+        }
 
 
         [HttpPost("update-hh")]
@@ -429,6 +442,7 @@ namespace DA_CNPM_VatTu.Controllers
                                 $"<td>{(hh.IdhsxNavigation == null ? "" : hh.IdhsxNavigation.TenHsx)}</td>" +
                                 $"<td>{(hh.IddvtchinhNavigation == null ? "" : hh.IddvtchinhNavigation.TenDvt)}</td>" +
                                 $"<td>{(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)}</td>" +
+                                $"<td>{(hh.IdnganKeNavigation == null ? "" : hh.IdnganKeNavigation.TenNganKe)}</td>" +
                                 $"<td>{getNhanVien(hh.Nvtao).TenNv}</td>" +
                                 $"<td>{formatDay(hh.NgayTao)}</td>" +
                                 $"<td>{getNhanVien(hh.Nvsua).TenNv}</td>" +
@@ -465,6 +479,7 @@ namespace DA_CNPM_VatTu.Controllers
                                 .Include(x => x.IdnsxNavigation)
                                 .Include(x => x.IdnhhNavigation)
                                 .Include(x => x.IdbaoHanhNavigation)
+                                .Include(x => x.IdnganKeNavigation)
                                 .ToListAsync();
             });
         }

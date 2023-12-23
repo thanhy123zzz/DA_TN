@@ -104,7 +104,8 @@ namespace DA_CNPM_VatTu.Controllers
                     ma = x.IddvtchinhNavigation.MaDvt,
                     slqd = 1
                 },
-                slTon = x.HangTonKhos.Where(y => y.Idcn == idCn).Sum(y => y.Slcon)
+                slTon = x.HangTonKhos.Where(y => y.Idcn == idCn).Sum(y => y.Slcon),
+                NganKe = x.IdnganKeNavigation.TenNganKe
             }).OrderBy(x => x.ten).ToListAsync());
         }
         [HttpPost("api/getSoPhieuXuat")]

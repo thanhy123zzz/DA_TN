@@ -1,0 +1,169 @@
+﻿@{
+    List<NhanVien> listNV = ViewBag.NhanViens;
+
+    NhanVien getNhanVien(int? id)
+    {
+        NhanVien nv = listNV.FirstOrDefault(x => x.Id == id);
+        if (nv != null) return nv;
+        else return new NhanVien();
+    }
+    string formatDay(DateTime? date)
+    {
+        if (date != null)
+        {
+            return date.Value.ToString("dd-MM-yyyy HH:mm");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    PhanQuyenChucNang phanQuyenNganKe = ViewBag.phanQuyenNganKe;
+}
+<div class="tables-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content" class="card-style mb-30 p-3">
+                <div class="row justify-content-between mb-2">
+                    <div class="col-auto">
+                        @if (phanQuyenNganKe.Them.Value)
+                        {
+                            <button class="btn btn-outline-primary"
+                                    onclick="showModalEdit(0)" value="0"
+                                    data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                Thêm mới
+                            </button>
+                        }
+                    </div>
+                    <div class="col-auto">
+                        @if (phanQuyenNganKe.TimKiem.Value)
+                        {
+                            <form id="formTimKiem" class="row justify-content-between">
+                                <div class="col-auto">
+                                    <div class="select-style-1 mb-0">
+                                        <div class="select-position select-sm">
+                                            <select class="light-bg" id="active" onchange="changeActive()">
+                                                <option value="true">Hiện tại</option>
+                                                <option value="false">Tất cả</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="text" class="form-control" id="search" placeholder="Tìm kiếm..." />
+                                </div>
+                                <div class="col-auto">
+                                    <button title="Tìm kiếm" id="btnSearch" type="submit" class="btn btn-light">
+                                        <span class="lni lni-keyword-research"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <!-- End Title -->
+                <div class="card">
+                    <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:400px">
+                        <table class="table table-bordered top-selling-table table-hover display nowrap">
+                            <thead style="background-color:lightgray;position: sticky; top: 0;">
+                                <tr class="text-center">
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Tên ngăn kệ
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            NV tạo
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày tạo
+                                        </h6>
+                                    </th>
+                                    <th>
+                                        <h6 class="text-sm fw-bold">
+                                            NV sửa
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Ngày sửa
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
+                                            Thao tác
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tBody">
+                                @foreach (NganKe vt in ViewBag.NganKes)
+                                {
+                                    <tr>
+                                        <td>@vt.TenNganKe</td>
+                                        <td>@getNhanVien(vt.Nvtao).TenNv</td>
+                                        <td>@formatDay(vt.NgayTao)</td>
+                                        <td>@getNhanVien(vt.Nvsua).TenNv</td>
+                                        <td>@formatDay(vt.NgaySua)</td>
+                                        <td>
+                                            <div class="action justify-content-end">
+                                                @if (phanQuyenNganKe.Sua.Value)
+                                                {
+                                                    <button onclick="showModalEdit(@vt.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="lni lni-pencil"></i>
+                                                    </button>
+                                                }
+                                                @if (phanQuyenNganKe.Xoa.Value)
+                                                {
+                                                    <button onclick="deleteVT(@vt.Id)" class="text-danger">
+                                                        @if (vt.Active.Value)
+                                                        {
+                                                            <i class="lni lni-trash-can"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="lni lni-spinner-arrow"></i>
+                                                        }
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="loader">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-grow text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Table -->
+                    </div>
+                </div>
+                <nav id="pages" aria-label="Page navigation example" class="m-2">
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item">
+                            <a class="page-link disabled" href="" id="prePage">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item"><a class="page-link" id="currentPage" href="#">1</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" id="nextPage">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/NganKe.js" defer asp-append-version="true">
+
+</script>

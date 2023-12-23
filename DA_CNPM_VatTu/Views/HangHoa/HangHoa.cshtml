@@ -104,6 +104,11 @@
                                     </th>
                                     <th class="min-width">
                                         <h6 class="text-sm fw-bold">
+                                            Ngăn kệ lưu trữ
+                                        </h6>
+                                    </th>
+                                    <th class="min-width">
+                                        <h6 class="text-sm fw-bold">
                                             NV tạo
                                         </h6>
                                     </th>
@@ -147,6 +152,7 @@
                                         <td>@(hh.IdhsxNavigation == null ? "" : hh.IdhsxNavigation.TenHsx)</td>
                                         <td>@(hh.IddvtchinhNavigation == null ? "" : hh.IddvtchinhNavigation.TenDvt)</td>
                                         <td>@(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)</td>
+                                        <td>@(hh.IdnganKeNavigation == null ? "" : hh.IdnganKeNavigation.TenNganKe)</td>
                                         <td>@getNhanVien(hh.Nvtao).TenNv</td>
                                         <td>@formatDay(hh.NgayTao)</td>
                                         <td>@getNhanVien(hh.Nvsua).TenNv</td>

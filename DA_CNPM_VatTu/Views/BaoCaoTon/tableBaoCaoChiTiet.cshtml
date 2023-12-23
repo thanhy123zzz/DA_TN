@@ -32,6 +32,7 @@
 				<td class="text-center">@ht.IdhhNavigation.MaHh</td>
 				<td>@ht.IdhhNavigation.TenHh</td>
 				<td class="text-center">@ht.SoLo</td>
+				<td>@ht.IdhhNavigation.IdnganKeNavigation?.TenNganKe</td>
 				<td class="text-center">@dayToString(ht.Hsd)</td>
 				<td class="text-end">@toDecimal(ht.Sl)</td>
 				<td class="text-end">@toDecimal(ht.Sl - (ht.HangTonKhos.Count == 0 ? 0 : ht.HangTonKhos.FirstOrDefault().Slcon))</td>
@@ -45,7 +46,7 @@
 		stt++;
 	}
 	<tr>
-		<td colspan="13" style="background-color: lightgray !important;
+		<td colspan="14" style="background-color: lightgray !important;
                                position: sticky;padding: 10px 5px;
                                bottom:0; text-align:start!important;
 							   font-weight:700">

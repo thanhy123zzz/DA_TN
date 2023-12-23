@@ -185,6 +185,7 @@ $('#btnModal').on('click', function (e) {
     formData.append('HangHoa.Idhsx', $('#Hsx').val());
     formData.append('HangHoa.Idnhh', $('#Nhh').val());
     formData.append('HangHoa.IdBaoHanh', $('#Bh').val());
+    formData.append('HangHoa.IdnganKe', $('#nganKe').val());
 
     $.ajax({
         url: "/DanhMuc/HangHoa/update-hh",

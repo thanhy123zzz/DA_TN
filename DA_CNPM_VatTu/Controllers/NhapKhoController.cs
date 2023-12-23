@@ -413,6 +413,7 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var phieu = _dACNPMContext.PhieuNhapKhos
                 .Include(x => x.ChiTietPhieuNhaps)
+                .ThenInclude(x => x.IdhhNavigation.IdnganKeNavigation)
                 .Include(x => x.IdnccNavigation)
                 .Include(x => x.IdnvNavigation)
                 .AsParallel()
@@ -586,6 +587,7 @@ namespace DA_CNPM_VatTu.Controllers
                                 .Include(x => x.IdhsxNavigation)
                                 .Include(x => x.IdnsxNavigation)
                                 .Include(x => x.IdnhhNavigation)
+                                .Include(x => x.IdnganKeNavigation)
                                 .ToList();
             });
         }

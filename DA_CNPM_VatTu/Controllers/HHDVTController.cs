@@ -130,7 +130,7 @@ namespace DA_CNPM_VatTu.Controllers
             });
         }
         [HttpGet("change-tt")]
-        public async Task<IActionResult> changeTT(bool tt)
+        public async Task<IActionResult> ThayDoiTrangThai(bool tt)
         {
 			var Si = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Si").TiLe;
 			var Le = _dACNPMContext.TiLeCanhBaos.FirstOrDefault(x => x.TenTiLe == "Le").TiLe;
@@ -201,7 +201,7 @@ namespace DA_CNPM_VatTu.Controllers
             });
         }
         [HttpPost("api/dvts")]
-        public async Task<IActionResult> optionDVTS(int idHh, int idDvt)
+        public async Task<IActionResult> getDvtExcept(int idHh, int idDvt)
         {
             var dvtChinh = getListHH().Result.FirstOrDefault(x => x.Id == idHh).Iddvtchinh;
             var listDvt = getListHHdvt().Result
@@ -222,7 +222,7 @@ namespace DA_CNPM_VatTu.Controllers
             }).ToList());
         }
         [HttpPost("update-hhdvt")]
-        public async Task<IActionResult> updateHHDVT([FromBody] Hhdvt hhdvt)
+        public async Task<IActionResult> updateDVTPhu([FromBody] Hhdvt hhdvt)
         {
             var tran = _dACNPMContext.Database.BeginTransaction();
             int _userId = int.Parse(User.Identity.Name);
@@ -332,7 +332,7 @@ namespace DA_CNPM_VatTu.Controllers
             }
         }
         [HttpPost("update-hhdvtc")]
-        public async Task<IActionResult> updateHHDVTC([FromBody] HangHoa hh)
+        public async Task<IActionResult> updateDVTChinh([FromBody] HangHoa hh)
         {
             var tran = _dACNPMContext.Database.BeginTransaction();
             int _userId = int.Parse(User.Identity.Name);

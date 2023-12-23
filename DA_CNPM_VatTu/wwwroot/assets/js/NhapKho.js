@@ -419,7 +419,8 @@ function dropDownHhChange(cbHangHoa, value) {
         var cbDvt = tr.find('select.dvt');
         cbDvt.empty();
         var dvts = ``;
-        option.dvts.unshift(option.dvtChinh);
+        //option.dvts.unshift(option.dvtChinh);
+        dvts += `<option value="${option.dvtChinh.id}" data-slqd="${option.dvtChinh.slqd}">${option.dvtChinh.ten}</option>`
         option.dvts.forEach(function (item) {
             dvts += `<option value="${item.id}" data-slqd="${item.slqd}">${item.ten}</option>`
         })
@@ -534,7 +535,8 @@ function showEditPhieuNhap(result) {
                 return data.id == item.idhh;
             });
             var dvts = ``;
-            hh.dvts.unshift(hh.dvtChinh);
+            dvts += `<option value="${hh.dvtChinh.id}" data-slqd="${hh.dvtChinh.slqd}">${hh.dvtChinh.ten}</option>`
+            //hh.dvts.unshift(hh.dvtChinh);
             hh.dvts.forEach(function (data) {
                 dvts += `<option ${(data.id == item.iddvtnhap ? "selected" : "")} value="${data.id}" data-slqd="${data.slqd}">${data.ten}</option>`
             });

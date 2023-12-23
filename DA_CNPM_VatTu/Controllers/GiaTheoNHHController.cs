@@ -66,7 +66,7 @@ namespace DA_CNPM_VatTu.Controllers
         }
 
         [HttpPost("load-gtnhh")]
-        public async Task<IActionResult> loadHHDVT(int idNhh)
+        public async Task<IActionResult> loadTableGTHHDVT(int idNhh)
         {
             int idCn = int.Parse(User.FindFirstValue("IdCn"));
             ViewBag.GTNHHs = _dACNPMContext.GiaTheoNhomHhs.AsParallel()
@@ -76,7 +76,7 @@ namespace DA_CNPM_VatTu.Controllers
             return PartialView("loadTableGTNHH");
         }
         [HttpPost("show-modal-gtnhh")]
-        public async Task<IActionResult> show_Modal_gtnhh(int idGtnhh)
+        public async Task<IActionResult> updateDVTChinh(int idGtnhh)
         {
             var gtnhh = _dACNPMContext.GiaTheoNhomHhs.AsParallel().FirstOrDefault(x => x.Id == idGtnhh);
             PartialViewResult partialViewResult = PartialView("formGTNHH", gtnhh == null ? new GiaTheoNhomHh() : gtnhh);

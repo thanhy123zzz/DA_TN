@@ -289,6 +289,7 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation)
                     .Include(x => x.IdhhNavigation.IddvtchinhNavigation)
                     .Include(x => x.IdhhNavigation.IdnhhNavigation)
+                    .Include(x => x.IdhhNavigation.IdnganKeNavigation)
                     .Include(x => x.ChiTietPhieuXuats)
                     .Include(x => x.HangTonKhos)
                     .Include(x => x.IdpnNavigation)
