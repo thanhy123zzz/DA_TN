@@ -28,7 +28,7 @@ namespace DA_CNPM_VatTu.Controllers
         {
             var pqcn = await GetPhanQuyenHHDVT();
             ViewBag.PhanQuyenPQ = pqcn;
-            ViewBag.HHs = getListHH().Result.OrderBy(x=>x.TenHh.Trim()).ToList();
+            ViewBag.HHs = getListHH().Result.Where(x=>x.Active == true).OrderBy(x=>x.TenHh.Trim()).ToList();
             ViewData["title"] = pqcn.IdchucNangNavigation.TenChucNang;
             return View();
         }

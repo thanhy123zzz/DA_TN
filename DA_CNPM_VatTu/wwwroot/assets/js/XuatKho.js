@@ -325,7 +325,7 @@ function configRowPhieuXuatCt(tr, hhs) {
                                 </div>
                            </div>
                            <div>
-                                Số lượng còn: ${item.slTon}
+                                Số lượng còn: <span class="${item.slTon < 1 ? "text-danger" : ""}">${item.slTon}</span> - Ngăn kệ: ${item.nganKe}
                            </div>
                         </div>`;
             },
@@ -353,6 +353,8 @@ function dropDownHhChange(cbHangHoa, value) {
         tr.find('img.image-modal').prop('alt', option.ten);
         if (option.hinh) {
             tr.find('img.image-modal').prop('src', option.hinh);
+        } else {
+            tr.find('img.image-modal').prop('src', "");
         }
         tr.find('input[name="Sl"]').prop('max', option.slTon);
         
@@ -382,16 +384,18 @@ function dropDownHhChange(cbHangHoa, value) {
                     showDropdownMenu(cbDvt, $dropdown);
                 },
                 onChange: function (value) {
-                    var cbHh = tr.find('select[name="Idhh"]');
-                    var idHh = cbHh.val();
-                    var slqd = cbDvt[0].selectize.options[value].slqd;
-                    tr.find('input.slqd').val(slqd);
-                    var sl = tr.find('input[name="Sl"]');
-                    var slTon = cbHh[0].selectize.options[idHh].slTon;
-                    sl.val(0);
-                    sl.prop('max', slTon / slqd);
-                    formatNumberFloatWithElement(sl);
-                    loadDonGia(idHh, value, $('#KhachHang').val(), tr.find('input[name="DonGia"]'));
+                    if (value) {
+                        var cbHh = tr.find('select[name="Idhh"]');
+                        var idHh = cbHh.val();
+                        var slqd = cbDvt[0].selectize.options[value].slqd;
+                        tr.find('input.slqd').val(slqd);
+                        var sl = tr.find('input[name="Sl"]');
+                        var slTon = cbHh[0].selectize.options[idHh].slTon;
+                        sl.val(0);
+                        sl.prop('max', slTon / slqd);
+                        formatNumberFloatWithElement(sl);
+                        loadDonGia(idHh, value, $('#KhachHang').val(), tr.find('input[name="DonGia"]'));
+                    }
                 },
                 onFocus: function ($dropdown) {
                     $('.my-selectize-2').not(this.$input).each(function () {

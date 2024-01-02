@@ -65,7 +65,7 @@
                 <div class="card">
                     <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh;">
                         <table class="table table-bordered top-selling-table table-hover display nowrap">
-                            <thead style="background-color:lightgray;position: sticky; top: 0;">
+                            <thead>
                                 <tr class="text-center">
                                     <th>
                                         <h6 class="text-sm fw-bold">Mã nhà CC</h6>
@@ -95,7 +95,7 @@
                                             Ghi chú
                                         </h6>
                                     </th>
-                                    <th class="min-width">
+                                    <th class="last-th-column min-width">
                                         <h6 class="text-sm fw-bold">
                                             Thao tác
                                         </h6>
@@ -112,7 +112,7 @@
                                         <td>@ncc.Sdt</td>
                                         <td>@ncc.Email</td>
                                         <td>@ncc.GhiChu</td>
-                                        <td>
+                                        <td class="last-td-column">
                                             <div class="action justify-content-end">
                                                 @if (phanQuyenNhaCC.Sua.Value)
                                                 {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace DA_CNPM_VatTu.Controllers
@@ -110,8 +111,50 @@ namespace DA_CNPM_VatTu.Controllers
         public async Task<IActionResult> showEdit(int id)
         {
             var nhaCC = await _dACNPMContext.NhaCungCaps.FindAsync(id);
+            if (nhaCC == null)
+            {
+                nhaCC = new NhaCungCap();
+                nhaCC.MaNcc = await getSoPhieu();
+            }
+            async Task<string> getSoPhieu()
+            {
+                var context = new DACNPMContext();
+                //ID chi nhánh
+                int cn = int.Parse(User.FindFirstValue("IdCn"));
 
-            PartialViewResult partialViewResult = PartialView("FormNhaCC", nhaCC == null ? new NhaCungCap() : nhaCC);
+                DateTime d = DateTime.Now;
+                string ngayThangNam = d.ToString("yyMMdd");
+
+                QuyDinhMa qd = await context.QuyDinhMas.FirstOrDefaultAsync(x => x.TiepDauNgu == "C");
+                string SoPhieu = cn + "_" + qd.TiepDauNgu + ngayThangNam;
+                var list = await context.SoThuTus.FirstOrDefaultAsync(x => x.Ngay.Date == DateTime.Now.Date && x.Loai.Equals("NhaCungCap"));
+                int stt;
+                if (list == null)
+                {
+                    SoThuTu sttt = new SoThuTu();
+                    sttt.Ngay = DateTime.ParseExact(DateTime.Now.ToString("dd-MM-yyyy"), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    sttt.Stt = 1;
+                    sttt.Loai = "NhaCungCap";
+                    await context.SoThuTus.AddAsync(sttt);
+                    context.SaveChanges();
+                    stt = 1;
+                }
+                else
+                {
+                    stt = list.Stt + 1;
+                    list.Stt++;
+                    context.SaveChanges();
+                }
+                SoPhieu += stt;
+                while (true)
+                {
+                    if (qd.DoDai == SoPhieu.Length) break;
+                    SoPhieu = SoPhieu.Insert(SoPhieu.Length - stt.ToString().Length, "0");
+                }
+
+                return SoPhieu;
+            }
+            PartialViewResult partialViewResult = PartialView("FormNhaCC", nhaCC);
             string viewContent = ConvertViewToString(ControllerContext, partialViewResult, _viewEngine);
             return Ok(new
             {
@@ -295,7 +338,7 @@ namespace DA_CNPM_VatTu.Controllers
                                 $"<td>{ncc.Sdt}</td>" +
                                 $"<td>{ncc.Email}</td>" +
                                 $"<td>{ncc.GhiChu}</td>" +
-                                $"<td>" +
+                                $"<td class='last-td-column'>" +
                                     $"<div class='action justify-content-end'>" +
                                         $"{btnSua}" +
                                         $"{btnXoa}" +
