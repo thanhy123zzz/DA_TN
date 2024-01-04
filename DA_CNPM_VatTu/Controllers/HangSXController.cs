@@ -253,14 +253,14 @@ namespace DA_CNPM_VatTu.Controllers
                                     ? $"<button onclick='deleteNSX({hsx.Id})' class='text-danger'><i class='{t}'></i></button>"
                                     : "";
                     str.Add($"<tr>" +
-                                    $"<td>{hsx.MaHsx}</td>" +
+                                    $"<td class=\"text-center\">{hsx.MaHsx}</td>" +
                                     $"<td>{hsx.TenHsx}</td>" +
                                     $"<td>{getNhanVien(hsx.Nvtao).TenNv}</td>" +
-                                    $"<td>{formatDay(hsx.NgayTao)}</td>" +
+                                    $"<td class=\"text-center\">{formatDay(hsx.NgayTao)}</td>" +
                                     $"<td>{getNhanVien(hsx.Nvsua).TenNv}</td>" +
-                                    $"<td>{formatDay(hsx.NgaySua)}</td>" +
-                                    $"<td>" +
-                                        $"<div class='action justify-content-end'>" +
+                                    $"<td class=\"text-center\">{formatDay(hsx.NgaySua)}</td>" +
+                                    $"<td class=\"last-td-column\">" +
+                                        $"<div class='action justify-content-center'>" +
                                             $"{btnSua}" +
                                             $"{btnXoa}" +
                                         $"</div>" +

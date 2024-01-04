@@ -258,11 +258,11 @@ namespace DA_CNPM_VatTu.Controllers
                     str.Add($"<tr>" +
                                     $"<td>{vt.TenNganKe}</td>" +
                                     $"<td>{getNhanVien(vt.Nvtao).TenNv}</td>" +
-                                    $"<td>{formatDay(vt.NgayTao)}</td>" +
+                                    $"<td class=\"text-center\">{formatDay(vt.NgayTao)}</td>" +
                                     $"<td>{getNhanVien(vt.Nvsua).TenNv}</td>" +
-                                    $"<td>{formatDay(vt.NgaySua)}</td>" +
+                                    $"<td class=\"text-center\">{formatDay(vt.NgaySua)}</td>" +
                                     $"<td>" +
-                                        $"<div class='action justify-content-end'>" +
+                                        $"<div class='action justify-content-center'>" +
                                             $"{btnSua}" +
                                             $"{btnXoa}" +
                                         $"</div>" +

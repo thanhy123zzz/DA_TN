@@ -333,10 +333,10 @@ namespace DA_CNPM_VatTu.Controllers
                                     $"<td>{kh.Sdt}</td>" +
                                     $"<td>{kh.Email}</td>" +
                                     $"<td>{kh.MaSoThue}</td>" +
-                                    $"<td>{(kh.LoaiKh.Value ? "Sỉ" : "Lẻ")}</td>" +
+                                    $"<td class=\"text-center\">{(kh.LoaiKh.Value ? "Sỉ" : "Lẻ")}</td>" +
                                     $"<td>{kh.GhiChu}</td>" +
                                     $"<td class='last-td-column'>" +
-                                        $"<div class='action justify-content-end'>" +
+                                        $"<div class='action justify-content-center'>" +
                                             $"{btnSua}" +
                                             $"{btnXoa}" +
                                         $"</div>" +

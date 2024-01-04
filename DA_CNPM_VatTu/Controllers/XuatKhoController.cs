@@ -228,7 +228,7 @@ namespace DA_CNPM_VatTu.Controllers
                                 : hh.GiaBanLe);
                         }
                     }
-                    // giá tnhh không có thì xét giá bán chung
+                    // giá theo nhh không có thì xét giá bán chung
                     else
                     {
                         // sỉ

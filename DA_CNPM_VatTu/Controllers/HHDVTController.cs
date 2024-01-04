@@ -142,17 +142,16 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
-                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
-                    )
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Si * y.SlquyDoi))
+                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null))
                     .Select(x => new
                     {
-                        Id = x.Key.Id,
-                        TenHh = x.Key.TenHh,
-                        MaHh = x.Key.MaHh,
+                        x.Key.Id,
+                        x.Key.TenHh,
+                        x.Key.MaHh,
                     }).OrderBy(x=>x.TenHh)
                     .ToList();
                 return Ok(new
@@ -166,10 +165,10 @@ namespace DA_CNPM_VatTu.Controllers
                 {
                     data = getListHH().Result.Select(x => new
                     {
-                        Id = x.Id,
-                        TenHh = x.TenHh,
-                        MaHh = x.MaHh
-                    }).OrderBy(x=>x.TenHh)
+                        x.Id,
+                        TenHh = x.TenHh.Trim(),
+                        x.MaHh
+                    }).OrderBy(x=>x.TenHh).ToList()
                 });
             }
 
@@ -287,12 +286,11 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
-                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
-                    )
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Si * y.SlquyDoi))
+                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null))
                     .Select(x => new
                     {
                         Id = x.Key.Id,
@@ -379,12 +377,11 @@ namespace DA_CNPM_VatTu.Controllers
                     .Include(x => x.IdhhNavigation.Hhdvts)
                     .AsEnumerable()
                     .GroupBy(x => x.IdhhNavigation)
-                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap) * Le))
-                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap) * Si))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap) * Le * y.SlquyDoi))
-                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap) * Si * y.SlquyDoi))
-                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null)
-                    )
+                    .Where(x => (x.Key.GiaBanLe <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Le))
+                    || (x.Key.GiaBanSi <= (x.Max(y => y.GiaNhap * (1 - y.Cktm / 100) * (1 + y.Thue / 100)) * Si))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanLe <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Le * y.SlquyDoi))
+                    || x.Key.Hhdvts.Where(x => x.Active == true).Any(y => y.GiaBanSi <= (x.Max(z => z.GiaNhap * (1 - z.Cktm / 100) * (1 + z.Thue / 100)) * Si * y.SlquyDoi))
+                    || (x.Key.GiaBanLe == null && x.Key.GiaBanSi == null && x.Key.TiLeLe == null && x.Key.TiLeSi == null))
                     .Select(x => new
                     {
                         Id = x.Key.Id,

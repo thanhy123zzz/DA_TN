@@ -254,14 +254,14 @@ namespace DA_CNPM_VatTu.Controllers
                                     ? $"<button onclick='deleteVT({vt.Id})' class='text-danger'><i class='{t}'></i></button>"
                                     : "";
                     str.Add($"<tr>" +
-                                    $"<td>{vt.MaVaiTro}</td>" +
+                                    $"<td class=\"text-center\">{vt.MaVaiTro}</td>" +
                                     $"<td>{vt.TenVaiTro}</td>" +
                                     $"<td>{getNhanVien(vt.Nvtao).TenNv}</td>" +
-                                    $"<td>{formatDay(vt.NgayTao)}</td>" +
+                                    $"<td class=\"text-center\">{formatDay(vt.NgayTao)}</td>" +
                                     $"<td>{getNhanVien(vt.Nvsua).TenNv}</td>" +
-                                    $"<td>{formatDay(vt.NgaySua)}</td>" +
+                                    $"<td class=\"text-center\">{formatDay(vt.NgaySua)}</td>" +
                                     $"<td>" +
-                                        $"<div class='action justify-content-end'>" +
+                                        $"<div class='action justify-content-center'>" +
                                             $"{btnSua}" +
                                             $"{btnXoa}" +
                                         $"</div>" +

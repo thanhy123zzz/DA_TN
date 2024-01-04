@@ -106,14 +106,14 @@
                                 @foreach (NuocSanXuat nsx in ViewBag.NuocSXs)
                                 {
                                     <tr>
-                                        <td>@nsx.MaNsx</td>
+                                        <td class="text-center">@nsx.MaNsx</td>
                                         <td>@nsx.TenNsx</td>
                                         <td>@getNhanVien(nsx.Nvtao).TenNv</td>
-                                        <td>@formatDay(nsx.NgayTao)</td>
+                                        <td class="text-center">@formatDay(nsx.NgayTao)</td>
                                         <td>@getNhanVien(nsx.Nvsua).TenNv</td>
-                                        <td>@formatDay(nsx.NgaySua)</td>
+                                        <td class="text-center">@formatDay(nsx.NgaySua)</td>
                                         <td>
-                                            <div class="action justify-content-end">
+                                            <div class="action justify-content-center">
                                                 @if (phanQuyenNuocSX.Sua.Value)
                                                 {
                                                     <button onclick="showModalEdit(@nsx.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">

@@ -65,7 +65,7 @@
                 <div class="card">
                     <div class="table-responsive" style="white-space:nowrap;overflow-y: auto; max-height:60vh">
                         <table class="table table-bordered top-selling-table table-hover display nowrap">
-                            <thead style="background-color:lightgray;position: sticky; top: 0;">
+                            <thead>
                                 <tr class="text-center">
                                     <th>
                                         <h6 class="text-sm fw-bold">Mã nhóm HH</h6>
@@ -95,7 +95,7 @@
                                             Ngày sửa
                                         </h6>
                                     </th>
-                                    <th class="min-width">
+                                    <th class="min-width last-th-column">
                                         <h6 class="text-sm fw-bold">
                                             Thao tác
                                         </h6>
@@ -106,14 +106,14 @@
                                 @foreach (NhomHangHoa nsx in ViewBag.NhomHHs)
                                 {
                                     <tr>
-                                        <td>@nsx.MaNhh</td>
+                                        <td class="text-center">@nsx.MaNhh</td>
                                         <td>@nsx.TenNhh</td>
                                         <td>@getNhanVien(nsx.Nvtao).TenNv</td>
-                                        <td>@formatDay(nsx.NgayTao)</td>
+                                        <td class="text-center">@formatDay(nsx.NgayTao)</td>
                                         <td>@getNhanVien(nsx.Nvsua).TenNv</td>
-                                        <td>@formatDay(nsx.NgaySua)</td>
-                                        <td>
-                                            <div class="action justify-content-end">
+                                        <td class="text-center">@formatDay(nsx.NgaySua)</td>
+                                        <td class="last-td-column">
+                                            <div class="action justify-content-center">
                                                 @if (phanQuyenNhomHH.Sua.Value)
                                                 {
                                                     <button onclick="showModalEdit(@nsx.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">

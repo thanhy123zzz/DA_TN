@@ -80,7 +80,7 @@ namespace DA_CNPM_VatTu.Controllers
             var listDvt = getListHHdvt().Result.AsParallel()
                 .Where(x => x.Idhh == idHh && x.Active == true)
                 .Select(x => x.IddvtNavigation).ToList();
-            listDvt.Add(dvtChinh);
+            listDvt.Insert(0, dvtChinh);
 
             var listDVTKH = _dACNPMContext.GiaTheoKhachHangs
                 .Where(x => x.Idhh == idHh && x.Active == true && x.Idkh == idKh)
@@ -88,7 +88,7 @@ namespace DA_CNPM_VatTu.Controllers
                 .ToList();
             var kh = await _dACNPMContext.KhachHangs
                 .FirstOrDefaultAsync(x => x.Id == idKh);
-            var dvts = listDvt.AsParallel()
+            var dvts = listDvt
                 .Where(x => !listDVTKH.Any(y => y.Id == x.Id)).ToList();
             ViewBag.Dvts = dvts;
             ViewBag.LoaiKh = kh.LoaiKh;

@@ -122,10 +122,10 @@
                                         <td>@kh.Sdt</td>
                                         <td>@kh.Email</td>
                                         <td>@kh.MaSoThue</td>
-                                        <td>@(kh.LoaiKh.Value ? "Sỉ" : "Lẻ")</td>
+                                        <td class="text-center">@(kh.LoaiKh.Value ? "Sỉ" : "Lẻ")</td>
                                         <td>@kh.GhiChu</td>
                                         <td class="last-td-column">
-                                            <div class="action justify-content-end">
+                                            <div class="action justify-content-center">
                                                 @if (phanQuyenKH.Sua.Value)
                                                 {
                                                     <button onclick="showModalEdit(@kh.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">

@@ -158,6 +158,7 @@ $(document).ready(function () {
                         showToast(response.message, response.statusCode);
                         showBtn($('#btnTaoPhieu'), 'Lưu');
                         if (response.statusCode == 200) {
+                            $('#btnLoadLsNhap').click();
                             if (!_idPn) {
                                 xoaTrangPhieuXuatKho();
                             } else {
@@ -350,8 +351,8 @@ function getRowPhieuNhapCt() {
         <td><select class="form-select form-table" name="SoLo" style="width: 120px;"></select></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Cktm" max="100" style="min-width: 60px;"/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Thue" max="100" style="min-width: 60px;"/></td>
-        <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Hsd" style="min-width: 110px;"/></td>
+        <td><input autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><textarea autocomplete="off" class="form-control form-table" name="GhiChu" style="min-width: 220px;" rows="1"></textarea></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;" readonly/></td>
         <td><input autocomplete="off" class="form-control form-table input-number-float" name="DonGia" style="min-width: 120px;" readonly/></td>
@@ -618,8 +619,8 @@ function getRowPhieuNhapCtCoDuLieu(data, dvts, daXuat) {
         </select></td>
         <td><input value="${data.cktm}" autocomplete="off" class="form-control form-table input-number-float" name="Cktm" max="100" style="min-width: 60px;"/></td>
         <td><input value="${data.thue}" autocomplete="off" class="form-control form-table input-number-float" name="Thue" max="100" style="min-width: 60px;"/></td>
-        <td><input value="${formatDay(data.nsx)}" autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><input value="${formatDay(data.hsd)}" autocomplete="off" class="form-control form-table date-sort-mask" name="Hsd" style="min-width: 110px;"/></td>
+        <td><input value="${formatDay(data.nsx)}" autocomplete="off" class="form-control form-table date-sort-mask" name="Nsx" style="min-width: 110px;"/></td>
         <td><textarea autocomplete="off" class="form-control form-table" name="GhiChu" style="min-width: 220px;" rows="1">${data.ghiChu}</textarea></td>
         <td><input value="${data.sl}" autocomplete="off" class="form-control form-table input-number-float" name="Sl" style="min-width: 80px;" readonly/></td>
         <td><input value="${data.donGia}" autocomplete="off" class="form-control form-table input-number-float" name="DonGia" style="min-width: 120px;" readonly/></td>

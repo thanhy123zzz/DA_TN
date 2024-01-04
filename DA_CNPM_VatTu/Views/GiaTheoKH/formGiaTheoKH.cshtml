@@ -21,12 +21,12 @@
         <label for="DVT">Đơn vị tính</label>
              <div class="select-position d-flex justify-content-between">
                 <select tabindex="1" id="DVT" class="light-bg col-lg-9" required>
-                @if(Model.IddvtNavigation!=null){
-                   <option selected value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
-                }
                 @foreach (var dvt in dvts)
                 {
-                   <option value="@dvt.Id">@dvt.TenDvt</option>
+                    <option value="@dvt.Id">@dvt.TenDvt</option>
+                }
+                @if(Model.IddvtNavigation!=null){
+                   <option selected value="@Model.Iddvt">@Model.IddvtNavigation.TenDvt</option>
                 }
                 </select>
             </div>

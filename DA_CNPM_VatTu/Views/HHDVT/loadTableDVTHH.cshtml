@@ -9,7 +9,7 @@
     }
     HangHoa hh = ViewBag.Hhdvt;
     List<HangTonKho> htks = ViewBag.giaNhaps;
-    var max = htks.Max(x => x.GiaNhap);
+    var max = htks.Max(x => x.GiaNhap * (1 - x.Cktm / 100) * (1 + x.Thue / 100));
     double Si = ViewBag.Si;
     double Le = ViewBag.Le;
 }

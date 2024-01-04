@@ -13,20 +13,20 @@
     @foreach (GiaTheoNhomHh gtnhh in ViewBag.GTNHHs)
     {
          <tr data-id="@gtnhh.Id">
-                <td class="text-center">
+            <td class="text-end">
                     @toDecimal(gtnhh.Min)
                 </td>
-                <td class="text-center">
+            <td class="text-end">
                     @toDecimal(gtnhh.Max)
                 </td>
-                <td class="text-center">
+            <td class="text-end">
                     @toDecimal(gtnhh.TiLeLe)
                 </td>
-                <td class="text-center">
+            <td class="text-end">
                     @toDecimal(gtnhh.TiLeSi)
                 </td>
                 <td class="last-td-column">
-                     <div class="action justify-content-end">
+                     <div class="action justify-content-center">
                          <button disabled="@(!pqcn.Sua.Value)"  onclick="showModalGTNHH(@gtnhh.Id)" class="text-primary">
                                <i class="lni lni-pencil"></i>
                          </button> 

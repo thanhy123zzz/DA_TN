@@ -148,8 +148,11 @@
                     contentType: "application/json",
                     success: function (response) {
                         showToast(response.message, response.statusCode);
-                        showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
-                        xoaTrangPhieuXuatKho();
+                        if (response.statusCode == 200) {
+                            showBtn($('#btnTaoPhieu'), 'Tạo phiếu');
+                            xoaTrangPhieuXuatKho();
+                            $('#btnLoadLsXuat').click();
+                        }
                     },
                     error: function (error) {
                         console.log(error);
@@ -347,6 +350,16 @@ function dropDownHhChange(cbHangHoa, value) {
         if (option.slTon == 0) {
             showToast("Đã hết hàng trong kho!", 500);
             cbHangHoa[0].selectize.clear();
+            tr.find('img.image-modal').prop('src', "");
+            tr.find('img.image-modal').prop('alt', "");
+            tr.find('select[name="Iddvt"]')[0].selectize.destroy();
+            tr.find('input[name="Sl"]').prop('max', 0);
+            tr.find('input[name="Sl"]').val('');
+            tr.find('.slqd').val('');
+            tr.find('input[name="DonGia"]').val('');
+            tr.find('input[name="Cktm"]').val('');
+            tr.find('input[name="Thue"]').val('');
+            tr.find('input.ThanhTien').val('');
             return;
         }
 

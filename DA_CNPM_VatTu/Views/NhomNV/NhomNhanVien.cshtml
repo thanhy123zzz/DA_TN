@@ -95,7 +95,7 @@
                                             Ngày sửa
                                         </h6>
                                     </th>
-                                    <th class="min-width">
+                                    <th class="min-width last-th-column">
                                         <h6 class="text-sm fw-bold">
                                             Thao tác
                                         </h6>
@@ -106,14 +106,14 @@
                                 @foreach (NhomNhanVien nnv in ViewBag.NhomNVs)
                                 {
                                     <tr>
-                                        <td>@nnv.MaNnv</td>
+                                        <td class="text-center">@nnv.MaNnv</td>
                                         <td>@nnv.TenNnv</td>
                                         <td>@getNhanVien(nnv.Nvtao).TenNv</td>
-                                        <td>@formatDay(nnv.NgayTao)</td>
+                                        <td class="text-center">@formatDay(nnv.NgayTao)</td>
                                         <td>@getNhanVien(nnv.Nvsua).TenNv</td>
-                                        <td>@formatDay(nnv.NgaySua)</td>
-                                        <td>
-                                            <div class="action justify-content-end">
+                                        <td class="text-center">@formatDay(nnv.NgaySua)</td>
+                                        <td class="last-td-column">
+                                            <div class="action justify-content-center">
                                                 @if (phanQuyenNhomNV.Sua.Value)
                                                 {
                                                     <button onclick="showModalEdit(@nnv.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">

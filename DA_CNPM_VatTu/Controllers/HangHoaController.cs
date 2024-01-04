@@ -444,11 +444,11 @@ namespace DA_CNPM_VatTu.Controllers
                                 $"<td>{(hh.IdbaoHanhNavigation == null ? "" : hh.IdbaoHanhNavigation.TenBh)}</td>" +
                                 $"<td>{(hh.IdnganKeNavigation == null ? "" : hh.IdnganKeNavigation.TenNganKe)}</td>" +
                                 $"<td>{getNhanVien(hh.Nvtao).TenNv}</td>" +
-                                $"<td>{formatDay(hh.NgayTao)}</td>" +
+                                $"<td class=\"text-center\">{formatDay(hh.NgayTao)}</td>" +
                                 $"<td>{getNhanVien(hh.Nvsua).TenNv}</td>" +
-                                $"<td>{formatDay(hh.NgaySua)}</td>" +
+                                $"<td class=\"text-center\">{formatDay(hh.NgaySua)}</td>" +
                                 $"<td class='last-td-column'>" +
-                                    $"<div class='action justify-content-end'>" +
+                                    $"<div class='action justify-content-center'>" +
                                         $"{btnSua}" +
                                         $"{btnXoa}" +
                                     $"</div>" +

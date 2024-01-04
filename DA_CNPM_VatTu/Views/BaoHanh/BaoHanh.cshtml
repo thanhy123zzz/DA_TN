@@ -111,15 +111,15 @@
                                 @foreach (BaoHanh bh in ViewBag.Bhs)
                                 {
                                     <tr>
-                                        <td>@bh.MaBh</td>
+                                        <td class="text-center">@bh.MaBh</td>
                                         <td>@bh.TenBh</td>
                                         <td>@bh.SoNgay</td>
                                         <td>@getNhanVien(bh.Nvtao).TenNv</td>
-                                        <td>@formatDay(bh.NgayTao)</td>
+                                        <td class="text-center">@formatDay(bh.NgayTao)</td>
                                         <td>@getNhanVien(bh.Nvsua).TenNv</td>
-                                        <td>@formatDay(bh.NgaySua)</td>
+                                        <td class="text-center">@formatDay(bh.NgaySua)</td>
                                         <td>
-                                            <div class="action justify-content-end">
+                                            <div class="action justify-content-center">
                                                 @if (phanQuyenBH.Sua.Value)
                                                 {
                                                     <button onclick="showModalEdit(@bh.Id)" class="text-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
